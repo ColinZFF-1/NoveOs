@@ -60,7 +60,7 @@ const TopNav: React.FC = () => {
               aria-haspopup="listbox"
               aria-label="选择项目"
             >
-              <span className="truncate max-w-[160px]">《{currentProject?.name || '加载中…'}》</span>
+              <span className="truncate max-w-[100px] md:max-w-[160px]">《{currentProject?.name || '加载中…'}》</span>
               <ChevronDown size={13} className={`transition-transform duration-200 ease-apple shrink-0 text-apple-gray-400 ${open ? 'rotate-180' : ''}`} />
             </button>
             {open && (
@@ -103,15 +103,15 @@ const TopNav: React.FC = () => {
       <div className="flex items-center gap-1">
         <button className="apple-btn-secondary h-8 text-sm font-semibold gap-1.5 text-primary">
           <LayoutDashboard size={15} strokeWidth={2.5} />
-          <span>控制台</span>
+          <span className="hidden lg:inline">控制台</span>
         </button>
         <button className="apple-btn-ghost h-8 text-sm font-medium gap-1.5">
           <BookOpen size={15} strokeWidth={2} />
-          <span>知识库</span>
+          <span className="hidden lg:inline">知识库</span>
         </button>
         <button className="apple-btn-ghost h-8 text-sm font-medium gap-1.5">
           <Settings size={15} strokeWidth={2} />
-          <span>设置</span>
+          <span className="hidden lg:inline">设置</span>
         </button>
         <button
           className="relative p-2 text-apple-gray-400 hover:text-apple-gray-700 hover:bg-apple-gray-50 rounded-xl transition-all duration-200 ease-apple focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 outline-none"
@@ -125,7 +125,7 @@ const TopNav: React.FC = () => {
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-apple-purple flex items-center justify-center text-white text-xs font-bold shadow-button">
             作
           </div>
-          <span className="text-sm font-medium text-apple-gray-700">创作者</span>
+          <span className="hidden lg:inline text-sm font-medium text-apple-gray-700">创作者</span>
           <ChevronDown size={13} className="text-apple-gray-400" />
         </button>
       </div>

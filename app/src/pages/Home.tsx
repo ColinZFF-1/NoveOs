@@ -27,35 +27,41 @@ const Home: React.FC = () => {
       <TopNav />
 
       {/* Main Content */}
-      <div className="flex-1 flex gap-4 p-4 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[240px_1fr] xl:grid-cols-[240px_1fr_288px] gap-4 p-4 overflow-hidden">
         {/* Left Panel */}
-        <LeftPanel projectId={projectId} />
+        <div className="hidden lg:flex flex-col overflow-hidden">
+          <LeftPanel projectId={projectId} />
+        </div>
 
         {/* Center Stage */}
-        <main className="flex-1 flex flex-col gap-4 min-w-0 overflow-y-auto scrollbar-thin">
-          <PipelineFlow projectId={projectId} />
-          <WritingPreview
-            projectId={projectId}
-            currentChapter={currentChapter}
-            status={status}
-            events={events}
-          />
-          <div className="flex-1 min-h-0">
-            <ChapterPreview
+        <main className="flex flex-col gap-4 min-w-0 overflow-hidden">
+          <div className="flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-4">
+            <PipelineFlow projectId={projectId} />
+            <WritingPreview
               projectId={projectId}
               currentChapter={currentChapter}
               status={status}
+              events={events}
             />
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ChapterPreview
+                projectId={projectId}
+                currentChapter={currentChapter}
+                status={status}
+              />
+            </div>
+            <EmotionCurve projectId={projectId} />
+            <AuditGrid projectId={projectId} />
           </div>
-          <EmotionCurve projectId={projectId} />
-          <AuditGrid projectId={projectId} />
         </main>
 
         {/* Right Panel */}
-        <aside className="w-72 shrink-0 flex flex-col gap-4 overflow-y-auto scrollbar-thin">
-          <CharacterPanel projectId={projectId} />
-          <div className="flex-1 min-h-0">
-            <LogStream projectId={projectId} />
+        <aside className="hidden xl:flex flex-col gap-4 overflow-hidden">
+          <div className="flex-1 flex flex-col gap-4 overflow-y-auto scrollbar-thin">
+            <CharacterPanel projectId={projectId} />
+            <div className="flex-1 min-h-0">
+              <LogStream projectId={projectId} />
+            </div>
           </div>
         </aside>
       </div>

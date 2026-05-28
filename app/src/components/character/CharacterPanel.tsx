@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Users } from 'lucide-react';
 import PixelAvatar from '@/components/pixel/PixelAvatar';
 
 const API_BASE = '/api/v1';
@@ -29,12 +29,7 @@ const roleBadgeColors: Record<string, string> = {
   反派: 'bg-apple-red-light text-apple-red',
 };
 
-const fallbackCharacters: CharacterData[] = [
-  { id: '1', name: '艾伦', role: '主角', roleType: 'protagonist', description: '星核持有者，沉默而坚定', chapters: 12, avatar: 'allen' as any },
-  { id: '2', name: '莉娅', role: '女主角', roleType: 'female_lead', description: '星辰学院的天才少女', chapters: 10, avatar: 'liya' as any },
-  { id: '3', name: '卡尔', role: '配角', roleType: 'supporting', description: '帝国骑士团团长', chapters: 8, avatar: 'kael' as any },
-  { id: '4', name: '莫林', role: '反派', roleType: 'villain', description: '暗影教团的首领', chapters: 6, avatar: 'morin' as any },
-];
+const fallbackCharacters: CharacterData[] = [];
 
 const avatarMap: Record<string, string> = {
   protagonist: 'allen',
@@ -54,7 +49,7 @@ const CharacterPanel: React.FC<CharacterPanelProps> = ({ projectId }) => {
 
   useEffect(() => {
     if (!projectId) {
-      setCharacters(fallbackCharacters);
+      setCharacters([]);
       return;
     }
     const load = async () => {
@@ -68,12 +63,12 @@ const CharacterPanel: React.FC<CharacterPanelProps> = ({ projectId }) => {
         if (Array.isArray(data) && data.length > 0) {
           setCharacters(data);
         } else {
-          setCharacters(fallbackCharacters);
+          setCharacters([]);
         }
       } catch (e) {
         console.error('Failed to load characters:', e);
         setError('加载失败');
-        setCharacters(fallbackCharacters);
+        setCharacters([]);
       } finally {
         setLoading(false);
       }
@@ -81,7 +76,7 @@ const CharacterPanel: React.FC<CharacterPanelProps> = ({ projectId }) => {
     load();
   }, [projectId]);
 
-  const displayList = characters.length > 0 ? characters : fallbackCharacters;
+  const displayList = characters;
 
   return (
     <div className="apple-card p-4 animate-fade-up stagger-2">
@@ -109,7 +104,15 @@ const CharacterPanel: React.FC<CharacterPanelProps> = ({ projectId }) => {
       )}
 
       {error && !loading && (
-        <div className="text-xs text-apple-gray-400 py-2">{error}，显示默认数据</div>
+        <div className="text-xs text-apple-gray-400 py-2">{error}</div>
+      )}
+
+      {!loading && displayList.length === 0 && (
+        <div className="flex flex-col items-center py-8 text-apple-gray-400">
+          <Users size={24} className="mb-2 opacity-30" />
+          <p className="text-xs">暂无角色数据</p>
+          <p className="text-[10px] mt-1 opacity-60">请在后端配置角色设定</p>
+        </div>
       )}
 
       {/* Character List */}

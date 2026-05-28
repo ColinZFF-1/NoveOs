@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { Project } from '@/hooks/useNovelOS';
 
 const API_BASE = '/api/v1';
@@ -8,6 +8,7 @@ interface ProjectContextType {
   setProjectId: (id: string) => void;
   projects: Project[];
   refreshProjects: () => void;
+  isLoading: boolean;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -15,8 +16,14 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [projectId, setProjectId] = useState<string>('');
   const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const hasFetchedRef = useRef(false);
+  const loadingRef = useRef(false);
 
   const refreshProjects = useCallback(async () => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+    setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/projects`);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
@@ -24,11 +31,17 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setProjects(json.data || []);
     } catch (e) {
       console.error('Failed to load projects:', e);
+    } finally {
+      setIsLoading(false);
+      loadingRef.current = false;
     }
   }, []);
 
   useEffect(() => {
-    refreshProjects();
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      refreshProjects();
+    }
   }, [refreshProjects]);
 
   useEffect(() => {
@@ -37,8 +50,13 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [projects, projectId]);
 
+  const value = useMemo(
+    () => ({ projectId, setProjectId, projects, refreshProjects, isLoading }),
+    [projectId, projects, refreshProjects, isLoading]
+  );
+
   return (
-    <ProjectContext.Provider value={{ projectId, setProjectId, projects, refreshProjects }}>
+    <ProjectContext.Provider value={value}>
       {children}
     </ProjectContext.Provider>
   );

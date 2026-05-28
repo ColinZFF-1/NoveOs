@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Settings, Maximize2, Minimize2, Loader2, RefreshCw, FileText } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -36,6 +36,59 @@ function countChineseChars(text: string): number {
   return (text.match(/[\u4e00-\u9fff]/g) || []).length;
 }
 
+const MAX_VISIBLE_CHAPTERS = 50;
+
+interface ChapterListProps {
+  chapters: ChapterItem[];
+  currentChapter: number;
+  selectedChapter: number;
+  onSelect: (chapterNum: number) => void;
+}
+
+const ChapterList: React.FC<ChapterListProps> = React.memo(function ChapterList({
+  chapters,
+  currentChapter,
+  selectedChapter,
+  onSelect,
+}) {
+  const visibleChapters = chapters.length > MAX_VISIBLE_CHAPTERS
+    ? chapters.slice(0, MAX_VISIBLE_CHAPTERS)
+    : chapters;
+
+  return useMemo(
+    () => (
+      <div className="py-1.5 px-1.5 space-y-0.5">
+        {visibleChapters.map((ch) => (
+          <button
+            type="button"
+            key={ch.chapter_num}
+            onClick={() => onSelect(ch.chapter_num)}
+            className={cn(
+              'w-full text-left px-3 py-2 text-xs rounded-xl transition-all duration-200 ease-apple flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-inset outline-none font-medium',
+              selectedChapter === ch.chapter_num
+                ? 'bg-white text-primary shadow-xs'
+                : 'text-apple-gray-600 hover:bg-white/60'
+            )}
+          >
+            {currentChapter === ch.chapter_num && (
+              <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+            )}
+            <span className="truncate">
+              第{ch.chapter_num}章 {ch.title || (ch.summary ? ch.summary.slice(0, 10) : '')}
+            </span>
+          </button>
+        ))}
+        {chapters.length > MAX_VISIBLE_CHAPTERS && (
+          <div className="px-3 py-2 text-[10px] text-apple-gray-400 text-center">
+            共 {chapters.length} 章，仅显示前 {MAX_VISIBLE_CHAPTERS} 章
+          </div>
+        )}
+      </div>
+    ),
+    [visibleChapters, currentChapter, selectedChapter, onSelect, chapters.length]
+  );
+});
+
 const ChapterPreview: React.FC<ChapterPreviewProps> = ({
   projectId,
   currentChapter,
@@ -52,7 +105,29 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
   const [listError, setListError] = useState<string | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
 
-  const loadChapters = async () => {
+  // Lock body scroll and listen ESC when fullscreen
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
+
+  const loadChapters = useCallback(async () => {
     if (!projectId) return;
     try {
       setListError(null);
@@ -63,7 +138,7 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
     } catch {
       setListError('加载失败，请重试');
     }
-  };
+  }, [projectId]);
 
   useEffect(() => {
     loadChapters();
@@ -118,12 +193,20 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
   const isWriting = currentChapter === selectedChapter && status === 'writing';
 
   return (
-    <div
-      className={cn(
-        'apple-card flex flex-col overflow-hidden',
-        isFullscreen && 'fixed inset-4 z-50'
+    <>
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30"
+          onClick={() => setIsFullscreen(false)}
+          aria-hidden="true"
+        />
       )}
-    >
+      <div
+        className={cn(
+          'apple-card flex flex-col overflow-hidden',
+          isFullscreen && 'fixed inset-4 z-50'
+        )}
+      >
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-apple-gray-100/60">
         <div className="flex items-center gap-3">
@@ -177,7 +260,7 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
       {/* Body: Sidebar + Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Chapter List Sidebar */}
-        <div className="w-44 border-r border-apple-gray-100/60 flex flex-col shrink-0 bg-apple-gray-50/30">
+        <div className="w-36 lg:w-44 border-r border-apple-gray-100/60 flex flex-col shrink-0 bg-apple-gray-50/30">
           <div className="px-3 py-2.5 text-[11px] font-bold text-apple-gray-400 uppercase tracking-wider flex items-center justify-between">
             <span>章节列表</span>
             <button
@@ -199,28 +282,12 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
                 <span>暂无章节</span>
               </div>
             ) : (
-              <div className="py-1.5 px-1.5 space-y-0.5">
-                {chapters.map((ch) => (
-                  <button
-                    type="button"
-                    key={ch.chapter_num}
-                    onClick={() => setSelectedChapter(ch.chapter_num)}
-                    className={cn(
-                      'w-full text-left px-3 py-2 text-xs rounded-xl transition-all duration-200 ease-apple flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-inset outline-none font-medium',
-                      selectedChapter === ch.chapter_num
-                        ? 'bg-white text-primary shadow-xs'
-                        : 'text-apple-gray-600 hover:bg-white/60'
-                    )}
-                  >
-                    {currentChapter === ch.chapter_num && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                    )}
-                    <span className="truncate">
-                      第{ch.chapter_num}章 {ch.title || (ch.summary ? ch.summary.slice(0, 10) : '')}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <ChapterList
+                chapters={chapters}
+                currentChapter={currentChapter}
+                selectedChapter={selectedChapter}
+                onSelect={setSelectedChapter}
+              />
             )}
           </ScrollArea>
         </div>
@@ -246,7 +313,7 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
 
           {/* Content */}
           <div className="flex-1 px-6 py-4 overflow-y-auto">
-            <div className="space-y-5 max-w-2xl">
+            <div className="space-y-5 w-full">
               {loading ? (
                 <div className="flex items-center gap-2.5 text-sm text-apple-gray-400 py-10">
                   <Loader2 size={15} className="animate-spin" strokeWidth={2} />
@@ -277,6 +344,7 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
         </div>
       </div>
     </div>
+    </>
   );
 };
 

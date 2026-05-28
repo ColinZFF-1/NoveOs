@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   ReferenceDot,
 } from 'recharts';
-import { ChevronDown, Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2, TrendingUp } from 'lucide-react';
 
 const API_BASE = '/api/v1';
 
@@ -27,18 +27,7 @@ interface EmotionApiItem {
   desc: string;
 }
 
-const fallbackData: EmotionPoint[] = [
-  { stage: '开篇', emotion: 35, chapter: '第1-3章' },
-  { stage: '铺垫', emotion: 42, chapter: '第4-6章' },
-  { stage: '', emotion: 55, chapter: '第7-8章' },
-  { stage: '上升', emotion: 68, chapter: '第9-10章' },
-  { stage: '', emotion: 75, chapter: '第11章' },
-  { stage: '高潮', emotion: 85, chapter: '第12章' },
-  { stage: '', emotion: 72, chapter: '第13-14章' },
-  { stage: '下降', emotion: 58, chapter: '第15-17章' },
-  { stage: '', emotion: 45, chapter: '第18-20章' },
-  { stage: '收尾', emotion: 62, chapter: '第21-22章' },
-];
+const fallbackData: EmotionPoint[] = [];
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -68,7 +57,7 @@ interface EmotionCurveProps {
 
 const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [data, setData] = useState<EmotionPoint[]>(fallbackData);
+  const [data, setData] = useState<EmotionPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentChapter, setCurrentChapter] = useState(12);
 
@@ -84,7 +73,7 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
 
   useEffect(() => {
     if (!projectId) {
-      setData(fallbackData);
+      setData([]);
       return;
     }
     const load = async () => {
@@ -104,11 +93,11 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
           const latest = coords[coords.length - 1];
           if (latest) setCurrentChapter(latest.chapter);
         } else {
-          setData(fallbackData);
+          setData([]);
         }
       } catch (e) {
         console.error('Failed to load emotions:', e);
-        setData(fallbackData);
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -116,7 +105,7 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
     load();
   }, [projectId]);
 
-  const maxPoint = data.reduce((max, p) => (p.emotion > max.emotion ? p : max), data[0]);
+  const maxPoint = data.length > 0 ? data.reduce((max, p) => (p.emotion > max.emotion ? p : max), data[0]) : null;
 
   return (
     <div className="apple-card p-4 animate-fade-up stagger-4">
@@ -147,6 +136,15 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
         </div>
       )}
 
+      {!loading && data.length === 0 && (
+        <div className="flex flex-col items-center justify-center h-48 text-apple-gray-400">
+          <TrendingUp size={24} className="mb-2 opacity-30" />
+          <p className="text-xs">暂无情绪曲线数据</p>
+        </div>
+      )}
+
+      {!loading && data.length > 0 && (
+      <>
       {/* Chart */}
       <div className="h-28">
         <ResponsiveContainer width="100%" height="100%">
@@ -203,9 +201,11 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
       <div className="flex items-center justify-end gap-2 mt-3">
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 rounded-xl">
           <div className="w-2 h-2 rounded-full bg-primary" />
-          <span className="text-xs text-primary font-bold">情绪值 {maxPoint?.emotion ?? 72}/100</span>
+          <span className="text-xs text-primary font-bold">情绪值 {maxPoint?.emotion ?? 0}/100</span>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };

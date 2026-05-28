@@ -1,9 +1,24 @@
 /** @type {import('tailwindcss').Config} */
+const APPLE_BLUE = '#007AFF';
+const APPLE_GREEN = '#34C759';
+const APPLE_ORANGE = '#FF9500';
+const APPLE_RED = '#FF3B30';
+const APPLE_PURPLE = '#AF52DE';
+const APPLE_TEAL = '#5AC8FA';
+const APPLE_YELLOW = '#FFCC00';
+
 module.exports = {
   darkMode: ["class"],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1536px',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -12,18 +27,18 @@ module.exports = {
         foreground: "hsl(var(--foreground))",
         // Apple-style color system
         apple: {
-          blue: '#007AFF',
+          blue: APPLE_BLUE,
           'blue-light': '#E8F1FE',
-          green: '#34C759',
+          green: APPLE_GREEN,
           'green-light': '#E8F8EC',
-          orange: '#FF9500',
+          orange: APPLE_ORANGE,
           'orange-light': '#FFF3E0',
-          red: '#FF3B30',
+          red: APPLE_RED,
           'red-light': '#FFE8E6',
-          purple: '#AF52DE',
+          purple: APPLE_PURPLE,
           'purple-light': '#F5E8FC',
-          teal: '#5AC8FA',
-          yellow: '#FFCC00',
+          teal: APPLE_TEAL,
+          yellow: APPLE_YELLOW,
           gray: {
             50: '#F5F5F7',
             100: '#E8E8ED',
@@ -38,10 +53,10 @@ module.exports = {
           },
         },
         primary: {
-          DEFAULT: "#007AFF",
+          DEFAULT: APPLE_BLUE,
           50: '#E8F1FE',
           100: '#D1E3FD',
-          500: '#007AFF',
+          500: APPLE_BLUE,
           600: '#0051D5',
           700: '#003BB3',
           foreground: "#FFFFFF",
@@ -51,7 +66,7 @@ module.exports = {
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "#FF3B30",
+          DEFAULT: APPLE_RED,
           foreground: "#FFFFFF",
         },
         muted: {
@@ -70,9 +85,9 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        success: '#34C759',
-        warning: '#FF9500',
-        error: '#FF3B30',
+        success: APPLE_GREEN,
+        warning: APPLE_ORANGE,
+        error: APPLE_RED,
       },
       fontSize: {
         '2xs': ['11px', { lineHeight: '14px', letterSpacing: '-0.01em' }],

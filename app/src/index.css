@@ -32,6 +32,19 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --apple-bg: #F5F5F7;
+    --apple-surface: #FFFFFF;
+    --apple-text: #1C1C1E;
+    --apple-text-secondary: #8E8E93;
+    --apple-border: #E8E8ED;
+  }
+
+  .dark {
+    --apple-bg: #000000;
+    --apple-surface: #1C1C1E;
+    --apple-text: #F5F5F7;
+    --apple-text-secondary: #8E8E93;
+    --apple-border: #3A3A3C;
   }
 
   body {

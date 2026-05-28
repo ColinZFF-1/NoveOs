@@ -6,13 +6,30 @@ export interface WSEvent {
   payload: Record<string, unknown>;
 }
 
+const MAX_RECONNECT_ATTEMPTS = 5;
+
 export function useWebSocket() {
   const [events, setEvents] = useState<WSEvent[]>([]);
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const unmountedRef = useRef(false);
+
+  const clearReconnectTimer = useCallback(() => {
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+  }, []);
 
   const connect = useCallback(() => {
+    if (unmountedRef.current) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+      console.warn('[WebSocket] Max reconnect attempts reached');
+      return;
+    }
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const ws = new WebSocket(`${protocol}//${window.location.host}/ws/events`);
@@ -20,6 +37,7 @@ export function useWebSocket() {
 
     ws.onopen = () => {
       setConnected(true);
+      reconnectAttemptsRef.current = 0;
       ws.send(JSON.stringify({ action: 'subscribe' }));
     };
 
@@ -35,8 +53,17 @@ export function useWebSocket() {
     ws.onclose = () => {
       setConnected(false);
       wsRef.current = null;
-      // auto reconnect after 3s
-      setTimeout(() => connect(), 3000);
+      if (unmountedRef.current) return;
+
+      reconnectAttemptsRef.current += 1;
+      if (reconnectAttemptsRef.current > MAX_RECONNECT_ATTEMPTS) {
+        console.warn('[WebSocket] Max reconnect attempts reached');
+        return;
+      }
+
+      // 指数退避: 1s -> 2s -> 4s -> 8s -> 16s
+      const delay = Math.min(1000 * 2 ** (reconnectAttemptsRef.current - 1), 16000);
+      reconnectTimerRef.current = setTimeout(() => connect(), delay);
     };
 
     ws.onerror = () => {
@@ -45,11 +72,16 @@ export function useWebSocket() {
   }, []);
 
   useEffect(() => {
+    unmountedRef.current = false;
+    reconnectAttemptsRef.current = 0;
     connect();
     return () => {
+      unmountedRef.current = true;
+      clearReconnectTimer();
       wsRef.current?.close();
+      wsRef.current = null;
     };
-  }, [connect]);
+  }, [connect, clearReconnectTimer]);
 
   return { events, connected, clearEvents: () => setEvents([]) };
 }

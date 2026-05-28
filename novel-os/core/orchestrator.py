@@ -358,6 +358,7 @@ class Orchestrator:
                 "total_chapters": runtime.book_config.chapters_target,
                 "pipeline_id": runtime.pipeline_id,
                 "base_path": str(runtime.book_config.base_path),
+                "llm": runtime.book_config.llm,
             }
 
     def get_all_projects(self) -> list[dict[str, Any]]:

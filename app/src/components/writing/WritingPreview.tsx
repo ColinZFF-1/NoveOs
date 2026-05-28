@@ -85,7 +85,21 @@ const WritingPreview: React.FC<WritingPreviewProps> = ({
     }
   }, [isWriting]);
 
-  if (!isWriting) return null;
+  if (!isWriting) {
+    return (
+      <div className="apple-card p-4 animate-fade-up stagger-2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-apple-gray-50 flex items-center justify-center">
+            <FileText size={16} className="text-apple-gray-300" strokeWidth={2} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-apple-gray-900">写作预览</h3>
+            <p className="text-[11px] text-apple-gray-400 font-medium">流水线未启动，暂无写作内容</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const wordCount = countChineseChars(content);
   const paragraphs = content
