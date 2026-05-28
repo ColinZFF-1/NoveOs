@@ -17,6 +17,8 @@ const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
   let currentChapter = pipeline?.current_step_index || 0;
   if (latestEvent) {
     if (latestEvent.event === 'chapter_start') currentStage = 'writer';
+    else if (latestEvent.event === 'interceptor_scan_start') currentStage = 'interceptor';
+    else if (latestEvent.event === 'interceptor_scan_complete') currentStage = 'polish';
     else if (latestEvent.event === 'chapter_complete') currentStage = 'auditor';
     else if (latestEvent.event === 'chapter_error') currentStage = 'error';
     else if (latestEvent.event === 'pipeline_start') currentStage = 'director';
@@ -28,8 +30,9 @@ const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
   const steps = [
     { id: 1, name: '调度', agentName: 'Director', agentType: 'theme' as const, key: 'director' },
     { id: 2, name: '写作', agentName: 'Writer', agentType: 'writer' as const, key: 'writer' },
-    { id: 3, name: '润色', agentName: 'Polish', agentType: 'chapter' as const, key: 'polish' },
-    { id: 4, name: '审计', agentName: 'Auditor', agentType: 'publish' as const, key: 'auditor' },
+    { id: 3, name: '去AI', agentName: 'DeAI Filter', agentType: 'filter' as const, key: 'interceptor' },
+    { id: 4, name: '润色', agentName: 'Polish', agentType: 'chapter' as const, key: 'polish' },
+    { id: 5, name: '审计', agentName: 'Auditor', agentType: 'publish' as const, key: 'auditor' },
   ];
 
   return (
@@ -93,7 +96,8 @@ const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
           const isActive = currentStage === step.key && isRunning;
           const isDone =
             (currentStage === 'writer' && step.key === 'director') ||
-            (currentStage === 'polish' && (step.key === 'director' || step.key === 'writer')) ||
+            (currentStage === 'interceptor' && (step.key === 'director' || step.key === 'writer')) ||
+            (currentStage === 'polish' && (step.key === 'director' || step.key === 'writer' || step.key === 'interceptor')) ||
             (currentStage === 'auditor' && step.key !== 'auditor') ||
             (latestEvent?.event === 'chapter_complete');
 

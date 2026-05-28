@@ -141,7 +141,7 @@ class Orchestrator:
                 base_path=str(book_config.base_path),
                 total_chapters=book_config.chapters_target,
             )
-            writer = BatchWriter(book_config, state_manager=state)
+            writer = BatchWriter(book_config, state_manager=state, event_bus=self._event_bus)
             runtime = ProjectRuntime(
                 project_id=project_id,
                 book_config=book_config,

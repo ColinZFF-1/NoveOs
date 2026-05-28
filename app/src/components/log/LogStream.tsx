@@ -5,6 +5,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 const agentColors: Record<string, string> = {
   Director: 'text-apple-purple',
   Writer: 'text-primary',
+  'DeAI Filter': 'text-apple-red',
   Polish: 'text-apple-teal',
   Auditor: 'text-apple-blue',
   系统: 'text-apple-gray-400',
@@ -20,6 +21,8 @@ const eventAgentMap: Record<string, string> = {
   agent_call_start: '系统',
   agent_call_complete: '系统',
   quality_gate_blocking: '系统',
+  interceptor_scan_start: 'DeAI Filter',
+  interceptor_scan_complete: 'DeAI Filter',
 };
 
 const eventMessageMap: Record<string, (p: Record<string, unknown>) => string> = {
@@ -32,6 +35,10 @@ const eventMessageMap: Record<string, (p: Record<string, unknown>) => string> = 
   agent_call_start: (p) => `调用 ${p.agent_type}…`,
   agent_call_complete: (p) => `${p.agent_type} 完成`,
   quality_gate_blocking: (p) => `质量门拦截: ${p.reason}`,
+  interceptor_scan_start: (p) => `DeAI 扫描第${p.chapter_num}章…`,
+  interceptor_scan_complete: (p) =>
+    `DeAI 扫描完成: 第${p.chapter_num}章标红${p.issues_count}处` +
+    (p.blocking ? ' [BLOCKING]' : ''),
 };
 
 interface LogStreamProps {

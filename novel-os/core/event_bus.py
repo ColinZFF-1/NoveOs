@@ -30,6 +30,8 @@ CHAPTER_ERROR = "chapter_error"
 AGENT_CALL_START = "agent_call_start"
 AGENT_CALL_COMPLETE = "agent_call_complete"
 QUALITY_GATE_BLOCKING = "quality_gate_blocking"
+INTERCEPTOR_SCAN_START = "interceptor_scan_start"
+INTERCEPTOR_SCAN_COMPLETE = "interceptor_scan_complete"
 PIPELINE_START = "pipeline_start"
 PIPELINE_PAUSE = "pipeline_pause"
 PIPELINE_COMPLETE = "pipeline_complete"
@@ -41,6 +43,8 @@ EVENT_TYPES: set[str] = {
     AGENT_CALL_START,
     AGENT_CALL_COMPLETE,
     QUALITY_GATE_BLOCKING,
+    INTERCEPTOR_SCAN_START,
+    INTERCEPTOR_SCAN_COMPLETE,
     PIPELINE_START,
     PIPELINE_PAUSE,
     PIPELINE_COMPLETE,

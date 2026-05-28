@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface PixelAvatarProps {
-  type: 'theme' | 'world' | 'role' | 'plot' | 'chapter' | 'writer' | 'publish' |
+  type: 'theme' | 'world' | 'role' | 'plot' | 'chapter' | 'writer' | 'publish' | 'filter' |
          'allen' | 'liya' | 'kael' | 'morin' | 'rocket' | 'gpt';
   size?: number;
   className?: string;
@@ -137,6 +137,23 @@ const AgentAvatars: Record<string, string[]> = {
     "....BB.BB...",
     "...BBB.BBB..",
   ],
+  filter: [
+    "....RRRR....",
+    "...RRRRRR...",
+    "..RRSSSSRR..",
+    "..RSEEEESR..",
+    "..RSEEEESR..",
+    "...SSSSSS...",
+    "....SSSS....",
+    "...VVVVVV...",
+    "...VVVVVV...",
+    "..VVVVVVVV..",
+    "..VVVVVVVV..",
+    "..VVVVVVVV..",
+    "....VV.VV...",
+    "....VV.VV...",
+    "...VVV.VVV..",
+  ],
 };
 
 const AgentColorMaps: Record<string, Record<string, string>> = {
@@ -223,6 +240,19 @@ const AgentColorMaps: Record<string, Record<string, string>> = {
     S: '#F5D0A0',  // skin
     E: '#1F2329',  // eyes
     B: '#38A169',  // teal/green clothes
+    D: '#276749',
+    G: '#48BB78',
+    P: '#D53F8C',
+    M: '#9F7AEA',
+    C: '#4FD1C5',
+    O: '#DD6B20',
+    '.': 'transparent',
+  },
+  filter: {
+    R: '#D70015',  // dark red hair
+    S: '#F5D0A0',  // skin
+    E: '#1F2329',  // eyes
+    V: '#FF3B30',  // red clothes (Apple Red)
     D: '#276749',
     G: '#48BB78',
     P: '#D53F8C',

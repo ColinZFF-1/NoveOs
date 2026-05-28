@@ -663,3 +663,17 @@ class StateManager:
             json.dumps(view, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
+
+
+    # ------------------------------------------------------------------
+    # Interceptor / DeAI 扩展（Phase 2 预留）
+    # ------------------------------------------------------------------
+    def get_interceptor_rules(self) -> dict[str, Any]:
+        """获取去 AI 拦截器配置（当前返回默认值，后续可从表读取）。"""
+        # TODO: 当需要按项目自定义规则时，创建 interceptor_rules 表
+        return {}
+
+    def update_frequency_tracker(self, chapter_num: int, stats: dict[str, Any]) -> None:
+        """更新频率追踪器（当前为占位，后续写入 SQLite）。"""
+        # TODO: 创建 frequency_tracker 表并持久化
+        pass
