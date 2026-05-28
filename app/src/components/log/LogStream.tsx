@@ -1,13 +1,13 @@
 import React, { useRef, useEffect } from 'react';
-import { Check, ChevronRight } from 'lucide-react';
+import { Check, ChevronRight, FileText } from 'lucide-react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 
 const agentColors: Record<string, string> = {
-  Director: 'text-purple-500',
-  Writer: 'text-blue-500',
-  Polish: 'text-teal-500',
-  Auditor: 'text-cyan-500',
-  系统: 'text-gray-500',
+  Director: 'text-apple-purple',
+  Writer: 'text-primary',
+  Polish: 'text-apple-teal',
+  Auditor: 'text-apple-blue',
+  系统: 'text-apple-gray-400',
 };
 
 const eventAgentMap: Record<string, string> = {
@@ -29,7 +29,7 @@ const eventMessageMap: Record<string, (p: Record<string, unknown>) => string> = 
   pipeline_start: (p) => `流水线启动 ${p.pipeline_id}`,
   pipeline_pause: (p) => `流水线暂停 @第${p.paused_at}章`,
   pipeline_complete: (p) => `流水线结束 (${p.final_status})`,
-  agent_call_start: (p) => `调用 ${p.agent_type}...`,
+  agent_call_start: (p) => `调用 ${p.agent_type}…`,
   agent_call_complete: (p) => `${p.agent_type} 完成`,
   quality_gate_blocking: (p) => `质量门拦截: ${p.reason}`,
 };
@@ -52,51 +52,60 @@ const LogStream: React.FC<LogStreamProps> = () => {
     const agent = eventAgentMap[e.event] || '系统';
     const msgFn = eventMessageMap[e.event];
     const message = msgFn ? msgFn(e.payload as Record<string, unknown>) : JSON.stringify(e.payload).slice(0, 80);
-    const now = new Date();
-    const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    const ts = (e.payload?.timestamp as string) || (e.payload?.created_at as string);
+    const time = ts
+      ? new Date(ts).toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      : new Date().toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const status = e.event === 'chapter_error' ? 'running' : e.event === 'chapter_complete' ? 'completed' : 'info';
     return { id: `${e.event}-${i}`, time, agent, message, status };
   });
 
   return (
-    <div className="card-base p-4 flex flex-col" style={{ height: 'calc(100% - 8px)' }}>
+    <div className="apple-card p-4 flex flex-col h-full animate-fade-up stagger-3">
       <div className="flex items-center justify-between mb-3 shrink-0">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-gray-700">日志</h3>
-          <span className="text-xs text-gray-400">· 实时运行日志</span>
-          <div className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-success' : 'bg-red-400'}`} />
+          <h3 className="apple-section-title">日志</h3>
+          <span className="apple-section-subtitle">实时运行</span>
+          <div className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-apple-green' : 'bg-apple-red'}`} />
         </div>
-        <button className="flex items-center gap-0.5 text-xs text-primary-500 hover:text-primary-600 transition-colors">
-          <span>全部日志</span>
-          <ChevronRight size={12} />
+        <button
+          type="button"
+          className="apple-btn-ghost h-7 text-xs gap-0.5"
+          aria-label="查看全部日志"
+        >
+          <span>全部</span>
+          <ChevronRight size={12} strokeWidth={2.5} />
         </button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin space-y-1 min-h-0">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin space-y-0.5 min-h-0">
         {logs.length === 0 && (
-          <div className="text-xs text-gray-400 text-center py-8">等待事件推送...</div>
+          <div className="flex flex-col items-center text-xs text-apple-gray-300 text-center py-10">
+            <FileText size={22} className="mb-2 opacity-25" strokeWidth={1.5} />
+            <span className="font-medium">等待事件推送…</span>
+          </div>
         )}
         {logs.map((log) => (
-          <div key={log.id} className="flex items-start gap-2 py-1.5 px-2 rounded-md hover:bg-gray-50/50 transition-colors">
+          <div key={log.id} className="flex items-start gap-2 py-1.5 px-2 rounded-xl hover:bg-apple-gray-50/60 transition-colors duration-150">
             <div className="mt-1 shrink-0">
               {log.status === 'completed' ? (
-                <div className="w-3.5 h-3.5 rounded-full bg-success/10 flex items-center justify-center">
-                  <Check size={10} className="text-success" strokeWidth={3} />
+                <div className="w-3.5 h-3.5 rounded-full bg-apple-green/10 flex items-center justify-center">
+                  <Check size={10} className="text-apple-green" strokeWidth={3.5} />
                 </div>
               ) : log.status === 'running' ? (
-                <div className="w-3.5 h-3.5 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
+                <div className="w-3.5 h-3.5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
               ) : (
-                <div className="w-3.5 h-3.5 rounded-full bg-gray-200" />
+                <div className="w-3.5 h-3.5 rounded-full bg-apple-gray-100" />
               )}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[10px] text-gray-400 font-mono tabular-nums">{log.time}</span>
-                <span className={`text-[11px] font-medium ${agentColors[log.agent] || 'text-gray-500'}`}>
+                <span className="text-[10px] text-apple-gray-300 font-mono tabular-nums font-medium">{log.time}</span>
+                <span className={`text-[11px] font-bold ${agentColors[log.agent] || 'text-apple-gray-400'}`}>
                   {log.agent}
                 </span>
               </div>
-              <p className="text-xs text-gray-600 mt-0.5">{log.message}</p>
+              <p className="text-xs text-apple-gray-600 mt-0.5 font-medium leading-relaxed">{log.message}</p>
             </div>
           </div>
         ))}

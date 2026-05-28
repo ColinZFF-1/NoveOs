@@ -32,46 +32,46 @@ const Footer: React.FC = () => {
   const healthText =
     health === 'healthy' ? '正常运行' :
     health === 'degraded' ? '性能降级' :
-    health === 'down' ? '系统故障' : '连接中...';
+    health === 'down' ? '系统故障' : '连接中…';
   const healthDotClass =
-    health === 'healthy' ? 'bg-success' :
-    health === 'degraded' ? 'bg-yellow-400' :
-    health === 'down' ? 'bg-error' : 'bg-gray-300';
+    health === 'healthy' ? 'bg-apple-green' :
+    health === 'degraded' ? 'bg-apple-orange' :
+    health === 'down' ? 'bg-apple-red' : 'bg-apple-gray-300';
   const healthTextClass =
-    health === 'healthy' ? 'text-success' :
-    health === 'degraded' ? 'text-yellow-500' :
-    health === 'down' ? 'text-error' : 'text-gray-400';
+    health === 'healthy' ? 'text-apple-green' :
+    health === 'degraded' ? 'text-apple-orange' :
+    health === 'down' ? 'text-apple-red' : 'text-apple-gray-400';
 
   return (
-    <footer className="h-10 bg-white border-t border-gray-200 flex items-center justify-between px-5 shrink-0">
+    <footer className="h-10 glass border-t border-apple-gray-100/80 flex items-center justify-between px-6 shrink-0 animate-fade-in">
       {/* Left: System Status */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full animate-pulse-dot ${healthDotClass}`} />
-          <span className="text-xs text-gray-500">系统状态：</span>
-          <span className={`text-xs font-medium ${healthTextClass}`}>{healthText}</span>
+          <span className={`w-2 h-2 rounded-full ${healthDotClass} ${health === 'healthy' ? 'animate-pulse-dot' : ''}`} />
+          <span className="text-xs text-apple-gray-400 font-medium">系统状态</span>
+          <span className={`text-xs font-bold ${healthTextClass}`}>{healthText}</span>
         </div>
-        <div className="h-4 w-px bg-gray-200" />
+        <div className="h-3.5 w-px bg-apple-gray-200" />
         <div className="flex items-center gap-1.5">
-          <Zap size={12} className="text-gray-400" />
-          <span className="text-xs text-gray-500">并发任务：</span>
-          <span className="text-xs font-medium text-gray-700">
+          <Zap size={11} className="text-apple-gray-300" strokeWidth={2.5} />
+          <span className="text-xs text-apple-gray-400 font-medium">并发</span>
+          <span className="text-xs font-bold text-apple-gray-700 tabular-nums">
             {stats ? `${stats.active_projects}/${stats.max_workers}` : '—'}
           </span>
         </div>
-        <div className="h-4 w-px bg-gray-200" />
+        <div className="h-3.5 w-px bg-apple-gray-200" />
         <div className="flex items-center gap-1.5">
-          <Type size={12} className="text-gray-400" />
-          <span className="text-xs text-gray-500">今日生成：</span>
-          <span className="text-xs font-medium text-gray-700">
+          <Type size={11} className="text-apple-gray-300" strokeWidth={2.5} />
+          <span className="text-xs text-apple-gray-400 font-medium">今日</span>
+          <span className="text-xs font-bold text-apple-gray-700 tabular-nums">
             {stats ? `${stats.completed_projects} 章` : '—'}
           </span>
         </div>
-        <div className="h-4 w-px bg-gray-200" />
+        <div className="h-3.5 w-px bg-apple-gray-200" />
         <div className="flex items-center gap-1.5">
-          <Cpu size={12} className="text-gray-400" />
-          <span className="text-xs text-gray-500">总项目数：</span>
-          <span className="text-xs font-medium text-gray-700">
+          <Cpu size={11} className="text-apple-gray-300" strokeWidth={2.5} />
+          <span className="text-xs text-apple-gray-400 font-medium">项目</span>
+          <span className="text-xs font-bold text-apple-gray-700 tabular-nums">
             {stats ? stats.total_projects : '—'}
           </span>
         </div>
@@ -79,14 +79,12 @@ const Footer: React.FC = () => {
 
       {/* Right: Powered By */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-400">Powered by CrewAI</span>
-        <span className="text-xs text-gray-300">|</span>
-        <span className="text-xs text-gray-400">多Agent协同引擎</span>
+        <span className="text-[11px] text-apple-gray-300 font-medium">CrewAI 多Agent引擎</span>
         <div className="flex items-center gap-0.5 ml-1">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="w-4 h-4 rounded-full bg-gradient-to-br from-primary-400 to-purple-500 flex items-center justify-center text-white text-[8px] font-bold"
+              className="w-4 h-4 rounded-full bg-gradient-to-br from-primary to-apple-purple flex items-center justify-center text-white text-[8px] font-bold shadow-xs"
             >
               {['T', 'W', 'R', 'P'][i - 1]}
             </div>

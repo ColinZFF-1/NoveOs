@@ -99,6 +99,7 @@ class BatchWriter:
         gate_result = GateResult(passed=False, level="BLOCKING", reasons=["尚未开始"])
         director_prompt = ""
 
+        extra_instruction = ""
         while self.gates.should_retry(gate_result, attempt, self.cfg.max_retries):
             attempt += 1
             logger.info("第 %d 章 第 %d 次尝试", chapter_num, attempt)
@@ -107,8 +108,8 @@ class BatchWriter:
                 # b. Director（只在第一次生成，重试时复用）
                 if not director_prompt:
                     director_prompt = self._call_director(chapter_num, context)
-                # c. Writer
-                content = self._call_writer(chapter_num, director_prompt)
+                # c. Writer（重试时注入修正指令）
+                content = self._call_writer(chapter_num, director_prompt, extra_instruction)
                 # d. Polish（每 3 章调 1 次：第 1,4,7,10... 章）
                 if (chapter_num - 1) % 3 == 0:
                     content = self._call_polish(chapter_num, content)
@@ -132,6 +133,16 @@ class BatchWriter:
                         gate_result = self.gates.audit(content, audit_report)
                         if gate_result.level != "BLOCKING":
                             break
+                    # 如果是字数不足，注入扩写指令
+                    elif any("字数不足" in r for r in gate_result.reasons):
+                        short_by = self.cfg.words_per_chapter - self.cfg.words_tolerance - audit_report.get("word_count", 0)
+                        extra_instruction = (
+                            f"上稿字数不足，仅 {audit_report.get('word_count', 0)} 字，"
+                            f"距离最低要求还差约 {max(short_by, 200)} 字。\n"
+                            f"请扩写：增加场景细节描写、人物心理活动、对话内容或环境氛围渲染。"
+                            f"确保最终中文字数 ≥ {self.cfg.words_per_chapter - self.cfg.words_tolerance} 字。"
+                        )
+                        logger.info("第 %d 章 注入扩写指令: %s", chapter_num, extra_instruction)
                 else:
                     break
 
@@ -144,13 +155,14 @@ class BatchWriter:
                 )
 
         # 最终判定
+        final_word_count = self._count_chinese_chars(content)
         if gate_result.level == "BLOCKING":
-            logger.error("第 %d 章 最终失败，已用尽 %d 次重试", chapter_num, attempt)
+            logger.error("第 %d 章 最终失败，已用尽 %d 次重试，字数=%d", chapter_num, attempt, final_word_count)
             return WriteResult(
                 chapter_num=chapter_num,
                 success=False,
                 final_content=content,
-                word_count=len(content),
+                word_count=final_word_count,
                 gate_level="BLOCKING",
                 attempts=attempt,
             )
@@ -162,12 +174,12 @@ class BatchWriter:
         saved_path = self.save_chapter(chapter_num, content)
         self._update_state_after_chapter(chapter_num, content)
 
-        logger.info("第 %d 章 完成，字数=%d，路径=%s", chapter_num, len(content), saved_path)
+        logger.info("第 %d 章 完成，中文字数=%d，路径=%s", chapter_num, final_word_count, saved_path)
         return WriteResult(
             chapter_num=chapter_num,
             success=True,
             final_content=content,
-            word_count=len(content),
+            word_count=final_word_count,
             gate_level=gate_result.level,
             attempts=attempt,
             saved_path=saved_path,
@@ -242,6 +254,11 @@ class BatchWriter:
         pattern = f"第{chapter_num:03d}章_*_正文.txt"
         return any(self.output_dir.glob(pattern))
 
+    def _count_chinese_chars(self, text: str) -> int:
+        """统计中文字符数（CJK 统一表意文字）。"""
+        import re
+        return len(re.findall(r'[\u4e00-\u9fff]', text))
+
     def _update_state_after_chapter(self, chapter_num: int, content: str) -> None:
         """章节写完后更新状态库。"""
         # 简单摘要：取前 200 字作为摘要
@@ -249,7 +266,7 @@ class BatchWriter:
         self.state.update_after_chapter(
             chapter_num=chapter_num,
             summary=summary,
-            word_count=len(content),
+            word_count=self._count_chinese_chars(content),
             mode="",  # TODO: 从内容或配置中提取 mode
         )
 
@@ -299,19 +316,25 @@ class BatchWriter:
             parts.append(f"\n[预期输出]\n{expected}")
 
         if agent_type == "writer":
+            target = self.cfg.words_per_chapter
+            tol = self.cfg.words_tolerance
+            min_w = target - tol
+            max_w = target + tol
             # 字数铁律放在最前面，确保模型最先看到
             parts.insert(0,
-                f"【最高优先级 - 字数铁律】\n"
-                f"本章正文总字数必须严格控制在 {self.cfg.words_per_chapter}±{self.cfg.words_tolerance} 字\n"
-                f"（即 {self.cfg.words_per_chapter - self.cfg.words_tolerance} ~ {self.cfg.words_per_chapter + self.cfg.words_tolerance} 字）。\n"
-                f"写完后立即自检字数，超出上限必须删除冗余描写。\n"
-                f"宁可在范围内精简，绝对不要超标。超标整章废弃。\n"
-                f"目标字数：{self.cfg.words_per_chapter} 字。\n\n"
-                f"【节拍字数分配】\n"
-                f"- 节拍1（起）：约 {int(self.cfg.words_per_chapter * 0.20)} 字\n"
-                f"- 节拍2（承）：约 {int(self.cfg.words_per_chapter * 0.30)} 字\n"
-                f"- 节拍3（转）：约 {int(self.cfg.words_per_chapter * 0.30)} 字\n"
-                f"- 节拍4（合）：约 {int(self.cfg.words_per_chapter * 0.20)} 字\n\n"
+                f"【系统指令 - 字数铁律 - 绝对不可违背】\n"
+                f"1. 本章正文总字数（仅统计中文字符）必须严格控制在 {min_w} ~ {max_w} 字。\n"
+                f"2. 目标字数：{target} 字。允许误差 ±{tol} 字，超出即失败。\n"
+                f"3. 写作过程中每完成一个节拍，立即估算已写中文字数，确保进度与分配一致。\n"
+                f"4. 完成全部正文后，必须再次精确统计中文字数。若不足 {min_w} 字，立即补充细节描写、对话或心理活动；若超过 {max_w} 字，立即删除冗余修辞和重复叙述。\n"
+                f"5. 字数统计方法：只计算中文汉字（不计算标点、空格、英文字母、数字）。\n"
+                f"6. 最终输出必须满足字数要求，否则整章废弃重写。\n\n"
+                f"【节拍字数分配 - 含自检节点】\n"
+                f"- 节拍1（起）：约 {int(target * 0.20)} 字 → 自检：应达 {int(target * 0.18)}~{int(target * 0.22)} 字\n"
+                f"- 节拍2（承）：约 {int(target * 0.30)} 字 → 自检：累计应达 {int(target * 0.48)}~{int(target * 0.52)} 字\n"
+                f"- 节拍3（转）：约 {int(target * 0.30)} 字 → 自检：累计应达 {int(target * 0.78)}~{int(target * 0.82)} 字\n"
+                f"- 节拍4（合）：约 {int(target * 0.20)} 字 → 自检：总字数必须 ≥{min_w} 字\n"
+                f"注意：每个节拍完成后立即估算中文字数，不足就补充细节，超标就精简。\n\n"
                 f"【正文格式铁律】\n"
                 f"- 禁止出现【节拍X】标签、markdown标记、自检表、字数统计\n"
                 f"- 每章开头直接以正文第一句开始，不要标题\n\n"
@@ -330,10 +353,12 @@ class BatchWriter:
         )
         return self.llm.call(system, user, temperature=0.1, max_tokens=4000)
 
-    def _call_writer(self, chapter_num: int, director_prompt: str) -> str:
-        """Writer Agent：生成初稿。"""
+    def _call_writer(self, chapter_num: int, director_prompt: str, extra_instruction: str = "") -> str:
+        """Writer Agent：生成初稿。支持注入扩写/精简等额外指令。"""
         system = self._build_system_prompt("writer")
         user = self._build_task_user_prompt("writer", chapter_num, context=director_prompt)
+        if extra_instruction:
+            user += f"\n\n【修正指令 - 本次必须执行】\n{extra_instruction}\n"
         # 字数硬限制：max_tokens 设为 7000（约 5000 中文字上限）
         max_tok = min(7000, self.cfg.llm.get("max_tokens", 8000))
         return self.llm.call(system, user, temperature=0.15, max_tokens=max_tok)
@@ -369,16 +394,23 @@ class BatchWriter:
 
     def _mock_audit(self, content: str) -> dict[str, Any]:
         """本地快速审计（当 Auditor Agent 不可用时降级使用）。"""
+        import re
         text = content
-        word_count = len(text)
-        # 他字密度: 统计 "他" 字出现频率
-        ta_count = text.count("他")
+        # 中文字数：统计 CJK 统一表意文字
+        chinese_chars = re.findall(r'[\u4e00-\u9fff]', text)
+        word_count = len(chinese_chars)
+        # 他字密度: 统计 "他" 字出现频率（基于中文字数）
+        ta_count = text.count("他") + text.count("她") + text.count("它")
         ta_density = ta_count / max(word_count, 1)
+        # 禁用词检测
+        forbidden_words = ["然而", "不得不说", "众所周知", "突然", "竟然", "原来",
+                           "与此同时", "紧接着", "果不其然"]
+        found_forbidden = [w for w in forbidden_words if w in text]
         return {
             "word_count": word_count,
             "ta_density": ta_density,
             "redline_words": [],
-            "forbidden_words": [],
+            "forbidden_words": found_forbidden,
             "broken_sentences": [],
             "extra": {},
         }

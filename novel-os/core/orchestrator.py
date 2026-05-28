@@ -332,7 +332,9 @@ class Orchestrator:
             with self._lock:
                 runtime = self._projects.get(project_id)
                 if runtime:
-                    runtime.status = "error"
+                    # 保护已完成的流水线不被 event handler 或 persist 异常覆盖
+                    if runtime.status not in ("completed", "paused"):
+                        runtime.status = "error"
                     runtime.pipeline_id = None
                     runtime.future = None
                     self._persist_project(project_id, runtime)

@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 220 14% 96%;
-    --foreground: 220 14% 13%;
+    --background: 0 0% 100%;
+    --foreground: 240 6% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 220 14% 13%;
+    --card-foreground: 240 6% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 14% 13%;
-    --primary: 220 100% 65%;
+    --popover-foreground: 240 6% 10%;
+    --primary: 211 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 14% 13%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 5% 46%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 14% 13%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 9% 89%;
-    --input: 220 9% 89%;
-    --ring: 220 100% 65%;
-    --radius: 0.625rem;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 211 100% 50%;
+    --radius: 0.75rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -35,28 +35,74 @@
   }
 
   body {
-    @apply bg-[#F3F4F6] text-gray-700;
-    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    @apply bg-apple-gray-50 text-apple-gray-900 antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: 13px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Apple-style selection */
+  ::selection {
+    background: rgba(0, 122, 255, 0.15);
+    color: inherit;
+  }
 }
 
 @layer components {
-  .card-base {
-    @apply bg-white rounded-xl border border-[#E5E6EB] shadow-card;
+  /* Apple Card - frosted glass + layered shadow */
+  .apple-card {
+    @apply bg-white rounded-3xl shadow-apple transition-all duration-300 ease-apple;
   }
 
-  .card-hoverable {
-    @apply bg-white rounded-xl border border-[#E5E6EB] shadow-card transition-all duration-200;
+  .apple-card:hover {
+    @apply shadow-apple-hover;
   }
 
-  .card-hoverable:hover {
-    @apply shadow-card-hover;
+  /* Apple Button */
+  .apple-btn {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium
+           transition-all duration-200 ease-apple
+           focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 outline-none;
   }
 
+  .apple-btn-primary {
+    @apply apple-btn bg-primary text-white shadow-button hover:shadow-button-hover hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .apple-btn-secondary {
+    @apply apple-btn bg-apple-gray-50 text-apple-gray-700 hover:bg-apple-gray-100 active:bg-apple-gray-200;
+  }
+
+  .apple-btn-ghost {
+    @apply apple-btn text-apple-gray-500 hover:text-apple-gray-700 hover:bg-apple-gray-50;
+  }
+
+  /* Apple Tag / Badge */
+  .apple-tag {
+    @apply inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold;
+  }
+
+  /* Apple Section Title */
+  .apple-section-title {
+    @apply text-base font-semibold text-apple-gray-900 tracking-tight;
+  }
+
+  .apple-section-subtitle {
+    @apply text-xs text-apple-gray-400 font-medium;
+  }
+
+  /* Glass morphism for overlays */
+  .glass {
+    @apply bg-white/80 backdrop-blur-apple backdrop-saturate-150;
+  }
+
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-apple backdrop-saturate-150;
+  }
+
+  /* Progress shimmer */
   .progress-shimmer {
     position: relative;
     overflow: hidden;
@@ -78,8 +124,9 @@
     image-rendering: crisp-edges;
   }
 
+  /* Scrollbar - Apple thin style */
   .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
+    width: 5px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -87,17 +134,46 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #d9d9d9;
-    border-radius: 2px;
+    background: #D2D2D7;
+    border-radius: 10px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #bbbfc4;
+    background: #AEAEB2;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Staggered animation delays for page load */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+  .stagger-6 { animation-delay: 0.3s; }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-dot,
+  .animate-breathe,
+  .animate-spin,
+  .animate-shimmer,
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-scale-in {
+    animation: none !important;
+  }
+  .transition-all,
+  .transition-colors,
+  .transition-shadow,
+  .transition-transform,
+  .transition-opacity {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }

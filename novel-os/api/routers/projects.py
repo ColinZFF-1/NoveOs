@@ -30,8 +30,8 @@ async def create_project(req: CreateProjectRequest):
     base.mkdir(parents=True, exist_ok=True)
 
     yaml_path = base / "book.yaml"
-    # 强制重写，确保配置始终最新
-    if True or not yaml_path.exists():
+    # 仅在 book.yaml 不存在时创建模板，不覆盖已有配置（保护 api_key 等手动配置）
+    if not yaml_path.exists():
         yaml_content = (
             f"project: {req.name}\n"
             f"platform: {req.platform}\n"

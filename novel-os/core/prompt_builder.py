@@ -160,24 +160,30 @@ class PromptBuilder:
         """字数铁律（目标 4500±450）。"""
         target = self.cfg.words_per_chapter
         tol = self.cfg.words_tolerance
+        min_w = target - tol
+        max_w = target + tol
         return (
-            f"【最高优先级 - 字数铁律】\n"
-            f"本章正文总字数必须严格控制在 {target}±{tol} 字\n"
-            f"（即 {target - tol} ~ {target + tol} 字）。\n"
-            f"写完后立即自检字数，超出上限必须删除冗余描写。\n"
-            f"宁可在范围内精简，绝对不要超标。超标整章废弃。\n"
-            f"目标字数：{target} 字。"
+            f"【系统指令 - 字数铁律 - 绝对不可违背】\n"
+            f"1. 本章正文总字数（仅统计中文字符）必须严格控制在 {min_w} ~ {max_w} 字。\n"
+            f"2. 目标字数：{target} 字。允许误差 ±{tol} 字，超出即失败。\n"
+            f"3. 写作过程中每完成一个节拍，立即估算已写中文字数，确保进度与分配一致。\n"
+            f"4. 完成全部正文后，必须再次精确统计中文字数。若不足 {min_w} 字，立即补充细节描写、对话或心理活动；若超过 {max_w} 字，立即删除冗余修辞和重复叙述。\n"
+            f"5. 字数统计方法：只计算中文汉字（不计算标点、空格、英文字母、数字）。\n"
+            f"6. 最终输出必须满足字数要求，否则整章废弃重写。"
         )
 
     def _build_beat_allocation(self) -> str:
         """节拍字数分配。"""
         target = self.cfg.words_per_chapter
+        tol = self.cfg.words_tolerance
+        min_w = target - tol
         return (
-            f"【节拍字数分配】\n"
-            f"- 节拍1（起）：约 {int(target * 0.20)} 字\n"
-            f"- 节拍2（承）：约 {int(target * 0.30)} 字\n"
-            f"- 节拍3（转）：约 {int(target * 0.30)} 字\n"
-            f"- 节拍4（合）：约 {int(target * 0.20)} 字"
+            f"【节拍字数分配 - 含自检节点】\n"
+            f"- 节拍1（起）：约 {int(target * 0.20)} 字 → 写完后自检：应达 {int(target * 0.18)}~{int(target * 0.22)} 字\n"
+            f"- 节拍2（承）：约 {int(target * 0.30)} 字 → 写完后自检：累计应达 {int(target * 0.48)}~{int(target * 0.52)} 字\n"
+            f"- 节拍3（转）：约 {int(target * 0.30)} 字 → 写完后自检：累计应达 {int(target * 0.78)}~{int(target * 0.82)} 字\n"
+            f"- 节拍4（合）：约 {int(target * 0.20)} 字 → 写完后自检：总字数必须 ≥{min_w} 字\n"
+            f"注意：每个节拍完成后立即估算中文字数，不足就补充细节，超标就精简。"
         )
 
     def _build_format_rules(self) -> str:

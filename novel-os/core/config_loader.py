@@ -9,14 +9,27 @@ from typing import Any
 import yaml
 
 
+import re
+
+def _expand_env(value: str) -> str:
+    """跨平台环境变量展开，支持 ${VAR}、$VAR 和 %VAR%（Windows）。"""
+    # 1. Windows 原生 %VAR%
+    expanded = os.path.expandvars(value)
+    # 2. Unix 风格 ${VAR} 和 $VAR
+    def _repl(m: re.Match) -> str:
+        var_name = m.group(1) or m.group(2)
+        return os.environ.get(var_name, m.group(0))
+    expanded = re.sub(r'\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)', _repl, expanded)
+    return expanded
+
 def _resolve_llm(llm_cfg: dict[str, Any]) -> dict[str, Any]:
     """对 llm 配置中的 api_key 做环境变量展开。"""
     if not llm_cfg:
         return llm_cfg
     resolved = dict(llm_cfg)
     if "api_key" in resolved and isinstance(resolved["api_key"], str):
-        expanded = os.path.expandvars(resolved["api_key"])
-        if "$" not in expanded:
+        expanded = _expand_env(resolved["api_key"])
+        if "$" not in expanded and "%" not in expanded:
             resolved["api_key"] = expanded
     return resolved
 
@@ -97,9 +110,9 @@ class BookConfig:
 
     @staticmethod
     def _resolve_path(value: str, env_hint: str) -> Path:
-        """展开环境变量并返回 Path；若展开后仍含 '$' 说明变量未定义。"""
-        expanded = os.path.expandvars(value)
-        if "$" in expanded:
+        """展开环境变量并返回 Path；若展开后仍含 '$' 或 '%' 说明变量未定义。"""
+        expanded = _expand_env(value)
+        if "$" in expanded or "%" in expanded:
             raise ValueError(
                 f"路径中的环境变量未设置: {value!r}。"
                 f"请确保 {env_hint} 等环境变量已导出。"
