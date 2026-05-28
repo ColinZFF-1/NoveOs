@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -117,6 +118,16 @@ class LLMClient:
                 extra_body=extra_body if extra_body else None,
             )
             content = response.choices[0].message.content or ""
+
+            # 防御 DeepSeek V4 thinking 内容泄漏到 content（社区已知 issue）
+            if "<think>" in content:
+                original_len = len(content)
+                content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+                logger.warning(
+                    "LLM 返回内容中包含 <think> 块，已过滤（移除 %d 字符）",
+                    original_len - len(content),
+                )
+
             if not content.strip():
                 raise ValueError("API 返回空内容")
             return content
