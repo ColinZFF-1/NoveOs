@@ -108,11 +108,11 @@ const LogStream: React.FC<LogStreamProps> = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-[10px] text-apple-gray-300 font-mono tabular-nums font-medium">{log.time}</span>
-                <span className={`text-[11px] font-bold ${agentColors[log.agent] || 'text-apple-gray-400'}`}>
+                <span className={`text-[10px] font-bold ${agentColors[log.agent] || 'text-apple-gray-400'}`}>
                   {log.agent}
                 </span>
               </div>
-              <p className="text-xs text-apple-gray-600 mt-0.5 font-medium leading-relaxed">{log.message}</p>
+              <p className="text-[11px] text-apple-gray-600 mt-0.5 font-medium leading-relaxed">{log.message}</p>
             </div>
           </div>
         ))}

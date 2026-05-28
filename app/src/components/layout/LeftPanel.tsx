@@ -77,15 +77,15 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ projectId }) => {
       </div>
 
       {/* Stats Card */}
-      <div className="apple-card p-4 space-y-4 animate-fade-up stagger-3">
+      <div className="apple-card p-4 space-y-3 animate-fade-up stagger-3">
         <div>
-          <p className="text-xs text-apple-gray-400 font-medium mb-1">当前章节</p>
-          <p className="text-xl font-bold text-apple-gray-900 tabular-nums">第 {pipeline?.current_step_index || 0} 章</p>
+          <p className="text-[11px] text-apple-gray-400 font-medium mb-0.5">当前章节</p>
+          <p className="text-lg font-bold text-apple-gray-900 tabular-nums">第 {pipeline?.current_step_index || 0} 章</p>
         </div>
         <div className="h-px bg-apple-gray-100" />
         <div>
-          <p className="text-xs text-apple-gray-400 font-medium mb-1">流水线状态</p>
-          <p className={`text-xl font-bold ${isRunning ? 'text-primary' : 'text-apple-gray-900'}`}>
+          <p className="text-[11px] text-apple-gray-400 font-medium mb-0.5">流水线状态</p>
+          <p className={`text-lg font-bold ${isRunning ? 'text-primary' : 'text-apple-gray-900'}`}>
             {pipeline?.status || 'idle'}
           </p>
         </div>

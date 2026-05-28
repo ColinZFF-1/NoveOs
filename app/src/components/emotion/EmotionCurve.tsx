@@ -59,7 +59,7 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [data, setData] = useState<EmotionPoint[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentChapter, setCurrentChapter] = useState(12);
+  const [currentChapter, setCurrentChapter] = useState(0);
 
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -137,8 +137,8 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
       )}
 
       {!loading && data.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-48 text-apple-gray-400">
-          <TrendingUp size={24} className="mb-2 opacity-30" />
+        <div className="flex flex-col items-center justify-center h-32 text-apple-gray-400">
+          <TrendingUp size={20} className="mb-1.5 opacity-30" />
           <p className="text-xs">暂无情绪曲线数据</p>
         </div>
       )}
@@ -146,7 +146,7 @@ const EmotionCurve: React.FC<EmotionCurveProps> = ({ projectId }) => {
       {!loading && data.length > 0 && (
       <>
       {/* Chart */}
-      <div className="h-28">
+      <div className="h-20">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
             <defs>
