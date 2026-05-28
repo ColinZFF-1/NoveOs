@@ -41,7 +41,7 @@ async def create_project(req: CreateProjectRequest):
             f"total_words_target: 0\n"
             f"chapters_target: {req.total_chapters}\n"
             f"words_per_chapter: 4500\n"
-            f"output_dir: chapters/v9.0\n"
+            f"output_dir: chapters\n"
             f"plugin_id: \"\"\n"
             f"agent_query: {{}}\n"
             f"writing:\n"

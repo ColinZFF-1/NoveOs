@@ -20,7 +20,7 @@ async def list_chapters(project_id: str):
     # 补充文件系统中的章节
     base_path = Path(status["base_path"])
     file_chapters = {}
-    for dir_name in ("chapters/v9.0", "chapters/V9.0"):
+    for dir_name in ("chapters", "chapters/v9.0", "chapters/V9.0"):
         output_dir = base_path / dir_name
         if not output_dir.exists():
             continue

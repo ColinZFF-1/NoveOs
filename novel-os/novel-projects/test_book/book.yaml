@@ -6,7 +6,7 @@ crewai_db_path: ${CREWAI_STUDIO_PATH}/crewai.db
 total_words_target: 0
 chapters_target: 100
 words_per_chapter: 4500
-output_dir: chapters/v9.0
+output_dir: chapters
 plugin_id: ""
 agent_query: {}
 writing:

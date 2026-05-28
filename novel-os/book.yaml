@@ -7,7 +7,7 @@ chapters_target: 240
 words_per_chapter: 4500
 base_path: "${NOVEL_BASE_PATH}/重生七八老娘要搞钱"
 crewai_db_path: "${CREWAI_STUDIO_PATH}/crewai.db"
-output_dir: "chapters/V9.0"
+output_dir: "chapters"
 v8_dir: "chapters/V8.0"
 agent_query:
   director:

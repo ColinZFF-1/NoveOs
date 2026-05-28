@@ -100,7 +100,7 @@ class BookConfig:
             words_per_chapter=raw.get("words_per_chapter", 4500),
             base_path=base_path,
             crewai_db_path=crewai_db_path,
-            output_dir=raw.get("output_dir", "chapters/v9.0"),
+            output_dir=raw.get("output_dir", "chapters"),
             v8_dir=raw.get("v8_dir"),
             agent_query=raw.get("agent_query", {}),
             writing=raw.get("writing", {}),
