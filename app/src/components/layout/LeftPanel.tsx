@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Switch } from '@/components/ui/switch';
 import PixelAvatar from '@/components/pixel/PixelAvatar';
 import { useNovelOS } from '@/hooks/useNovelOS';
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -10,7 +9,6 @@ interface LeftPanelProps {
 }
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ projectId }) => {
-  const [autoAudit, setAutoAudit] = useState(true);
   const [isLaunching, setIsLaunching] = useState(false);
   const { pipeline, project, startPipeline, loading } = useNovelOS(projectId);
   const { connected } = useWebSocket();
@@ -91,17 +89,11 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ projectId }) => {
         </div>
       </div>
 
-      {/* Auto Audit Toggle */}
-      <div className="apple-card p-4 flex items-center justify-between animate-fade-up stagger-4">
-        <label htmlFor="auto-audit" className="text-sm font-medium text-apple-gray-700 cursor-pointer">
-          自动审核通过后发布
-        </label>
-        <Switch
-          id="auto-audit"
-          checked={autoAudit}
-          onCheckedChange={setAutoAudit}
-          className="data-[state=checked]:bg-primary"
-        />
+      {/* Placeholder Card - 预留功能位 */}
+      <div className="apple-card p-4 animate-fade-up stagger-4">
+        <div className="flex items-center justify-center h-10 text-xs text-apple-gray-300">
+          <span>功能开发中…</span>
+        </div>
       </div>
     </aside>
   );

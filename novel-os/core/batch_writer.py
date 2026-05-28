@@ -272,22 +272,45 @@ class BatchWriter:
         """保存章节正文到 output_dir。
 
         文件名格式: 第{num:03d}章_标题_正文.txt
-        （标题从内容第一行提取，若无则留空）
+        （标题从内容中智能提取，支持多种格式）
         """
-        title = ""
-        first_line = content.strip().splitlines()[0] if content.strip() else ""
-        if first_line.startswith("第") and "章" in first_line:
-            # 尝试提取标题
-            parts = first_line.split("章", 1)
-            if len(parts) > 1:
-                title = parts[1].strip().lstrip("_").strip()
-        title = title or "未命名"
+        title = self._extract_title(chapter_num, content)
         # 清理文件名非法字符
         safe_title = re.sub(r'[\\/:*?"<>|]', "", title)[:20]
         filename = f"第{chapter_num:03d}章_{safe_title}_正文.txt"
         path = self.output_dir / filename
         path.write_text(content, encoding="utf-8")
         return path
+
+    @staticmethod
+    def _extract_title(chapter_num: int, content: str) -> str:
+        """从正文内容中提取章节标题，支持多种格式。"""
+        if not content.strip():
+            return "未命名"
+
+        lines = content.strip().splitlines()
+
+        # 策略1: 匹配 markdown 格式 # 第X章 标题
+        md_pattern = re.compile(r'^#\s*第\s*(\d+|一|二|三|四|五|六|七|八|九|十)\s*章\s*[：:\s_]*(.+)$')
+        for line in lines[:3]:
+            m = md_pattern.match(line.strip())
+            if m:
+                return m.group(2).strip()
+
+        # 策略2: 匹配 第X章 标题（无 markdown）
+        plain_pattern = re.compile(r'^第\s*(\d+|一|二|三|四|五|六|七|八|九|十)\s*章\s*[：:\s_]*(.+)$')
+        for line in lines[:3]:
+            m = plain_pattern.match(line.strip())
+            if m:
+                return m.group(2).strip()
+
+        # 策略3: 在全文搜索 "第X章" 附近是否有标题提示
+        search_pattern = re.compile(r'第\s*' + str(chapter_num) + r'\s*章\s*[：:\s_]*([^\n]{1,20})')
+        m = search_pattern.search(content)
+        if m:
+            return m.group(1).strip()
+
+        return "未命名"
 
     # ------------------------------------------------------------------
     # 内部辅助
