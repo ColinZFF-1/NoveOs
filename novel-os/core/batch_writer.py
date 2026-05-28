@@ -13,6 +13,12 @@ from typing import Any
 
 from core.config_loader import BookConfig
 from core.crewai_connector import CrewAIConnector
+from core.event_bus import (
+    INTERCEPTOR_SCAN_COMPLETE,
+    INTERCEPTOR_SCAN_START,
+    EventBus,
+)
+from core.interceptor import DeAIInterceptor
 from core.llm_client import LLMClient, LLMConfig
 from core.quality_gates import GateResult, QualityGates
 from core.state_manager import StateManager
@@ -35,11 +41,24 @@ class WriteResult:
 class BatchWriter:
     """配置驱动的批量章节写作器，支持断点续传。"""
 
-    def __init__(self, book_config: BookConfig, state_manager: StateManager | None = None) -> None:
+    def __init__(
+        self,
+        book_config: BookConfig,
+        state_manager: StateManager | None = None,
+        event_bus: EventBus | None = None,
+    ) -> None:
         self.cfg = book_config
         self.state = state_manager or StateManager(
             book_config.base_path / "world_state.db"
         )
+        self._event_bus = event_bus
+
+        # 初始化 DeAI 拦截器（从 world_state 读取规则配置）
+        try:
+            interceptor_rules = self.state.get_interceptor_rules()
+        except Exception:
+            interceptor_rules = {}
+        self.interceptor = DeAIInterceptor(rules=interceptor_rules)
 
         # 自动检测 crewai 配置来源：db > export.json > mock
         export_json = book_config.base_path / "crewai_entities_export.json"
@@ -54,7 +73,7 @@ class BatchWriter:
         if llm_cfg:
             self.llm = LLMClient(
                 LLMConfig(
-                    model=llm_cfg.get("model", "deepseek-chat"),
+                    model=llm_cfg.get("model", "deepseek-v4-flash"),
                     api_key=llm_cfg.get("api_key", ""),
                     api_base=llm_cfg.get("api_base", "https://api.deepseek.com/v1"),
                     temperature=llm_cfg.get("temperature", 0.7),
@@ -110,12 +129,44 @@ class BatchWriter:
                     director_prompt = self._call_director(chapter_num, context)
                 # c. Writer（重试时注入修正指令）
                 content = self._call_writer(chapter_num, director_prompt, extra_instruction)
-                # d. Polish（每 3 章调 1 次：第 1,4,7,10... 章）
-                if (chapter_num - 1) % 3 == 0:
-                    content = self._call_polish(chapter_num, content)
+
+                # [新增] DeAI Interceptor 扫描（Writer → Polish 之间）
+                if self._event_bus:
+                    self._event_bus.emit(
+                        INTERCEPTOR_SCAN_START,
+                        {"chapter_num": chapter_num, "project_id": getattr(self.cfg, "project_id", "")},
+                    )
+                scan_result = self.interceptor.scan(content, chapter_num)
+                if self._event_bus:
+                    self._event_bus.emit(
+                        INTERCEPTOR_SCAN_COMPLETE,
+                        {
+                            "chapter_num": chapter_num,
+                            "project_id": getattr(self.cfg, "project_id", ""),
+                            "issues_count": len(scan_result.issues),
+                            "stats": scan_result.stats,
+                            "blocking": scan_result.blocking,
+                        },
+                    )
+
+                polish_extra = ""
+                if scan_result.issues:
+                    content = scan_result.modified_text
+                    polish_extra = scan_result.repair_instruction
+                    logger.info(
+                        "第 %d 章 Interceptor 标红 %d 处: %s",
+                        chapter_num,
+                        len(scan_result.issues),
+                        scan_result.issues,
+                    )
+
+                # d. Polish（每 3 章调 1 次；如有拦截 issues 则强制润色）
+                should_polish = (chapter_num - 1) % 3 == 0 or bool(scan_result.issues)
+                if should_polish:
+                    content = self._call_polish(chapter_num, content, extra_instruction=polish_extra)
                     logger.info("第 %d 章 调用 Polish 润色", chapter_num)
                 else:
-                    logger.info("第 %d 章 跳过 Polish（每3章润色1次）", chapter_num)
+                    logger.info("第 %d 章 跳过 Polish（每3章润色1次且无拦截问题）", chapter_num)
                 # e. Auditor
                 audit_report = self._call_auditor(chapter_num, content)
                 # f. QualityGates
@@ -363,8 +414,8 @@ class BatchWriter:
         max_tok = min(7000, self.cfg.llm.get("max_tokens", 8000))
         return self.llm.call(system, user, temperature=0.15, max_tokens=max_tok)
 
-    def _call_polish(self, chapter_num: int, draft: str) -> str:
-        """Polish Agent：去 AI 味润色。"""
+    def _call_polish(self, chapter_num: int, draft: str, extra_instruction: str = "") -> str:
+        """Polish Agent：去 AI 味润色。支持注入拦截器修复指令。"""
         system = self._build_system_prompt("polish")
         user = self._build_task_user_prompt("polish", chapter_num, context=draft)
         # 强制约束：Polish 只输出纯正文
@@ -377,6 +428,8 @@ class BatchWriter:
             "5. 如果原文中有【节拍X】标签，直接删除，保持正文流畅。\n"
             "6. 输出格式：直接以正文第一句开始，到最后一个字结束，中间不要任何非正文内容。"
         )
+        if extra_instruction:
+            user += f"\n\n{extra_instruction}\n"
         return self.llm.call(system, user, temperature=0.1, max_tokens=8000)
 
     def _call_auditor(self, chapter_num: int, content: str) -> dict[str, Any]:

@@ -73,7 +73,7 @@
 |------|------|
 | Python 3.12 | 运行环境 |
 | crewai-venv | 虚拟环境（crewai + litellm） |
-| DeepSeek API | LLM 调用（deepseek-chat） |
+| DeepSeek API | LLM 调用（deepseek-v4-flash） |
 | SQLite | 配置存储（crewai.db） |
 | JSON | 跨章状态（world_state.json） |
 
@@ -1000,7 +1000,7 @@ if __name__ == '__main__':
 # 方式1：直接前台运行（可看到实时输出）
 cd E:\番茄\小说\【书名】
 E:\crewai-venv\Scripts\python.exe batch_write_v9_direct.py \
-  --start 1 --end 115 --model deepseek-chat --delay 3
+  --start 1 --end 115 --model deepseek-v4-flash --delay 3
 
 # 方式2：后台运行（推荐）
 E:\crewai-venv\Scripts\python.exe launcher.py
@@ -1074,7 +1074,7 @@ python fix_names_v9.py
 
 ```bash
 # 单独重跑某一章
-python batch_write_v9_direct.py --start 50 --end 50 --model deepseek-chat
+python batch_write_v9_direct.py --start 50 --end 50 --model deepseek-v4-flash
 ```
 
 ---

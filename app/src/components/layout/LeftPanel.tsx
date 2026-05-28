@@ -37,7 +37,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ projectId }) => {
           <PixelAvatar type="gpt" size={44} />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-bold text-apple-gray-900">DeepSeek-V3</h3>
-            <p className="text-xs text-apple-gray-400 mt-0.5">deepseek-chat</p>
+            <p className="text-xs text-apple-gray-400 mt-0.5">deepseek-v4-flash</p>
             <div className="flex items-center gap-1.5 mt-2.5">
               <span className={`w-2 h-2 rounded-full animate-pulse-dot ${connected ? 'bg-apple-green' : 'bg-apple-red'}`} />
               <span className={`text-xs font-semibold ${connected ? 'text-apple-green' : 'text-apple-red'}`}>

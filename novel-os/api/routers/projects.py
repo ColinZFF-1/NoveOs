@@ -49,7 +49,7 @@ async def create_project(req: CreateProjectRequest):
             f"  max_retries: 3\n"
             f"  batch_size: 5\n"
             f"llm:\n"
-            f"  model: deepseek-chat\n"
+            f"  model: deepseek-v4-flash\n"
             f"  api_key: ${{DEEPSEEK_API_KEY}}\n"
             f"  api_base: https://api.deepseek.com/v1\n"
             f"  temperature: 0.7\n"

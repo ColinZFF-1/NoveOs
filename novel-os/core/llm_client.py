@@ -20,7 +20,7 @@ except ImportError:
 @dataclass
 class LLMConfig:
     """LLM 调用配置。"""
-    model: str = "deepseek-chat"
+    model: str = "deepseek-v4-flash"
     api_key: str = ""
     api_base: str = "https://api.deepseek.com/v1"
     temperature: float = 0.7
@@ -31,7 +31,7 @@ class LLMConfig:
     def from_env(cls, model: str | None = None) -> "LLMConfig":
         """从环境变量加载配置。"""
         return cls(
-            model=model or os.getenv("LLM_MODEL", "deepseek-chat"),
+            model=model or os.getenv("LLM_MODEL", "deepseek-v4-flash"),
             api_key=os.getenv("OPENAI_API_KEY", ""),
             api_base=os.getenv("OPENAI_API_BASE", "https://api.deepseek.com/v1"),
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
