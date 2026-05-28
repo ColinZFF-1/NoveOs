@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +29,7 @@ logger = logging.getLogger("novel-os.batch_writer")
 @dataclass
 class WriteResult:
     """单章写作结果。"""
+
     chapter_num: int
     success: bool
     final_content: str
@@ -36,6 +37,7 @@ class WriteResult:
     gate_level: str
     attempts: int
     saved_path: Path | None = None
+    audit_report: dict[str, Any] = field(default_factory=dict)
 
 
 class BatchWriter:
@@ -73,7 +75,7 @@ class BatchWriter:
         if llm_cfg:
             self.llm = LLMClient(
                 LLMConfig(
-                    model=llm_cfg.get("model", "deepseek-v4-flash"),
+                    model=llm_cfg.get("model", "deepseek-v4-pro"),
                     api_key=llm_cfg.get("api_key", ""),
                     api_base=llm_cfg.get("api_base", "https://api.deepseek.com/v1"),
                     temperature=llm_cfg.get("temperature", 0.7),
@@ -119,6 +121,7 @@ class BatchWriter:
         content = ""
         gate_result = GateResult(passed=False, level="BLOCKING", reasons=["尚未开始"])
         director_prompt = ""
+        audit_report: dict[str, Any] = {}
 
         extra_instruction = ""
         while self.gates.should_retry(gate_result, attempt, self.cfg.max_retries):
@@ -218,6 +221,7 @@ class BatchWriter:
                 word_count=final_word_count,
                 gate_level="BLOCKING",
                 attempts=attempt,
+                audit_report=audit_report,
             )
 
         if gate_result.level == "WARN":
@@ -236,6 +240,7 @@ class BatchWriter:
             gate_level=gate_result.level,
             attempts=attempt,
             saved_path=saved_path,
+            audit_report=audit_report,
         )
 
     def write_range(self, start: int, end: int, resume: bool = False) -> list[WriteResult]:

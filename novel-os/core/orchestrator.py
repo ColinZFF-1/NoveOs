@@ -41,6 +41,7 @@ class ProjectRuntime:
     current_chapter: int = 0
     pipeline_id: str | None = None
     future: Future | None = None
+    last_audit: dict[str, Any] = field(default_factory=dict)
     created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
 
@@ -280,6 +281,11 @@ class Orchestrator:
                             runtime.status = "writing"
                         else:
                             runtime.status = "error"
+                        # 记录最近一次审计结果
+                        runtime.last_audit = {
+                            "quality_passed": result.gate_level != "BLOCKING",
+                            "sensitive_passed": len(result.audit_report.get("forbidden_words", [])) == 0,
+                        }
                         self._persist_project(project_id, runtime)
 
                     self._event_bus.emit(
@@ -359,6 +365,7 @@ class Orchestrator:
                 "pipeline_id": runtime.pipeline_id,
                 "base_path": str(runtime.book_config.base_path),
                 "llm": runtime.book_config.llm,
+                "last_audit": runtime.last_audit,
             }
 
     def get_all_projects(self) -> list[dict[str, Any]]:
@@ -393,6 +400,7 @@ class Orchestrator:
                 "completed_projects": sum(
                     1 for p in self._projects.values() if p.status == "completed"
                 ),
+                "health": "healthy" if active < self.max_workers else "degraded",
             }
 
     def get_state_manager(self, project_id: str) -> StateManager | None:

@@ -36,7 +36,15 @@ _main_loop: asyncio.AbstractEventLoop | None = None
 
 
 async def _broadcast_event(event_type: str, payload: dict) -> None:
-    await manager.broadcast({"event": event_type, "payload": payload})
+    """将事件推送到 WebSocket，支持按项目订阅广播。"""
+    project_id = payload.get("project_id", "")
+    message = {
+        "event": event_type,
+        "project_id": project_id,
+        "payload": payload,
+    }
+    # 如果有 project_id，仅推送给订阅了该项目的连接
+    await manager.broadcast(message, project_id=project_id or None)
 
 
 def _event_bridge(event_type: str, payload: dict) -> None:

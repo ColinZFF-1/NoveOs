@@ -25,6 +25,14 @@ async def pipeline_status(project_id: str):
     status = orchestrator.get_project_status(project_id)
     if not status:
         raise HTTPException(status_code=404, detail="项目不存在")
+
+    # audit 字段：从最近一次章节审计结果取值
+    last_audit = status.get("last_audit") or {}
+    audit = {
+        "quality_passed": last_audit.get("quality_passed", False),
+        "sensitive_passed": last_audit.get("sensitive_passed", False),
+    }
+
     return {
         "code": 200,
         "data": {
@@ -33,6 +41,7 @@ async def pipeline_status(project_id: str):
             "current_step_index": status.get("current_chapter", 0),
             "can_start": status.get("status") not in ("writing", "auditing"),
             "is_running": status.get("status") in ("writing", "auditing"),
+            "audit": audit,
         },
     }
 

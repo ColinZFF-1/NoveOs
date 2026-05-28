@@ -21,7 +21,7 @@ except ImportError:
 @dataclass
 class LLMConfig:
     """LLM 调用配置。"""
-    model: str = "deepseek-v4-flash"
+    model: str = "deepseek-v4-pro"
     api_key: str = ""
     api_base: str = "https://api.deepseek.com/v1"
     temperature: float = 0.7
@@ -34,7 +34,7 @@ class LLMConfig:
     def from_env(cls, model: str | None = None) -> "LLMConfig":
         """从环境变量加载配置。"""
         return cls(
-            model=model or os.getenv("LLM_MODEL", "deepseek-v4-flash"),
+            model=model or os.getenv("LLM_MODEL", "deepseek-v4-pro"),
             api_key=os.getenv("OPENAI_API_KEY", ""),
             api_base=os.getenv("OPENAI_API_BASE", "https://api.deepseek.com/v1"),
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
@@ -105,6 +105,9 @@ class LLMClient:
             extra_body["thinking"] = {"type": "enabled"}
 
         try:
+            # LiteLLM 对 openai/deepseek-v4-pro 不认识 reasoning_effort，需要允许丢弃不支持的参数
+            import litellm
+            litellm.drop_params = True
             response = completion(
                 model=model_name,
                 messages=[

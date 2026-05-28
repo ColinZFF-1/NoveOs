@@ -124,7 +124,7 @@ interface PipelineStatus {
 ```json
 {
   "llm": {
-    "model": "deepseek-v4-flash",
+    "model": "deepseek-v4-pro",
     "reasoning_effort": "high",
     "thinking_enabled": true
   }

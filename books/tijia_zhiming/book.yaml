@@ -1,0 +1,36 @@
+project: 替嫁纸命
+platform: qimao
+genre: 爽文+玄学+大女主+替嫁
+base_path: D:/noveos/books/tijia_zhiming
+crewai_db_path: D:/noveos/crewai/crewai.db
+total_words_target: 540000
+chapters_target: 120
+words_per_chapter: 4500
+output_dir: chapters
+plugin_id: ""
+agent_query:
+  director:
+    role: 小说导演
+    goal: 根据大纲和状态库生成本章任务卡，明确节拍分配和情绪曲线
+  writer:
+    role: 小说写手
+    goal: 按任务卡写出4500字纯正文，严格遵守字数铁律和去AI味规则
+  polish:
+    role: 小说润色师
+    goal: 消除AI痕迹，提升画面感和节奏感，只输出纯正文
+  auditor:
+    role: 小说审计师
+    goal: 审计字数、他字密度、禁用词、情绪一致性
+writing:
+  tolerance: 450
+  max_retries: 3
+  batch_size: 5
+llm:
+  model: deepseek-v4-pro
+  api_key: sk-72809169853646398cf6c8baf488a9a4
+  api_base: https://api.deepseek.com/v1
+  temperature: 0.7
+  max_tokens: 8000
+  timeout: 300
+  reasoning_effort: high
+  thinking_enabled: true

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -5,6 +6,19 @@ from fastapi import APIRouter, HTTPException
 from api.main import orchestrator
 
 router = APIRouter()
+
+
+def _extract_title_from_filename(filename: str) -> str | None:
+    """从文件名中提取章节标题。
+    
+    格式: 第001章_标题_正文.txt → 标题
+    """
+    stem = Path(filename).stem  # 去掉扩展名
+    parts = stem.split("_")
+    # parts[0] = 第001章, parts[1] = 标题, parts[-1] = 正文
+    if len(parts) >= 3 and parts[-1] == "正文":
+        return parts[1]
+    return None
 
 
 @router.get("/projects/{project_id}/chapters")
@@ -24,21 +38,29 @@ async def list_chapters(project_id: str):
         output_dir = base_path / dir_name
         if not output_dir.exists():
             continue
+        # md 文件
         for f in sorted(output_dir.glob("*.md")):
             try:
                 num = int(f.stem.split("_")[-1])
             except (ValueError, IndexError):
                 continue
-            file_chapters[num] = {"chapter_num": num, "filename": f.name}
+            file_chapters[num] = {
+                "chapter_num": num,
+                "filename": f.name,
+                "title": None,
+            }
         # 中文文件名：第001章_xxx_正文.txt
         for f in sorted(output_dir.glob("第*章*.txt")):
             try:
-                # 提取 第001章 中的数字
-                import re
                 m = re.search(r'第(\d+)章', f.name)
                 if m:
                     num = int(m.group(1))
-                    file_chapters[num] = {"chapter_num": num, "filename": f.name}
+                    title = _extract_title_from_filename(f.name)
+                    file_chapters[num] = {
+                        "chapter_num": num,
+                        "filename": f.name,
+                        "title": title,
+                    }
             except (ValueError, IndexError):
                 continue
 
@@ -48,6 +70,7 @@ async def list_chapters(project_id: str):
         num = ch["chapter"]
         merged[num] = {
             "chapter_num": num,
+            "title": ch.get("title") or file_chapters.get(num, {}).get("title"),
             "summary": ch.get("summary"),
             "word_count": ch.get("word_count"),
             "mode": ch.get("mode"),
@@ -56,7 +79,15 @@ async def list_chapters(project_id: str):
         }
     for num, info in file_chapters.items():
         if num not in merged:
-            merged[num] = info
+            merged[num] = {
+                "chapter_num": num,
+                "title": info.get("title"),
+                "summary": None,
+                "word_count": None,
+                "mode": None,
+                "created_at": None,
+                "filename": info.get("filename"),
+            }
 
     return {"code": 200, "data": list(merged.values())}
 
@@ -86,8 +117,8 @@ async def get_chapter_content(project_id: str, chapter_num: int):
         raise HTTPException(status_code=404, detail="项目不存在")
 
     base_path = Path(status["base_path"])
-    # 尝试多种可能的目录名（大小写兼容）
-    for dir_name in ("chapters/v9.0", "chapters/V9.0"):
+    # 尝试多种可能的目录名（扁平化 chapters/ 优先，再兼容旧版 v9.0）
+    for dir_name in ("chapters", "chapters/v9.0", "chapters/V9.0"):
         output_dir = base_path / dir_name
         if not output_dir.exists():
             continue
