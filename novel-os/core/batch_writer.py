@@ -271,7 +271,7 @@ class BatchWriter:
     def save_chapter(self, chapter_num: int, content: str) -> Path:
         """保存章节正文到 output_dir。
 
-        文件名格式: 第{num:03d}章_标题_v9.0-pm_正文.txt
+        文件名格式: 第{num:03d}章_标题_正文.txt
         （标题从内容第一行提取，若无则留空）
         """
         title = ""
@@ -284,7 +284,7 @@ class BatchWriter:
         title = title or "未命名"
         # 清理文件名非法字符
         safe_title = re.sub(r'[\\/:*?"<>|]', "", title)[:20]
-        filename = f"第{chapter_num:03d}章_{safe_title}_v9.0-pm_正文.txt"
+        filename = f"第{chapter_num:03d}章_{safe_title}_正文.txt"
         path = self.output_dir / filename
         path.write_text(content, encoding="utf-8")
         return path

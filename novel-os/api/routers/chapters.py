@@ -30,7 +30,7 @@ async def list_chapters(project_id: str):
             except (ValueError, IndexError):
                 continue
             file_chapters[num] = {"chapter_num": num, "filename": f.name}
-        # 中文文件名：第001章_xxx_v9.0-pm_正文.txt
+        # 中文文件名：第001章_xxx_正文.txt
         for f in sorted(output_dir.glob("第*章*.txt")):
             try:
                 # 提取 第001章 中的数字
@@ -101,7 +101,7 @@ async def get_chapter_content(project_id: str, chapter_num: int):
             if path.exists():
                 content = path.read_text(encoding="utf-8")
                 return {"code": 200, "data": {"content": content}}
-        # 2. 中文文件名格式：第001章_xxx_v9.0-pm_正文.txt
+        # 2. 中文文件名格式：第001章_xxx_正文.txt
         for f in output_dir.iterdir():
             if not f.is_file():
                 continue
