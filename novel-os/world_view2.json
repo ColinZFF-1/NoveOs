@@ -1,0 +1,78 @@
+{
+  "exported_at": "2026-05-28T13:04:19.318032",
+  "characters": {
+    "周卫国": {
+      "chapter": 0,
+      "character_name": "周卫国",
+      "location": null,
+      "emotional_state": null,
+      "known_secrets": "[]",
+      "unknown_secrets": "[]",
+      "abilities_active": "\"武力+组织能力\"",
+      "abilities_locked": "[]",
+      "dialog_fingerprint": "",
+      "body_language": "",
+      "physical_description": ""
+    },
+    "沈若楠": {
+      "chapter": 0,
+      "character_name": "沈若楠",
+      "location": null,
+      "emotional_state": null,
+      "known_secrets": "[\"王建国不能生\", \"改革开放时间线\"]",
+      "unknown_secrets": "[\"亲生母亲还活着\"]",
+      "abilities_active": "\"前世商业经验\"",
+      "abilities_locked": "[]",
+      "dialog_fingerprint": "短句、反问、带刺",
+      "body_language": "抱臂防御、眼神不退",
+      "physical_description": "瘦、高颧骨、眼睛极亮"
+    }
+  },
+  "items": {
+    "翡翠戒指": {
+      "chapter": 0,
+      "item_name": "翡翠戒指",
+      "location": "左手中指",
+      "state": "激活",
+      "rule": "[\"滴血认主\", \"只能储物\"]",
+      "state_history": "[{\"chapter\": 0, \"state\": \"激活\"}]"
+    }
+  },
+  "debts": [
+    {
+      "debt_id": "D1",
+      "type": "情感",
+      "content": "拒婚如何善后",
+      "bury_chapter": 1,
+      "collect_chapter": 3,
+      "status": "active"
+    },
+    {
+      "debt_id": "D2",
+      "type": "商业",
+      "content": "第一桶金来源",
+      "bury_chapter": 5,
+      "collect_chapter": 8,
+      "status": "active"
+    }
+  ],
+  "foreshadowing": [
+    {
+      "fs_id": "F1",
+      "bury_chapter": 1,
+      "content": "王建国不能生",
+      "collect_chapter": "3/10",
+      "type": "身份秘密",
+      "status": "active"
+    },
+    {
+      "fs_id": "F2",
+      "bury_chapter": 2,
+      "content": "沈母没死，被卖到邻省",
+      "collect_chapter": "50",
+      "type": "身世",
+      "status": "active"
+    }
+  ],
+  "chapter_history": []
+}

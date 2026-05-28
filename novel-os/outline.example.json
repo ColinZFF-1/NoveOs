@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "project": "重生七八：老娘要搞钱",
+    "platform": "fanqie_novel",
+    "genre": "era_biz",
+    "chapters_target": 240
+  },
+  "characters": {
+    "protagonist_female": {
+      "name": "沈若楠",
+      "a_track": {
+        "identity": "重生者，18岁外表59岁灵魂",
+        "ability": "前世商业经验",
+        "goal": "搞钱，摆脱王家",
+        "secrets_known": ["王建国不能生", "改革开放时间线"]
+      },
+      "b_track": {
+        "essence": "害怕被遗忘的女孩",
+        "vulnerability": "对亲情的渴望",
+        "deep_need": "被真正看见",
+        "secrets_unknown": ["亲生母亲还活着"]
+      },
+      "dialog_fingerprint": "短句、反问、带刺",
+      "body_language": "抱臂防御、眼神不退",
+      "physical_description": "瘦、高颧骨、眼睛极亮"
+    },
+    "protagonist_male": {
+      "name": "周卫国",
+      "a_track": {
+        "identity": "退伍军人，公社书记",
+        "ability": "武力+组织能力",
+        "goal": "保护沈若楠"
+      },
+      "b_track": {
+        "essence": "害怕自己变成父亲那样的暴君"
+      }
+    }
+  },
+  "world": {
+    "era_description": "1978年11月，中国尚未改革开放。农村公社制度仍在运行，个体户被视为投机倒把。",
+    "spaces": [
+      {"name": "沈家小院", "rules": ["空间只能储物", "不能带人进入"]}
+    ],
+    "locks": [
+      "1978年11月不能用改革开放",
+      "空间只能储物",
+      "不能公开宣扬现代理念"
+    ],
+    "key_items": [
+      {"name": "翡翠戒指", "initial_location": "左手中指", "initial_state": "激活", "rules": ["滴血认主", "只能储物"]}
+    ]
+  },
+  "plot": {
+    "debts": [
+      {"id": "D1", "type": "情感", "content": "拒婚如何善后", "bury_chapter": 1, "collect_chapter": 3},
+      {"id": "D2", "type": "商业", "content": "第一桶金来源", "bury_chapter": 5, "collect_chapter": 8}
+    ],
+    "foreshadowing": [
+      {"id": "F1", "content": "王建国不能生", "bury_chapter": 1, "collect_chapter": "3/10", "type": "身份秘密"},
+      {"id": "F2", "content": "沈母没死，被卖到邻省", "bury_chapter": 2, "collect_chapter": 50, "type": "身世"}
+    ],
+    "chapter_beats": [
+      {"chapter": 1, "mode": "紧", "beat_1": {"plot": "拒婚"}, "beat_4": {"cliffhanger": true}}
+    ]
+  }
+}

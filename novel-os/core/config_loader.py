@@ -1,0 +1,142 @@
+"""Novel-OS 配置加载器 —— 解析 book.yaml 为强类型 BookConfig。"""
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+
+def _resolve_llm(llm_cfg: dict[str, Any]) -> dict[str, Any]:
+    """对 llm 配置中的 api_key 做环境变量展开。"""
+    if not llm_cfg:
+        return llm_cfg
+    resolved = dict(llm_cfg)
+    if "api_key" in resolved and isinstance(resolved["api_key"], str):
+        expanded = os.path.expandvars(resolved["api_key"])
+        if "$" not in expanded:
+            resolved["api_key"] = expanded
+    return resolved
+
+
+@dataclass
+class BookConfig:
+    """单本小说的全局配置，由 book.yaml 反序列化而来。"""
+
+    # 项目元信息
+    project: str
+    platform: str
+    genre: str
+    target_tier: str
+    total_words_target: int
+    chapters_target: int
+    words_per_chapter: int
+    base_path: Path
+    crewai_db_path: Path
+    output_dir: str
+    v8_dir: str | None = None
+
+    # Agent 查询配置
+    agent_query: dict[str, dict[str, str]] = field(default_factory=dict)
+
+    # 写作参数
+    writing: dict[str, Any] = field(default_factory=dict)
+
+    # LLM 配置
+    llm: dict[str, Any] = field(default_factory=dict)
+
+    # 插件 ID
+    plugin_id: str = ""
+
+    @classmethod
+    def from_yaml(cls, yaml_path: str | Path) -> "BookConfig":
+        """从 book.yaml 文件加载配置。
+
+        Args:
+            yaml_path: book.yaml 的本地路径。
+
+        Raises:
+            FileNotFoundError: yaml_path 不存在。
+            ValueError: 环境变量未设置或 YAML 结构缺失关键字段。
+        """
+        yaml_path = Path(yaml_path)
+        if not yaml_path.exists():
+            raise FileNotFoundError(f"book.yaml 不存在: {yaml_path}")
+
+        raw: dict[str, Any] = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
+
+        # 必需字段校验
+        required = ["project", "platform", "genre", "base_path", "crewai_db_path"]
+        missing = [k for k in required if k not in raw]
+        if missing:
+            raise ValueError(f"book.yaml 缺少必需字段: {missing}")
+
+        # 解析路径并展开环境变量
+        base_path = cls._resolve_path(raw["base_path"], "NOVEL_BASE_PATH")
+        crewai_db_path = cls._resolve_path(raw["crewai_db_path"], "CREWAI_STUDIO_PATH")
+
+        return cls(
+            project=raw["project"],
+            platform=raw["platform"],
+            genre=raw["genre"],
+            target_tier=raw.get("target_tier", "A"),
+            total_words_target=raw.get("total_words_target", 0),
+            chapters_target=raw.get("chapters_target", 0),
+            words_per_chapter=raw.get("words_per_chapter", 4500),
+            base_path=base_path,
+            crewai_db_path=crewai_db_path,
+            output_dir=raw.get("output_dir", "chapters/v9.0"),
+            v8_dir=raw.get("v8_dir"),
+            agent_query=raw.get("agent_query", {}),
+            writing=raw.get("writing", {}),
+            llm=_resolve_llm(raw.get("llm", {})),
+            plugin_id=raw.get("plugin_id", ""),
+        )
+
+    @staticmethod
+    def _resolve_path(value: str, env_hint: str) -> Path:
+        """展开环境变量并返回 Path；若展开后仍含 '$' 说明变量未定义。"""
+        expanded = os.path.expandvars(value)
+        if "$" in expanded:
+            raise ValueError(
+                f"路径中的环境变量未设置: {value!r}。"
+                f"请确保 {env_hint} 等环境变量已导出。"
+            )
+        return Path(expanded)
+
+    @property
+    def words_tolerance(self) -> int:
+        """单章字数容差，默认 10%。"""
+        return self.writing.get("tolerance", int(self.words_per_chapter * 0.1))
+
+    @property
+    def max_retries(self) -> int:
+        """质量门拦截后的最大重试次数。"""
+        return self.writing.get("max_retries", 3)
+
+    @property
+    def batch_size(self) -> int:
+        """批量写作时每批连续写的章节数。"""
+        return self.writing.get("batch_size", 5)
+
+    def to_dict(self) -> dict[str, Any]:
+        """将 BookConfig 导出为 dict，供 StateManager.init_project 等使用。"""
+        return {
+            "project": self.project,
+            "platform": self.platform,
+            "genre": self.genre,
+            "target_tier": self.target_tier,
+            "total_words_target": self.total_words_target,
+            "chapters_target": self.chapters_target,
+            "words_per_chapter": self.words_per_chapter,
+            "base_path": str(self.base_path),
+            "crewai_db_path": str(self.crewai_db_path),
+            "output_dir": self.output_dir,
+            "v8_dir": self.v8_dir,
+            "agent_query": self.agent_query,
+            "writing": self.writing,
+            "llm": self.llm,
+            "plugin_id": self.plugin_id,
+        }

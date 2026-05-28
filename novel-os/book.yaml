@@ -1,0 +1,38 @@
+project: 重生七八：老娘要搞钱
+platform: fanqie_novel
+genre: era_biz
+target_tier: A+
+total_words_target: 800000
+chapters_target: 240
+words_per_chapter: 4500
+base_path: "${NOVEL_BASE_PATH}/重生七八老娘要搞钱"
+crewai_db_path: "${CREWAI_STUDIO_PATH}/crewai.db"
+output_dir: "chapters/V9.0"
+v8_dir: "chapters/V8.0"
+agent_query:
+  director:
+    role: "重生七八小说导演"
+    type: "director"
+  writer:
+    role: "重生七八节拍写作员"
+    type: "writer"
+  polish:
+    role: "重生七八去AI味润色师"
+    type: "polish"
+  auditor:
+    role: "重生七八硬指标审计员"
+    type: "auditor"
+writing:
+  words_per_chapter: 4500
+  tolerance: 450
+  max_retries: 3
+  batch_size: 5
+llm:
+  model: deepseek-chat
+  api_key: "${OPENAI_API_KEY}"
+  api_base: https://api.deepseek.com/v1
+  temperature: 0.7
+  max_tokens: 8000
+  timeout: 300
+
+plugin_id: era_biz

@@ -1,0 +1,22 @@
+project: 重生七八老娘要搞钱
+platform: 番茄
+genre: 年代
+base_path: D:\noveos\books\重生七八老娘要搞钱
+crewai_db_path: D:/noveos/crewai/crewai.db
+total_words_target: 0
+chapters_target: 120
+words_per_chapter: 4500
+output_dir: chapters/v9.0
+plugin_id: ""
+agent_query: {}
+writing:
+  tolerance: 450
+  max_retries: 3
+  batch_size: 5
+llm:
+  model: deepseek-chat
+  api_key: ${DEEPSEEK_API_KEY}
+  api_base: https://api.deepseek.com/v1
+  temperature: 0.7
+  max_tokens: 8000
+  timeout: 300

@@ -1,0 +1,143 @@
+plugin_id: era_biz
+name: 年代商战插件
+version: "1.0"
+genre_match:
+  - era_biz
+  - 重生年代
+  - 改革开放前
+  - 年代文
+  - 商战年代
+
+inject_modules:
+  - era_sensory_guide
+  - era_audit_extra
+  - era_beat_weights
+
+beat_defaults:
+  modes:
+    - id: tight
+      name: 紧
+      desc: 节奏紧凑，危机四伏
+      word_target_ratio: 1.0
+      nue_density: 0.4
+      tian_density: 0.1
+      shuang_density: 0.2
+      audit_weight: 1.2
+    - id: oppressive
+      name: 压抑
+      desc: 环境压迫，内心挣扎
+      word_target_ratio: 0.95
+      nue_density: 0.6
+      tian_density: 0.05
+      shuang_density: 0.05
+      audit_weight: 1.0
+    - id: abuse
+      name: 虐
+      desc: 情感暴击，读者心疼
+      word_target_ratio: 0.9
+      nue_density: 0.8
+      tian_density: 0.0
+      shuang_density: 0.0
+      audit_weight: 1.3
+    - id: ignite
+      name: 燃
+      desc: 反击爆发，读者痛快
+      word_target_ratio: 1.05
+      nue_density: 0.1
+      tian_density: 0.3
+      shuang_density: 0.8
+      audit_weight: 1.1
+
+  beat_allocation:
+    standard_4beat:
+      beat_1:
+        name: 起
+        ratio: 0.20
+        desc: 承接上文，铺设本章情境
+      beat_2:
+        name: 承
+        ratio: 0.30
+        desc: 矛盾升级，人物行动
+      beat_3:
+        name: 转
+        ratio: 0.30
+        desc: 重大转折或情感爆点
+      beat_4:
+        name: 合
+        ratio: 0.20
+        desc: 收尾+钩子，引导追读
+
+audit_extra:
+  - id: era_accuracy
+    name: 年代准确性
+    desc: 检查是否出现 1978 年不该有的物品、语言、概念
+    severity: BLOCKING
+    examples:
+      - 改革开放（1978年11月尚未提出）
+      - 手机
+      - 互联网
+      - 二维码
+      - GDP
+
+  - id: biz_realism
+    name: 商战真实感
+    desc: 检查商业操作是否符合 1970 年代中国实际
+    severity: WARN
+    examples:
+      - 个体户尚未合法化时的大规模倒买倒卖
+      - 远超时代背景的资金运作
+
+  - id: ptsd_consistency
+    name: PTSD一致性
+    desc: 检查重生者前世创伤在当下的反应是否连贯
+    severity: WARN
+    examples:
+      - 前世被背叛，今生面对相似场景却毫无波动
+      - 创伤触发点前后不一致
+
+sensory_arsenal:
+  tactile:
+    - 粗粝
+    - 冰凉
+    - 滚烫
+    - 粗糙的搪瓷
+    - 磨手的麻绳
+    - 潮湿的棉絮
+    - 裂口的冻疮
+    - 铁锈的涩感
+  olfactory:
+    - 霉味
+    - 煤油味
+    - 灶灰味
+    - 咸菜坛子的酸腐
+    - 旱厕的氨臭
+    - 劣质烟草的辛辣
+    - 棉被晒过太阳后的干燥味
+  auditory:
+    - 搪瓷缸子磕碰声
+    - 广播喇叭的电流杂音
+    - 缝纫机咔嗒咔嗒
+    - 煤球炉的呼呼声
+    - 远处拖拉机的突突声
+    - 自行车链条的哗啦声
+    - 木算盘珠子噼啪
+  gustatory:
+    - 高粱面的拉嗓子
+    - 咸菜疙瘩的齁咸
+    - 红薯粥的寡淡
+    - 散装白酒的烧喉
+    - 麦乳精的甜腻
+    - 水果糖的黏牙
+  proprioception:
+    - 久蹲后站起的眩晕
+    - 挑担子的肩膀灼痛
+    - 冷水洗衣后手指的僵直
+    - 熬夜缝补的眼皮沉重
+    - 饥饿时胃部的收缩
+
+redline_words:
+  - 血渗出来
+  - 大腿内侧
+  - 把病带回家
+  - 睡了六年
+  - 操你妈的
