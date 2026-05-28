@@ -26,6 +26,8 @@ class LLMConfig:
     temperature: float = 0.7
     max_tokens: int = 8000
     timeout: int = 300
+    reasoning_effort: str = "high"  # DeepSeek V4 thinking mode: high / max
+    thinking_enabled: bool = True   # DeepSeek V4 thinking mode switch
 
     @classmethod
     def from_env(cls, model: str | None = None) -> "LLMConfig":
@@ -37,6 +39,8 @@ class LLMConfig:
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
             max_tokens=int(os.getenv("LLM_MAX_TOKENS", "8000")),
             timeout=int(os.getenv("LLM_TIMEOUT", "300")),
+            reasoning_effort=os.getenv("LLM_REASONING_EFFORT", "high"),
+            thinking_enabled=os.getenv("LLM_THINKING_ENABLED", "true").lower() == "true",
         )
 
     def validate(self) -> None:
@@ -94,6 +98,11 @@ class LLMClient:
             model_name, temp, tokens, to,
         )
 
+        # DeepSeek V4 thinking mode 参数
+        extra_body = {}
+        if self.cfg.thinking_enabled and self.cfg.model.startswith("deepseek-v4"):
+            extra_body["thinking"] = {"type": "enabled"}
+
         try:
             response = completion(
                 model=model_name,
@@ -104,6 +113,8 @@ class LLMClient:
                 temperature=temp,
                 max_tokens=tokens,
                 timeout=to,
+                reasoning_effort=self.cfg.reasoning_effort if self.cfg.thinking_enabled and self.cfg.model.startswith("deepseek-v4") else None,
+                extra_body=extra_body if extra_body else None,
             )
             content = response.choices[0].message.content or ""
             if not content.strip():

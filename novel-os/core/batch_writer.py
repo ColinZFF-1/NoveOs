@@ -79,6 +79,8 @@ class BatchWriter:
                     temperature=llm_cfg.get("temperature", 0.7),
                     max_tokens=llm_cfg.get("max_tokens", 8000),
                     timeout=llm_cfg.get("timeout", 300),
+                    reasoning_effort=llm_cfg.get("reasoning_effort", "high"),
+                    thinking_enabled=llm_cfg.get("thinking_enabled", True),
                 )
             )
         else:

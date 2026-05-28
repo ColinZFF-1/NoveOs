@@ -55,6 +55,8 @@ async def create_project(req: CreateProjectRequest):
             f"  temperature: 0.7\n"
             f"  max_tokens: 8000\n"
             f"  timeout: 300\n"
+            f"  reasoning_effort: high\n"
+            f"  thinking_enabled: true\n"
         )
         yaml_path.write_text(yaml_content, encoding="utf-8")
 
