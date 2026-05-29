@@ -54,7 +54,8 @@ class BatchWriter:
     ) -> None:
         self.cfg = book_config
         self.state = state_manager or StateManager(
-            book_config.base_path / "world_state.db"
+            book_config.base_path / "world_state.db",
+            project_id=book_config.base_path.name,
         )
         self._event_bus = event_bus
 
@@ -134,6 +135,7 @@ class BatchWriter:
         gate_result = GateResult(passed=False, level="BLOCKING", reasons=["尚未开始"])
         director_prompt = ""
         audit_report: dict[str, Any] = {}
+        chapter_title = ""  # 章节标题
 
         extra_instruction = ""
         while self.gates.should_retry(gate_result, attempt, self.cfg.max_retries):
@@ -144,6 +146,11 @@ class BatchWriter:
                 # b. Director（只在第一次生成，重试时复用）
                 if not director_prompt:
                     director_prompt = self._call_director(chapter_num, context)
+                    # 提取标题并保存到数据库
+                    chapter_title = self._extract_title_from_director(director_prompt, chapter_num)
+                    if chapter_title:
+                        self._save_chapter_title(chapter_num, chapter_title)
+                        logger.info("第 %d 章 标题: %s", chapter_num, chapter_title)
                 # c. Writer（重试时注入修正指令）
                 content = self._call_writer(chapter_num, director_prompt, extra_instruction)
 
@@ -206,16 +213,29 @@ class BatchWriter:
                         gate_result = self.gates.audit(content, audit_report)
                         if gate_result.level != "BLOCKING":
                             break
-                    # 如果是字数不足，注入扩写指令
+                    # 如果是字数不足，调用 Expander Agent 扩写（而非让 Writer 重试）
                     elif any("字数不足" in r for r in gate_result.reasons):
                         short_by = self.cfg.words_per_chapter - self.cfg.words_tolerance - audit_report.get("word_count", 0)
+                        logger.info(
+                            "第 %d 章 字数不足（%d 字），调用 Expander Agent 扩写 %d 字",
+                            chapter_num, audit_report.get("word_count", 0), max(short_by, 200),
+                        )
+                        expanded = self._call_expander(chapter_num, content, max(short_by, 200))
+                        content = content + "\n\n" + expanded
+                        # 扩写后直接重新审计，不再重试 Writer
+                        audit_report = self._call_auditor(chapter_num, content)
+                        gate_result = self.gates.audit(content, audit_report)
+                        if gate_result.level != "BLOCKING":
+                            break
+                        # 扩写后仍不足，再注入扩写指令给 Writer 重试
+                        short_by2 = self.cfg.words_per_chapter - self.cfg.words_tolerance - self._count_chinese_chars(content)
                         extra_instruction = (
-                            f"上稿字数不足，仅 {audit_report.get('word_count', 0)} 字，"
-                            f"距离最低要求还差约 {max(short_by, 200)} 字。\n"
-                            f"请扩写：增加场景细节描写、人物心理活动、对话内容或环境氛围渲染。"
+                            f"上稿字数仍不足，当前 {self._count_chinese_chars(content)} 字，"
+                            f"距离最低要求还差约 {max(short_by2, 200)} 字。\n"
+                            f"请大幅扩写：增加场景细节描写、人物心理活动、对话内容或环境氛围渲染。"
                             f"确保最终中文字数 ≥ {self.cfg.words_per_chapter - self.cfg.words_tolerance} 字。"
                         )
-                        logger.info("第 %d 章 注入扩写指令: %s", chapter_num, extra_instruction)
+                        logger.info("第 %d 章 Expander 后仍不足，注入扩写指令: %s", chapter_num, extra_instruction)
                 else:
                     break
 
@@ -246,7 +266,7 @@ class BatchWriter:
 
         # h. 保存并更新状态
         saved_path = self.save_chapter(chapter_num, content)
-        self._update_state_after_chapter(chapter_num, content)
+        self._update_state_after_chapter(chapter_num, content, title=chapter_title)
 
         logger.info("第 %d 章 完成，中文字数=%d，路径=%s", chapter_num, final_word_count, saved_path)
         return WriteResult(
@@ -294,15 +314,63 @@ class BatchWriter:
         """保存章节正文到 output_dir。
 
         文件名格式: 第{num:03d}章_标题_正文.txt
-        （标题从内容中智能提取，支持多种格式）
+        标题优先从 world_state.db 读取，其次从内容中提取。
         """
-        title = self._extract_title(chapter_num, content)
+        # 优先从数据库读取标题
+        title = self._get_chapter_title(chapter_num) or self._extract_title(chapter_num, content)
         # 清理文件名非法字符
         safe_title = re.sub(r'[\\/:*?"<>|]', "", title)[:20]
         filename = f"第{chapter_num:03d}章_{safe_title}_正文.txt"
         path = self.output_dir / filename
         path.write_text(content, encoding="utf-8")
         return path
+
+    def _get_chapter_title(self, chapter_num: int) -> str:
+        """从 world_state.db 读取章节标题。"""
+        try:
+            import sqlite3
+            db_path = self.cfg.base_path / "world_state.db"
+            with sqlite3.connect(str(db_path)) as conn:
+                cursor = conn.execute(
+                    "SELECT title FROM chapter_history WHERE project_id = ? AND chapter = ?",
+                    (self.state.project_id, chapter_num),
+                )
+                row = cursor.fetchone()
+                return row[0] if row and row[0] else ""
+        except Exception:
+            return ""
+
+    @staticmethod
+    def _extract_title_from_director(director_prompt: str, chapter_num: int) -> str:
+        """从 Director 任务卡中提取章节标题。"""
+        lines = director_prompt.strip().splitlines()
+        for line in lines[:5]:
+            line = line.strip()
+            if line.startswith("【标题】") or line.startswith("第"):
+                # 格式：【标题】第X章：标题名 或 第X章：标题名
+                if "：" in line or ":" in line:
+                    sep = "：" if "：" in line else ":"
+                    parts = line.split(sep, 1)
+                    if len(parts) == 2:
+                        title = parts[1].strip()
+                        # 移除可能的 【标题】前缀
+                        title = title.replace("【标题】", "").strip()
+                        return title[:20]
+        return ""
+
+    def _save_chapter_title(self, chapter_num: int, title: str) -> None:
+        """保存章节标题到 world_state.db。"""
+        try:
+            import sqlite3
+            db_path = self.cfg.base_path / "world_state.db"
+            with sqlite3.connect(str(db_path)) as conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO chapter_history (project_id, chapter, title, created_at) VALUES (?, ?, ?, datetime('now'))",
+                    (self.state.project_id, chapter_num, title),
+                )
+                conn.commit()
+        except Exception:
+            pass
 
     @staticmethod
     def _extract_title(chapter_num: int, content: str) -> str:
@@ -343,9 +411,76 @@ class BatchWriter:
             "chapter": chapter_num,
             "debts": self.state.get_active_debts(chapter_num),
             "foreshadowing": self.state.get_active_foreshadowing(chapter_num),
+            "outline": self._get_chapter_outline(chapter_num),
+            "characters": self._get_character_states(),
+            "rules": self._get_consistency_rules(),
         }
-        # TODO: 如需人物状态，可在此扩展
         return ctx
+
+    def _get_chapter_outline(self, chapter_num: int) -> dict[str, str]:
+        """从 world_state.db outline 表读取本章详细规划。"""
+        try:
+            import sqlite3
+            db_path = self.cfg.base_path / "world_state.db"
+            with sqlite3.connect(str(db_path)) as conn:
+                cursor = conn.execute(
+                    "SELECT arc, core_event, face_slap_target, face_slap_method, husband_moment, chapter_hook, emotion_ratio, skill_unlocked FROM outline WHERE project_id = ? AND chapter = ?",
+                    (self.state.project_id, chapter_num),
+                )
+                row = cursor.fetchone()
+                if row:
+                    return {
+                        "arc": row[0] or "",
+                        "core_event": row[1] or "",
+                        "face_slap_target": row[2] or "",
+                        "face_slap_method": row[3] or "",
+                        "husband_moment": row[4] or "",
+                        "chapter_hook": row[5] or "",
+                        "emotion_ratio": row[6] or "",
+                        "skill_unlocked": row[7] or "",
+                    }
+        except Exception as exc:
+            logger.warning("读取 outline 失败: %s", exc)
+        return {}
+
+    def _get_character_states(self) -> list[dict]:
+        """从 world_state.db 读取活跃人物状态。"""
+        try:
+            import sqlite3
+            db_path = self.cfg.base_path / "world_state.db"
+            with sqlite3.connect(str(db_path)) as conn:
+                cursor = conn.execute(
+                    "SELECT character_name, location, emotional_state, known_secrets, unknown_secrets, abilities_active, dialog_fingerprint, body_language, physical_description FROM character_states WHERE project_id = ?",
+                    (self.state.project_id,),
+                )
+                rows = cursor.fetchall()
+                return [
+                    {
+                        "name": r[0], "location": r[1], "emotional_state": r[2],
+                        "known_secrets": r[3], "unknown_secrets": r[4], "abilities": r[5],
+                        "dialog_fingerprint": r[6], "body_language": r[7], "description": r[8],
+                    }
+                    for r in rows
+                ]
+        except Exception as exc:
+            logger.warning("读取人物状态失败: %s", exc)
+        return []
+
+    def _get_consistency_rules(self) -> list[str]:
+        """从 world_state.db 读取写作规则。"""
+        try:
+            import sqlite3
+            db_path = self.cfg.base_path / "world_state.db"
+            with sqlite3.connect(str(db_path)) as conn:
+                cursor = conn.execute(
+                    "SELECT rule_type, rule_content FROM consistency_rules WHERE project_id = ? AND enforcement_level = 'hard'",
+                    (self.state.project_id,),
+                )
+                rows = cursor.fetchall()
+                return [f"[{r[0]}] {r[1]}" for r in rows]
+        except Exception as exc:
+            logger.warning("读取规则失败: %s", exc)
+        return []
 
     def _chapter_exists(self, chapter_num: int) -> bool:
         """检查 output_dir 是否已有该章节文件。"""
@@ -357,7 +492,7 @@ class BatchWriter:
         import re
         return len(re.findall(r'[\u4e00-\u9fff]', text))
 
-    def _update_state_after_chapter(self, chapter_num: int, content: str) -> None:
+    def _update_state_after_chapter(self, chapter_num: int, content: str, title: str = "") -> None:
         """章节写完后更新状态库。"""
         # 简单摘要：取前 200 字作为摘要
         summary = content[:200].replace("\n", " ") + "..."
@@ -366,6 +501,7 @@ class BatchWriter:
             summary=summary,
             word_count=self._count_chinese_chars(content),
             mode="",  # TODO: 从内容或配置中提取 mode
+            title=title,
         )
 
     # ------------------------------------------------------------------
@@ -435,7 +571,8 @@ class BatchWriter:
                 f"注意：每个节拍完成后立即估算中文字数，不足就补充细节，超标就精简。\n\n"
                 f"【正文格式铁律】\n"
                 f"- 禁止出现【节拍X】标签、markdown标记、自检表、字数统计\n"
-                f"- 每章开头直接以正文第一句开始，不要标题\n\n"
+                f"- 每章开头必须写标题，格式：第X章：标题（标题由任务卡指定，不可自拟）\n"
+                f"- 标题后空一行，再开始正文\n\n"
                 f"【去AI味核心3条】\n"
                 f"- 他字密度≤10%，情绪必须物化，禁用：然而/不得不说/众所周知/突然/竟然/原来/与此同时\n\n"
             )
@@ -443,18 +580,64 @@ class BatchWriter:
         return "\n".join(parts)
 
     def _call_director(self, chapter_num: int, context: dict[str, Any]) -> str:
-        """Director Agent：生成本章任务卡。"""
+        """Director Agent：生成本章任务卡（含标题）。"""
         system = self._build_system_prompt("director")
+
+        # 构造大纲驱动的上下文
+        outline = context.get("outline", {})
+        outline_text = ""
+        if outline:
+            outline_text = (
+                f"\n【本章大纲】\n"
+                f"卷名/篇名：{outline.get('arc', '')}\n"
+                f"核心事件：{outline.get('core_event', '')}\n"
+                f"打脸对象：{outline.get('face_slap_target', '')}\n"
+                f"打脸方式：{outline.get('face_slap_method', '')}\n"
+                f"护妻时刻：{outline.get('husband_moment', '')}\n"
+                f"章末钩子：{outline.get('chapter_hook', '')}\n"
+                f"情绪配比：{outline.get('emotion_ratio', '')}\n"
+                f"技能解锁：{outline.get('skill_unlocked', '')}\n"
+            )
+        else:
+            outline_text = "\n【注意】本章暂无大纲，请基于上下文合理设计。\n"
+
+        # 人物状态
+        chars = context.get("characters", [])
+        chars_text = ""
+        if chars:
+            chars_text = "\n【人物状态】\n" + "\n".join(
+                f"- {c['name']}（{c['location']}）：{c['emotional_state']}。\n  已知秘密：{c['known_secrets']}\n  对话指纹：{c['dialog_fingerprint']}\n  肢体语言：{c['body_language']}"
+                for c in chars[:5]
+            )
+
+        # 硬规则
+        rules = context.get("rules", [])
+        rules_text = ""
+        if rules:
+            rules_text = "\n【必须遵守的写作铁律】\n" + "\n".join(f"{i+1}. {r}" for i, r in enumerate(rules))
+
         user = self._build_task_user_prompt(
             "director", chapter_num,
-            context=f"活跃债务: {context['debts']}\n活跃伏笔: {context['foreshadowing']}"
+            context=f"活跃债务: {context['debts']}\n活跃伏笔: {context['foreshadowing']}{outline_text}{chars_text}{rules_text}"
+        )
+        user += (
+            "\n\n【输出格式要求】\n"
+            "任务卡第一行必须是章节标题，格式：【标题】第X章：标题名\n"
+            "标题名要求：4-8个字，紧扣本章核心事件，有网文感，不要文艺腔。\n"
+            "标题后空一行，再写正文任务卡内容。\n"
+            "任务卡必须严格基于【本章大纲】设计，不能偏离大纲中的核心事件、打脸方式和章末钩子。"
         )
         return self.llm.call(system, user, temperature=0.1, max_tokens=4000)
 
     def _call_writer(self, chapter_num: int, director_prompt: str, extra_instruction: str = "") -> str:
         """Writer Agent：生成初稿。支持注入扩写/精简等额外指令。"""
         system = self._build_system_prompt("writer")
-        user = self._build_task_user_prompt("writer", chapter_num, context=director_prompt)
+        # 提取标题，在 Writer prompt 中明确要求写入标题
+        title = self._extract_title_from_director(director_prompt, chapter_num)
+        title_hint = ""
+        if title:
+            title_hint = f"【本章标题】第{chapter_num}章：{title}\n标题必须写在正文最开头，独占一行。标题后空一行再开始正文。\n\n"
+        user = self._build_task_user_prompt("writer", chapter_num, context=title_hint + director_prompt)
         if extra_instruction:
             user += f"\n\n【修正指令 - 本次必须执行】\n{extra_instruction}\n"
         # 字数硬限制：max_tokens 设为 7000（约 5000 中文字上限）
@@ -491,6 +674,30 @@ class BatchWriter:
         # report.update(llm_report)
 
         return report
+
+    def _call_expander(self, chapter_num: int, content: str, short_by: int) -> str:
+        """Expander Agent：接收现有正文和字数缺口，输出补充内容。
+
+        策略：不推翻已有内容，而是基于已有情节补充细节、对话、心理、环境描写。
+        """
+        system = (
+            "你是一位专业的小说扩写师。你的任务是根据已有的章节内容，"
+            "补充更多细节描写，使总字数达到要求。"
+            "\n\n规则："
+            "\n1. 不要重复已有内容，而是补充新的场景细节、人物对话、心理活动或环境氛围。"
+            "\n2. 补充内容必须自然衔接原文，保持情节连贯。"
+            "\n3. 直接输出补充的正文段落，不要任何标题、标记或说明。"
+            "\n4. 只输出中文正文。"
+        )
+        user = (
+            f"以下是第 {chapter_num} 章的已有内容（当前字数不足，需要补充约 {short_by} 字）：\n\n"
+            f"{content[:3000]}\n\n"
+            f"【任务】请基于以上内容，补充约 {short_by} 字的新内容。"
+            f"可以添加：更详细的场景描写、人物对话、内心独白、环境氛围渲染等。"
+            f"不要重复已有内容，直接输出补充的正文段落。"
+        )
+        max_tok = min(4000, self.cfg.llm.get("max_tokens", 8000))
+        return self.llm.call(system, user, temperature=0.2, max_tokens=max_tok)
 
     def _mock_audit(self, content: str) -> dict[str, Any]:
         """本地快速审计（当 Auditor Agent 不可用时降级使用）。"""

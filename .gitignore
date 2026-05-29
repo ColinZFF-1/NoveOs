@@ -64,5 +64,10 @@ books/*/chapters/
 books/*/world_state.db*
 books/*/*.bak*
 books/*/*.bak
+*.pid
+import_outline.py
 
+# Build & assets
 *.png
+app/dist/
+app/frontend.log

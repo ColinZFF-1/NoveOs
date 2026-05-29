@@ -537,17 +537,17 @@ class StateManager:
     # 章节结束更新
     # ------------------------------------------------------------------
     def update_after_chapter(
-        self, chapter_num: int, summary: str, word_count: int, mode: str
+        self, chapter_num: int, summary: str, word_count: int, mode: str, title: str = ""
     ) -> None:
         """每章写完后更新历史与情感坐标。"""
         with self._connect() as conn:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO chapter_history
-                (project_id, chapter, summary, word_count, mode, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                (project_id, chapter, summary, word_count, mode, title, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (self.project_id, chapter_num, summary, word_count, mode, datetime.now().isoformat()),
+                (self.project_id, chapter_num, summary, word_count, mode, title, datetime.now().isoformat()),
             )
 
     # ------------------------------------------------------------------

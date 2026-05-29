@@ -27,10 +27,10 @@ writing:
   batch_size: 5
 llm:
   model: deepseek-v4-pro
-  api_key: sk-72809169853646398cf6c8baf488a9a4
+  api_key: "${OPENAI_API_KEY}"
   api_base: https://api.deepseek.com/v1
   temperature: 0.7
   max_tokens: 8000
   timeout: 300
   reasoning_effort: high
-  thinking_enabled: true
+  thinking_enabled: false
