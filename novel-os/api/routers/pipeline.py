@@ -42,6 +42,7 @@ async def pipeline_status(project_id: str):
             "can_start": status.get("status") not in ("writing", "auditing"),
             "is_running": status.get("status") in ("writing", "auditing"),
             "audit": audit,
+            "reader_pull_score": status.get("reader_pull_score"),
         },
     }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Zap } from 'lucide-react';
+import { ShieldCheck, Zap, TrendingUp } from 'lucide-react';
 import { useNovelOS } from '@/hooks/useNovelOS';
 
 interface AuditGridProps {
@@ -29,6 +29,13 @@ const AuditGrid: React.FC<AuditGridProps> = ({ projectId }) => {
               {pipeline.audit?.sensitive_passed ? '通过' : '未通过'}
             </span>
           </div>
+          <div className="flex items-center gap-2 text-xs text-apple-gray-500 font-medium">
+            <TrendingUp size={14} className="text-apple-blue" strokeWidth={2} />
+            <span>追读力</span>
+            <span className="text-[10px] px-1.5 py-0.5 bg-apple-gray-100 rounded-md text-apple-gray-400">
+              {pipeline.reader_pull_score != null ? pipeline.reader_pull_score.toFixed(1) : '暂无评分'}
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -46,6 +53,11 @@ const AuditGrid: React.FC<AuditGridProps> = ({ projectId }) => {
           <Zap size={14} strokeWidth={2} />
           <span>敏感词检测</span>
           <span className="text-[10px] px-1.5 py-0.5 bg-apple-gray-100 rounded-md">等待数据</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-apple-gray-400">
+          <TrendingUp size={14} strokeWidth={2} />
+          <span>追读力</span>
+          <span className="text-[10px] px-1.5 py-0.5 bg-apple-gray-100 rounded-md">暂无评分</span>
         </div>
       </div>
     </div>

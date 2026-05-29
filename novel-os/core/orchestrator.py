@@ -42,6 +42,7 @@ class ProjectRuntime:
     pipeline_id: str | None = None
     future: Future | None = None
     last_audit: dict[str, Any] = field(default_factory=dict)
+    reader_pull_score: float | None = None
     created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
 
@@ -380,6 +381,7 @@ class Orchestrator:
                 "base_path": str(runtime.book_config.base_path),
                 "llm": runtime.book_config.llm,
                 "last_audit": runtime.last_audit,
+                "reader_pull_score": runtime.reader_pull_score,
             }
 
     def get_all_projects(self) -> list[dict[str, Any]]:

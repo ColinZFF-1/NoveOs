@@ -19,6 +19,7 @@ export interface PipelineStatus {
   can_start: boolean;
   is_running: boolean;
   audit?: { quality_passed: boolean; sensitive_passed: boolean };
+  reader_pull_score?: number | null;
 }
 
 export interface ProjectDetail extends Project {
