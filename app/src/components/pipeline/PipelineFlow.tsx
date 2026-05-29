@@ -81,7 +81,7 @@ const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
       </div>
 
       {/* Chapter Info */}
-      <div className="flex items-center gap-4 mb-5 text-sm">
+      <div className="flex items-center gap-4 mb-5 text-sm flex-wrap">
         <span className="truncate text-apple-gray-500">项目: <b className="text-apple-gray-900 font-semibold">{projectId || '—'}</b></span>
         <span className="text-apple-gray-500">当前: <b className="text-apple-gray-900 font-semibold tabular-nums">第{currentChapter}章</b></span>
         <span className="text-apple-gray-500">状态: <b className={isRunning ? 'text-primary font-semibold' : 'text-apple-gray-900 font-semibold'}>{pipeline?.status || 'idle'}</b></span>
@@ -91,7 +91,7 @@ const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
       </div>
 
       {/* Pipeline Steps */}
-      <div className="flex items-stretch gap-0">
+      <div className="flex flex-wrap items-stretch gap-2 lg:flex-nowrap lg:gap-0">
         {steps.map((step, index) => {
           const isActive = currentStage === step.key && isRunning;
           const isDone =
@@ -103,10 +103,10 @@ const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
 
           return (
             <React.Fragment key={step.id}>
-              <div className="flex-1 flex flex-col items-center">
+              <div className="flex-1 flex flex-col items-center min-w-[110px] lg:min-w-0">
                 <div
                   className={`
-                    w-full rounded-2xl p-3.5 flex flex-col items-center gap-2.5 relative
+                    w-full rounded-2xl p-3 lg:p-3.5 flex flex-col items-center gap-2.5 relative
                     transition-all duration-500 ease-apple
                     ${isActive
                       ? 'bg-primary-50 ring-2 ring-primary/30 animate-breathe'
@@ -150,7 +150,7 @@ const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
                 </div>
               </div>
               {index < steps.length - 1 && (
-                <div className="flex items-center self-center px-1 -mt-4">
+                <div className="hidden lg:flex items-center self-center px-1 -mt-4">
                   <ChevronRight size={16} className={isDone ? 'text-apple-gray-200' : 'text-apple-gray-100'} strokeWidth={2} />
                 </div>
               )}

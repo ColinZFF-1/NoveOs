@@ -9,14 +9,18 @@ import AuditGrid from '@/components/audit/AuditGrid';
 import CharacterPanel from '@/components/character/CharacterPanel';
 import LogStream from '@/components/log/LogStream';
 import Footer from '@/components/layout/Footer';
+import GlobalLoading from '@/components/loading/GlobalLoading';
+import { ErrorBoundary } from '@/components/error/ErrorBoundary';
+import { LoadingProvider, useLoading } from '@/context/LoadingContext';
 import { useProject } from '@/context/ProjectContext';
 import { useNovelOS } from '@/hooks/useNovelOS';
 import { useWebSocket } from '@/hooks/useWebSocket';
 
-const Home: React.FC = () => {
+const HomeContent: React.FC = () => {
   const { projectId } = useProject();
   const { pipeline } = useNovelOS(projectId);
   const { events } = useWebSocket(projectId);
+  const { isLoading, loadingText } = useLoading();
 
   const status = pipeline?.is_running ? 'writing' : (pipeline?.status || '');
   const currentChapter = pipeline?.current_step_index || 0;
@@ -27,7 +31,7 @@ const Home: React.FC = () => {
       <TopNav />
 
       {/* Main Content */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[240px_1fr] xl:grid-cols-[240px_1fr_288px] gap-4 p-4 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[200px_1fr] xl:grid-cols-[220px_1fr_288px] gap-4 lg:gap-3 xl:gap-4 p-4 overflow-hidden">
         {/* Left Panel */}
         <div className="hidden lg:flex flex-col overflow-hidden">
           <LeftPanel projectId={projectId} />
@@ -68,7 +72,20 @@ const Home: React.FC = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Global Loading Overlay */}
+      <GlobalLoading visible={isLoading} text={loadingText} />
     </div>
+  );
+};
+
+const Home: React.FC = () => {
+  return (
+    <LoadingProvider>
+      <ErrorBoundary>
+        <HomeContent />
+      </ErrorBoundary>
+    </LoadingProvider>
   );
 };
 

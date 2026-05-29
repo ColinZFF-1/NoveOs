@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, FileText, Sparkles, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import MemeIndicator from '@/components/meme/MemeIndicator';
 
 interface WSEvent {
   event: string;
@@ -109,6 +110,9 @@ const WritingPreview: React.FC<WritingPreviewProps> = ({
 
   const showComplete = latestEvent?.event === 'chapter_complete';
 
+  // TODO: replace with real reader_pull_score from backend when available
+  const memeScore = 45;
+
   return (
     <div className="apple-card p-4 animate-fade-up stagger-2 border-l-4 border-l-primary">
       {/* Header */}
@@ -122,9 +126,12 @@ const WritingPreview: React.FC<WritingPreviewProps> = ({
             )}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-apple-gray-900">
-              {showComplete ? `第${writingChapter}章 生成完成` : `正在写作 第${writingChapter}章`}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-apple-gray-900">
+                {showComplete ? `第${writingChapter}章 生成完成` : `正在写作 第${writingChapter}章`}
+              </h3>
+              <MemeIndicator score={memeScore} />
+            </div>
             <p className="text-[11px] text-apple-gray-400 font-medium">
               {showComplete
                 ? `字数 ${wordCount.toLocaleString()} · 审核通过`
