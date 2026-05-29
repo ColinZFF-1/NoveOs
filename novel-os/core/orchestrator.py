@@ -301,6 +301,14 @@ class Orchestrator:
                             "quality_passed": result.gate_level != "BLOCKING",
                             "sensitive_passed": len(result.audit_report.get("forbidden_words", [])) == 0,
                         }
+                        # 计算追读力分数（简化版：字数基础分 + 质量门加分）
+                        if result.success and result.gate_level != "BLOCKING":
+                            score = 5.0 + min(result.word_count / 1000, 3.0)
+                            if result.gate_level == "PASS":
+                                score += 1.0
+                            runtime.reader_pull_score = round(score, 1)
+                        else:
+                            runtime.reader_pull_score = 0.0
                         self._persist_project(project_id, runtime)
 
                     self._event_bus.emit(
