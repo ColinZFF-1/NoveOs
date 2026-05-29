@@ -18,6 +18,9 @@ from core.event_bus import (
     INTERCEPTOR_SCAN_START,
     EventBus,
 )
+from core.guard_registry_init import get_registry
+from core.guards.interceptor_guard import InterceptorGuard
+from core.guards.quality_gate_guard import QualityGateGuard
 from core.interceptor import DeAIInterceptor
 from core.llm_client import LLMClient, LLMConfig
 from core.quality_gates import GateResult, QualityGates
@@ -92,6 +95,15 @@ class BatchWriter:
             min_words=book_config.words_per_chapter - book_config.words_tolerance,
             max_words=book_config.words_per_chapter + book_config.words_tolerance,
         )
+
+        # Guard Registry：统一门禁管理与校准
+        self.guard_registry = get_registry()
+        # 注册本项目专属的 Guard 实例（如果尚未注册）
+        if "quality_gate" not in [g["guard_id"] for g in self.guard_registry.list_guards()]:
+            self.guard_registry.register(QualityGateGuard(self.gates))
+        if "deai_interceptor" not in [g["guard_id"] for g in self.guard_registry.list_guards()]:
+            self.guard_registry.register(InterceptorGuard(self.interceptor))
+
         self.output_dir = book_config.base_path / book_config.output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -142,6 +154,10 @@ class BatchWriter:
                         {"chapter_num": chapter_num, "project_id": getattr(self.cfg, "project_id", "")},
                     )
                 scan_result = self.interceptor.scan(content, chapter_num)
+                self.guard_registry.record(
+                    "deai_interceptor",
+                    "BLOCKING" if scan_result.blocking else ("WARN" if scan_result.issues else "PASS"),
+                )
                 if self._event_bus:
                     self._event_bus.emit(
                         INTERCEPTOR_SCAN_COMPLETE,
@@ -176,6 +192,7 @@ class BatchWriter:
                 audit_report = self._call_auditor(chapter_num, content)
                 # f. QualityGates
                 gate_result = self.gates.audit(content, audit_report)
+                self.guard_registry.record("quality_gate", gate_result.level)
 
                 if gate_result.level == "BLOCKING":
                     logger.warning("质量门 BLOCKING: %s", gate_result.reasons)

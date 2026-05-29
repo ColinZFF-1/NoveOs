@@ -19,6 +19,7 @@ interface TaskCardData {
     role: string;
     state: Record<string, unknown> | null;
   }>;
+  director_card?: string;
 }
 
 interface TaskCardModalProps {
@@ -128,6 +129,19 @@ const TaskCardModal: React.FC<TaskCardModalProps> = ({
                   )}
                 </div>
               </div>
+
+              {/* Director 任务卡 */}
+              {data.director_card && (
+                <div className="flex items-start gap-3">
+                  <Sparkles size={14} className="text-primary mt-0.5 shrink-0" strokeWidth={2} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-apple-gray-700">Director 任务卡</p>
+                    <div className="mt-1.5 p-2.5 bg-apple-gray-50/60 rounded-xl text-[11px] text-apple-gray-600 leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto">
+                      {data.director_card}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* 关键角色 */}
               {data.key_characters.length > 0 && (

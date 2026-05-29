@@ -135,6 +135,14 @@ class GuardRegistry:
                     )
         return adjustments
 
+    def record(self, guard_id: str, level: str) -> None:
+        """记录外部执行的 Guard 结果（用于校准统计）。"""
+        if guard_id not in self._stats:
+            return
+        self._stats[guard_id]["total"] += 1
+        if level != "PASS":
+            self._stats[guard_id]["hits"] += 1
+
     def list_guards(self) -> list[dict[str, str]]:
         """列出所有已注册的 Guard。"""
         return [

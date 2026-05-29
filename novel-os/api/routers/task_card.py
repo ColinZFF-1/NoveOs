@@ -30,7 +30,15 @@ async def get_task_card(project_id: str, chapter: int = 1):
     foreshadowing = state.get_active_foreshadowing(chapter)
     characters = state.list_characters()
 
-    # 简化版任务卡（后续可接入 Director Agent 生成更丰富的内容）
+    # 调用 Director Agent 生成任务卡（节拍规划、人物调度、情感坐标）
+    director_card = ""
+    try:
+        context = runtime.batch_writer._build_chapter_context(chapter)
+        director_card = runtime.batch_writer._call_director(chapter, context)
+    except Exception as exc:
+        logger = __import__("logging").getLogger("novel-os.task_card")
+        logger.warning("Director Agent 任务卡生成失败: %s", exc)
+
     task_card = {
         "chapter": chapter,
         "project": {
@@ -52,6 +60,7 @@ async def get_task_card(project_id: str, chapter: int = 1):
             }
             for c in characters[:5]
         ],
+        "director_card": director_card,
     }
 
     return {"code": 200, "data": task_card}
