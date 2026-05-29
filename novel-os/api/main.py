@@ -19,7 +19,7 @@ app.add_middleware(
 # 全局 Orchestrator 单例（必须在 routers 导入前定义，避免循环导入）
 orchestrator = Orchestrator(max_workers=10)
 
-from api.routers import chapters, characters, emotions, logs, pipeline, projects, system
+from api.routers import chapters, characters, emotions, guards, logs, pipeline, projects, system
 from api.websocket import websocket_router, manager
 
 app.include_router(projects.router, prefix="/api/v1")
@@ -29,6 +29,7 @@ app.include_router(characters.router, prefix="/api/v1")
 app.include_router(emotions.router, prefix="/api/v1")
 app.include_router(logs.router, prefix="/api/v1")
 app.include_router(system.router, prefix="/api/v1")
+app.include_router(guards.router, prefix="/api/v1")
 app.include_router(websocket_router, prefix="/ws")
 
 # 主线程事件循环引用（用于跨线程桥接）
