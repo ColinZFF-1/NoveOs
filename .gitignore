@@ -65,3 +65,4 @@ books/*/world_state.db*
 books/*/*.bak*
 books/*/*.bak
 
+*.png

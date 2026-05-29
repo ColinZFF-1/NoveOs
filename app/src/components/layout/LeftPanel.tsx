@@ -11,7 +11,7 @@ interface LeftPanelProps {
 const LeftPanel: React.FC<LeftPanelProps> = ({ projectId }) => {
   const [isLaunching, setIsLaunching] = useState(false);
   const { pipeline, project, startPipeline, loading } = useNovelOS(projectId);
-  const { connected } = useWebSocket();
+  const { connected } = useWebSocket(projectId);
 
   const handleLaunch = async () => {
     setIsLaunching(true);

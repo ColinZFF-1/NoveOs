@@ -16,7 +16,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 const Home: React.FC = () => {
   const { projectId } = useProject();
   const { pipeline } = useNovelOS(projectId);
-  const { events } = useWebSocket();
+  const { events } = useWebSocket(projectId);
 
   const status = pipeline?.is_running ? 'writing' : (pipeline?.status || '');
   const currentChapter = pipeline?.current_step_index || 0;

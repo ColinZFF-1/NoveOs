@@ -117,12 +117,26 @@ class Orchestrator:
             conn.commit()
 
     def _load_projects_from_db(self) -> None:
-        """启动时从全局注册表恢复项目列表（仅恢复元数据，不恢复运行时）。"""
+        """启动时从全局注册表恢复项目列表（若 book.yaml 存在则自动注册）。"""
         try:
             with sqlite3.connect(str(self._global_db_path)) as conn:
-                cur = conn.execute("SELECT * FROM projects")
+                cur = conn.execute(
+                    "SELECT project_id, base_path FROM projects"
+                )
                 for row in cur.fetchall():
-                    logger.info("从注册表恢复项目: %s", row[0])
+                    project_id, base_path = row[0], row[1]
+                    yaml_path = Path(base_path) / "book.yaml"
+                    if yaml_path.exists():
+                        try:
+                            book_config = BookConfig.from_yaml(yaml_path)
+                            self.register_project(project_id, book_config)
+                            logger.info("从注册表恢复项目: %s", project_id)
+                        except Exception:
+                            logger.exception("恢复项目 %s 失败", project_id)
+                    else:
+                        logger.warning(
+                            "项目 %s 的 book.yaml 不存在，跳过恢复", project_id
+                        )
         except Exception:
             logger.exception("恢复项目列表失败")
 

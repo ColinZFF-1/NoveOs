@@ -45,8 +45,8 @@ interface LogStreamProps {
   projectId?: string;
 }
 
-const LogStream: React.FC<LogStreamProps> = () => {
-  const { events, connected } = useWebSocket();
+const LogStream: React.FC<LogStreamProps> = ({ projectId }) => {
+  const { events, connected } = useWebSocket(projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

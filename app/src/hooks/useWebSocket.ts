@@ -8,18 +8,31 @@ export interface WSEvent {
 
 const MAX_RECONNECT_ATTEMPTS = 5;
 
-export function useWebSocket() {
+export function useWebSocket(projectId?: string) {
   const [events, setEvents] = useState<WSEvent[]>([]);
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const unmountedRef = useRef(false);
+  const projectIdRef = useRef(projectId);
+
+  // 保持 projectId 最新
+  projectIdRef.current = projectId;
 
   const clearReconnectTimer = useCallback(() => {
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = null;
+    }
+  }, []);
+
+  const sendSubscribe = useCallback(() => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    const pid = projectIdRef.current;
+    if (pid) {
+      ws.send(JSON.stringify({ action: 'subscribe', project_id: pid }));
     }
   }, []);
 
@@ -38,13 +51,19 @@ export function useWebSocket() {
     ws.onopen = () => {
       setConnected(true);
       reconnectAttemptsRef.current = 0;
-      ws.send(JSON.stringify({ action: 'subscribe' }));
+      sendSubscribe();
     };
 
     ws.onmessage = (e) => {
       try {
-        const data = JSON.parse(e.data) as WSEvent;
-        setEvents((prev) => [data, ...prev].slice(0, 200));
+        const data = JSON.parse(e.data);
+        // 忽略订阅确认消息，只处理真实事件
+        if (data.type === 'subscribed' || data.type === 'pong') return;
+        const eventData = data as WSEvent;
+        // 只接收与当前 projectId 匹配的事件
+        const pid = projectIdRef.current;
+        if (pid && eventData.project_id && eventData.project_id !== pid) return;
+        setEvents((prev) => [eventData, ...prev].slice(0, 200));
       } catch {
         // ignore non-JSON
       }
@@ -69,7 +88,7 @@ export function useWebSocket() {
     ws.onerror = () => {
       ws.close();
     };
-  }, []);
+  }, [sendSubscribe]);
 
   useEffect(() => {
     unmountedRef.current = false;
@@ -82,6 +101,11 @@ export function useWebSocket() {
       wsRef.current = null;
     };
   }, [connect, clearReconnectTimer]);
+
+  // projectId 变化时重新订阅
+  useEffect(() => {
+    sendSubscribe();
+  }, [projectId, sendSubscribe]);
 
   return { events, connected, clearEvents: () => setEvents([]) };
 }

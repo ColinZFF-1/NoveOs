@@ -10,7 +10,7 @@ interface PipelineFlowProps {
 
 const PipelineFlow: React.FC<PipelineFlowProps> = ({ projectId }) => {
   const { pipeline, startPipeline, pausePipeline, stopPipeline, loading } = useNovelOS(projectId);
-  const { events, connected } = useWebSocket();
+  const { events, connected } = useWebSocket(projectId);
 
   const latestEvent = events[0];
   let currentStage = '';
