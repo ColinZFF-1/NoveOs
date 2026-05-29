@@ -298,15 +298,19 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
           <div className="px-6 pt-5 pb-3">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-apple-gray-900">章节内容</h3>
-              <span className="text-sm text-apple-gray-200">·</span>
-              <span className="text-sm font-semibold text-apple-gray-700 tabular-nums">
-                第{selectedChapter}章
-              </span>
-              <span className="text-sm text-apple-gray-400 truncate">{title}</span>
-              {isWriting && (
-                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold text-primary bg-primary-50 rounded-md">
-                  AI生成中
-                </span>
+              {chapters.length > 0 && (
+                <>
+                  <span className="text-sm text-apple-gray-200">·</span>
+                  <span className="text-sm font-semibold text-apple-gray-700 tabular-nums">
+                    第{selectedChapter}章
+                  </span>
+                  <span className="text-sm text-apple-gray-400 truncate">{title}</span>
+                  {isWriting && (
+                    <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold text-primary bg-primary-50 rounded-md">
+                      AI生成中
+                    </span>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -314,7 +318,12 @@ const ChapterPreview: React.FC<ChapterPreviewProps> = ({
           {/* Content */}
           <div className="flex-1 px-6 py-4 overflow-y-auto">
             <div className="space-y-5 w-full">
-              {loading ? (
+              {chapters.length === 0 ? (
+                <div className="flex flex-col items-center text-sm text-apple-gray-400 py-12">
+                  <FileText size={28} className="mb-3 opacity-20" strokeWidth={1.5} />
+                  <span className="font-medium">章节尚未生成</span>
+                </div>
+              ) : loading ? (
                 <div className="flex items-center gap-2.5 text-sm text-apple-gray-400 py-10">
                   <Loader2 size={15} className="animate-spin" strokeWidth={2} />
                   加载中…
