@@ -140,11 +140,19 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ projectId }) => {
           </div>
         </div>
 
-        {/* Placeholder Card - 预留功能位 */}
+        {/* Report Card */}
         <div className="apple-card p-4 animate-fade-up stagger-4">
-          <div className="flex items-center justify-center h-10 text-xs text-apple-gray-300">
-            <span>功能开发中…</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (projectId) {
+                window.open(`/api/v1/projects/${encodeURIComponent(projectId)}/report`, '_blank');
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 h-10 text-xs font-medium text-apple-gray-500 hover:text-primary hover:bg-primary-50/40 rounded-xl transition-all duration-200"
+          >
+            <span>📊 生成质量报告</span>
+          </button>
         </div>
       </aside>
 
