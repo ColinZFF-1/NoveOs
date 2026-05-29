@@ -304,14 +304,8 @@ class Orchestrator:
                             "quality_passed": result.gate_level != "BLOCKING",
                             "sensitive_passed": len(result.audit_report.get("forbidden_words", [])) == 0,
                         }
-                        # 计算追读力分数（简化版：字数基础分 + 质量门加分）
-                        if result.success and result.gate_level != "BLOCKING":
-                            score = 5.0 + min(result.word_count / 1000, 3.0)
-                            if result.gate_level == "PASS":
-                                score += 1.0
-                            runtime.reader_pull_score = round(score, 1)
-                        else:
-                            runtime.reader_pull_score = 0.0
+                        # 计算追读力分数（多维度：字数 + 质量门 + 对话密度 + 节奏）
+                        runtime.reader_pull_score = self._calc_reader_pull_score(result)
                         self._persist_project(project_id, runtime)
 
                     self._event_bus.emit(
@@ -455,3 +449,42 @@ class Orchestrator:
     def emit(self, event_type: str, payload: dict[str, Any]) -> None:
         """直接发布事件（供外部模块使用）。"""
         self._event_bus.emit(event_type, payload)
+
+    # ------------------------------------------------------------------
+    # 追读力评分算法
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _calc_reader_pull_score(result: Any) -> float:
+        """多维度追读力评分算法。
+
+        维度:
+            - 基础分: 3.0
+            - 字数得分: min(word_count / 1000, 3.0)
+            - 质量门得分: PASS=1.5, WARN=0.8, BLOCKING=0
+            - 对话密度: 引号段落占比 × 2.0，上限 2.0
+            - 节奏得分: 一次通过 1.0，每次重试 -0.3
+        """
+        if not result.success or result.gate_level == "BLOCKING":
+            return 0.0
+
+        score = 3.0
+
+        # 字数得分
+        score += min(result.word_count / 1000, 3.0)
+
+        # 质量门得分
+        gate_bonus = {"PASS": 1.5, "WARN": 0.8, "BLOCKING": 0.0}
+        score += gate_bonus.get(result.gate_level, 0.0)
+
+        # 对话密度得分
+        content = result.final_content or ""
+        lines = content.split("\n")
+        dialogue_lines = sum(1 for line in lines if line.strip().startswith(("「", "\"", "'", "【")))
+        dialogue_ratio = dialogue_lines / max(len(lines), 1)
+        score += min(dialogue_ratio * 2.0, 2.0)
+
+        # 节奏得分（一次通过奖励，重试扣分）
+        rhythm = 1.0 - (result.attempts - 1) * 0.3
+        score += max(rhythm, 0.0)
+
+        return round(min(score, 10.0), 1)
