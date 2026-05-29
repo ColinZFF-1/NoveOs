@@ -595,6 +595,26 @@ class StateManager:
             )
             return [dict(row) for row in cursor.fetchall()]
 
+    def list_snapshots(self, chapter: int | None = None) -> list[dict[str, Any]]:
+        """列出当前项目的章节快照。"""
+        conditions = ["project_id = ?"]
+        params: list[Any] = [self.project_id]
+        if chapter is not None:
+            conditions.append("chapter = ?")
+            params.append(chapter)
+        where_clause = " AND ".join(conditions)
+        with self._connect() as conn:
+            cursor = conn.execute(
+                f"""
+                SELECT id, chapter, snapshot_type, created_at
+                FROM chapter_snapshots
+                WHERE {where_clause}
+                ORDER BY chapter, created_at DESC
+                """,
+                tuple(params),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
     # ------------------------------------------------------------------
     # 导出视图
     # ------------------------------------------------------------------

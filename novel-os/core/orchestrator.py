@@ -24,6 +24,7 @@ from core.event_bus import (
     PIPELINE_PAUSE,
     PIPELINE_START,
 )
+from core.snapshot_manager import SnapshotManager
 from core.state_manager import StateManager
 
 logger = logging.getLogger("novel-os.orchestrator")
@@ -43,6 +44,7 @@ class ProjectRuntime:
     future: Future | None = None
     last_audit: dict[str, Any] = field(default_factory=dict)
     reader_pull_score: float | None = None
+    snapshot_manager: SnapshotManager | None = None
     created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
 
@@ -163,6 +165,7 @@ class Orchestrator:
                 book_config=book_config,
                 state_manager=state,
                 batch_writer=writer,
+                snapshot_manager=SnapshotManager(state),
                 status="pending",
             )
             self._projects[project_id] = runtime
