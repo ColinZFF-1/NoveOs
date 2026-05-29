@@ -28,7 +28,7 @@ const WritingPreview: React.FC<WritingPreviewProps> = ({
   events,
 }) => {
   const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   const isWriting = status === 'writing';
 

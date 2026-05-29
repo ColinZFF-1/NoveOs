@@ -23,7 +23,6 @@ export interface PipelineStatus {
 
 export interface ProjectDetail extends Project {
   pipeline_id?: string | null;
-  current_chapter?: number;
   llm?: { model?: string; reasoning_effort?: string; [key: string]: unknown };
 }
 

@@ -29,7 +29,7 @@ const roleBadgeColors: Record<string, string> = {
   反派: 'bg-apple-red-light text-apple-red',
 };
 
-const fallbackCharacters: CharacterData[] = [];
+
 
 const avatarMap: Record<string, string> = {
   protagonist: 'allen',

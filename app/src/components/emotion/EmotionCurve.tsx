@@ -27,7 +27,7 @@ interface EmotionApiItem {
   desc: string;
 }
 
-const fallbackData: EmotionPoint[] = [];
+
 
 interface CustomTooltipProps {
   active?: boolean;
