@@ -81,7 +81,7 @@
 | **SceneWriter** | 场景正文创作 | 每章1次，重试时复用BeatPlanner |
 | **HookEngineer** | 开头/结尾钩子优化（IWR≥2.0） | 每章1次 |
 | **DialogueTuner** | 对话密度+道说比调优 | 每章1次 |
-| **Interceptor** | AI味快速扫描（替代旧版DeAIInterceptor） | 每章1次 |
+| **Interceptor** | AI味快速扫描 | 每章1次 |
 | **Polish** | 全文润色 | 每3章1次，或有问题时强制 |
 | **Auditor** | ChapterValidator 深度审计 | 每章1次 |
 
@@ -116,8 +116,8 @@
 |------|------|
 | `projects` | 项目注册 |
 | `outline` | 章节大纲（9字段） |
-| `chapter_specs` | 章节详细规格（新增，key-value） |
-| `term_dict` | 术语字典（新增） |
+| `chapter_specs` | 章节详细规格（key-value） |
+| `term_dict` | 术语字典 |
 | `character_states` | 人物动态快照 |
 | `item_states` | 道具状态 |
 | `debts` | 债务/伏笔（必须回收） |
@@ -148,8 +148,6 @@
 **配置来源**：SQLite db → YAML → JSON → Mock（三级降级）
 
 ### 3.5 Guard Registry（core/guards/，7个Guard）
-
-插件化质量守卫，当前已接入 BatchWriter：
 
 | Guard | 职责 |
 |-------|------|
@@ -217,7 +215,7 @@
 
 8. Auditor 深度审计
    └─ ChapterValidator 全量检查
-   └─ 术语命中检查（新增）
+   └─ 术语命中检查
    └─ 判定：BLOCK / WARN / PASS
 
 9. 处理 BLOCK
@@ -287,7 +285,7 @@ agent_query:                       # Agent 角色定义
   scene_writer: {role: "...", goal: "..."}
   ...
 
-author_persona:                    # 作者人格注入（新增）
+author_persona:                    # 作者人格注入
   voice: "冷峻观察者"
   core_wound: "..."
   signature_moves: [...]
@@ -347,7 +345,7 @@ dependencies = [
 # - pytest（测试）
 ```
 
-Python 版本：**3.10+**（代码使用 `|` Union 语法）
+Python 版本：**3.10+**
 
 ### 6.3 数据存储
 
@@ -362,7 +360,7 @@ Python 版本：**3.10+**（代码使用 `|` Union 语法）
 
 **当前状态**：开发/测试环境，无认证、无用户管理、无配额限制。
 
-**待完善**（P0-P3）：
+**待完善**：
 - 认证体系（JWT/API Key）
 - 用户/项目管理
 - LLM 调用配额控制
@@ -388,18 +386,3 @@ Python 版本：**3.10+**（代码使用 `|` Union 语法）
 | `scripts/import_outline.py` | 大纲入库脚本 | ~190 |
 | `scripts/build_term_dict.py` | 术语字典构建 | ~130 |
 | `scripts/preflight_check.py` | 写作前预检 | ~110 |
-
----
-
-## 八、当前瓶颈与待办
-
-| 优先级 | 问题 | 状态 |
-|--------|------|------|
-| **P0** | 术语强制检查已硬编码，但需更多章节验证稳定性 | ✅ 已改造 |
-| **P0** | 标题格式强制插入 | ✅ 已改造 |
-| **P1** | 双轨制模型策略（V3 for 遵循/v4-pro for 创意） | 待做 |
-| **P1** | 契诃夫之枪回调检查 | 待做 |
-| **P1** | 升番逻辑检查 | 待做 |
-| **P2** | 认证/用户/配额体系 | 未开始 |
-| **P2** | 前端界面 | 暂停中 |
-| **P3** | Docker 容器化 | 未开始 |

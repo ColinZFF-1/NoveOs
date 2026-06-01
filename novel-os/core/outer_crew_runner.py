@@ -207,16 +207,24 @@ class OuterCrewRunner:
     # ------------------------------------------------------------------
 
     def _build_system_prompt(self, agent_type: str) -> str:
-        """从 CrewAIConnector 查询 Agent 配置，构建 system prompt。"""
-        try:
-            agent_id = self.crew.get_agent_id("", agent_type)
-            cfg = self.crew.get_agent_config(agent_id)
-        except ValueError:
-            cfg = {}
+        """构建 system prompt。优先从 book.yaml agent_query 读取，fallback 到 crewai/agents.yaml。"""
+        # 1. 优先从 book.yaml agent_query 读取（与内层写作流水线统一）
+        query_cfg = self.cfg.agent_query.get(agent_type, {})
+        role = query_cfg.get("role", "")
+        goal = query_cfg.get("goal", "")
+        # book.yaml 的 agent_query 没有 backstory，所以 backstory 仍从 crewai YAML 取
 
-        role = cfg.get("role", agent_type)
-        goal = cfg.get("goal", "")
-        backstory = cfg.get("backstory", "")
+        # 2. Fallback 到 crewai/agents.yaml
+        crew_cfg = {}
+        if not role:
+            try:
+                agent_id = self.crew.get_agent_id("", agent_type)
+                crew_cfg = self.crew.get_agent_config(agent_id)
+            except ValueError:
+                pass
+            role = crew_cfg.get("role", agent_type)
+            goal = crew_cfg.get("goal", "")
+        backstory = crew_cfg.get("backstory", "")
 
         parts = [f"你是 {role}。"]
         if goal:

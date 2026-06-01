@@ -802,6 +802,49 @@ class BatchWriter:
         parts = []
         if worldview:
             parts.append(worldview)
+
+        # ★★★ author_persona 注入 system prompt ★★★
+        persona = self.cfg.author_persona
+        if persona:
+            parts.append("\n【作者人格——所有正文必须体现以下风格特征】")
+            voice = persona.get("voice", "")
+            if voice:
+                parts.append(f"叙事声音：{voice}")
+            wound = persona.get("core_wound", "")
+            if wound:
+                parts.append(f"核心创伤：{wound}")
+            rhythm = persona.get("sentence_rhythm", [])
+            if rhythm:
+                parts.append("句式节奏：")
+                for r in rhythm:
+                    parts.append(f"  - {r}")
+            sensory = persona.get("sensory_priority", [])
+            if sensory:
+                parts.append(f"感官优先级：{' > '.join(sensory)}")
+            moves = persona.get("signature_moves", [])
+            if moves:
+                parts.append("标志性动作（必须出现）：")
+                for m in moves:
+                    parts.append(f"  - {m}")
+            forbidden = persona.get("forbidden_rhetoric", [])
+            if forbidden:
+                parts.append("禁止修辞：")
+                for f in forbidden:
+                    parts.append(f"  - {f}")
+
+            parts.append("\n【网文禁区——出现即FAIL】")
+            parts.append("- 禁止'不知道为什么/仿佛/似乎/好像/他意识到'")
+            parts.append("- 禁止'一些/实际上/在一定程度上/本质上/换句话说'")
+            parts.append("- 禁止被动语态：'被拖走/被吞噬'→改成主动描述")
+            parts.append("- 禁止公共比喻：比喻必须锚定到主角的HR职业记忆")
+            parts.append("- 禁止概括性时间：'过了一会儿/不久之后'")
+            parts.append("- 禁止情绪标签：'恐惧/绝望'→改成生理反应")
+            parts.append("\n【人物对话指纹——逐句核对】")
+            parts.append("- 林默：精确、带数字、像HR谈判，'第12条，主语是谁？'")
+            parts.append("- 苏晚：短句、冷、不带感情，'别碰。系统会标记。'")
+            parts.append("- 张经理：像公司制度条文，没有主语")
+            parts.append("- 陈雨：颤音、断句、自我否定")
+        else:
             parts.append("\n【网文禁区——出现即FAIL】")
             parts.append("- 禁止'不知道为什么/仿佛/似乎/好像/他意识到'")
             parts.append("- 禁止'一些/实际上/在一定程度上/本质上/换句话说'")

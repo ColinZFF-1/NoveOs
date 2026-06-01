@@ -61,20 +61,20 @@ writing:
   max_retries: 3
   batch_size: 5
 
-# 主 Provider：DeepSeek 官方 V4 Pro
+# 主 Provider：SiliconFlow 硅基流动 DeepSeek-V3
 llm:
-  model: deepseek-chat
+  model: deepseek-ai/DeepSeek-V3
   api_key: "${OPENAI_API_KEY}"
-  api_base: https://api.deepseek.com/v1
+  api_base: https://api.siliconflow.cn/v1
   temperature: 0.7
   max_tokens: 16000
   timeout: 300
 
-# Fallback：DeepSeek 官方 V4 Pro（质量问题时自动切换）
+# Fallback：SiliconFlow 硅基流动 DeepSeek-V3（同主 Provider，Key 不同）
 llm_fallback:
-  model: deepseek-chat
+  model: deepseek-ai/DeepSeek-V3
   api_key: "${OPENAI_API_KEY_FALLBACK}"
-  api_base: https://api.deepseek.com/v1
+  api_base: https://api.siliconflow.cn/v1
   temperature: 0.7
   max_tokens: 16000
   timeout: 300

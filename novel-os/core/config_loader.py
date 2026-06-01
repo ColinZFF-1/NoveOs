@@ -65,6 +65,9 @@ class BookConfig:
     # Fallback LLM 配置（主Provider失败时自动切换）
     llm_fallback: dict[str, Any] = field(default_factory=dict)
 
+    # 作者人格注入
+    author_persona: dict[str, Any] = field(default_factory=dict)
+
     # 外层 CrewAI 配置
     outer_crew: dict[str, Any] = field(default_factory=dict)
 
@@ -114,6 +117,7 @@ class BookConfig:
             writing=raw.get("writing", {}),
             llm=_resolve_llm(raw.get("llm", {})),
             llm_fallback=_resolve_llm(raw.get("llm_fallback", {})),
+            author_persona=raw.get("author_persona", {}),
             outer_crew=raw.get("outer_crew", {}),
             plugin_id=raw.get("plugin_id", ""),
         )
@@ -161,5 +165,6 @@ class BookConfig:
             "agent_query": self.agent_query,
             "writing": self.writing,
             "llm": self.llm,
+            "author_persona": self.author_persona,
             "plugin_id": self.plugin_id,
         }
