@@ -1,0 +1,665 @@
+INFO:     Will watch for changes in these directories: ['D:\\noveos\\novel-os']
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [24080] using StatReload
+[92m21:37:51 - LiteLLM:WARNING[0m: get_model_cost_map.py:271 - LiteLLM: Failed to fetch remote model cost map from https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json: The read operation timed out. Falling back to local backup.
+[92m21:37:55 - LiteLLM:WARNING[0m: common_utils.py:979 - litellm: could not pre-load bedrock-runtime response stream shape ¡ª Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+[92m21:37:55 - LiteLLM:WARNING[0m: common_utils.py:24 - litellm: could not pre-load sagemaker-runtime response stream shape ¡ª SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+INFO:     Started server process [12476]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:62315 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63087 - "POST /api/v1/projects HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:52580 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52581 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55766 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55767 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57939 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57940 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57436 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57438 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57459 - "POST /api/v1/projects HTTP/1.1" 422 Unprocessable Entity
+crewai.db / YAML / JSON ¾ù²»´æÔÚ£¬ÆôÓÃ MOCK Ä£Ê½
+INFO:     127.0.0.1:57477 - "POST /api/v1/projects HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'core\batch_writer.py'. Reloading...
+INFO:     127.0.0.1:49990 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49991 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 51574) - "WebSocket /ws/events" [accepted]
+INFO:     127.0.0.1:51575 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     ('127.0.0.1', 63463) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 50744) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50745 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50746 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50747 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 52432) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 53541) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 61355) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60077 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64430 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64432 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 64431) - "WebSocket /ws/events" [accepted]
+INFO:     127.0.0.1:64433 - "GET /api/v1/projects/ru_zhi_gui_mi/metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64435 - "GET /api/v1/projects/ru_zhi_gui_mi/characters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64434 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     connection open
+INFO:     127.0.0.1:62798 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49553 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     127.0.0.1:56187 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 56586) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:52869 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 53468) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 50973) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 57040) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 64197) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 58494) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 51227) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 64620) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:61051 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55060 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55061 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65417 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 65213) - "WebSocket /ws/events" [accepted]
+INFO:     127.0.0.1:65214 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     ('127.0.0.1', 51562) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59510) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59511 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59512 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 64905) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:64906 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 61496) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 51670) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:64693 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/pipeline HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56754 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/chapters HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56753 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52571 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/metrics HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52572 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52574 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/characters HTTP/1.1" 404 Not Found
+INFO:     ('127.0.0.1', 52573) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:61589 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/chapters HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61590 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59572 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64357 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     ('127.0.0.1', 64358) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     ('127.0.0.1', 63616) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 63824) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:53960 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52508 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52796 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52797 - "GET /api/v1/projects/ru_zhi_gui_mi/metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52798 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52799 - "GET /api/v1/projects/ru_zhi_gui_mi/characters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52726 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65295 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49383 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/pipeline HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62313 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62315 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/chapters HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56734 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56735 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/metrics HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53893 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52650 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/characters HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62041 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62043 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81/chapters HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62045 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53365 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55902 - "GET /api/v1/projects/ru_zhi_gui_mi%E3%80%81 HTTP/1.1" 404 Not Found
+INFO:     ('127.0.0.1', 59762) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 57085) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59548) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 61208) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 52876) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:61227 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51270 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     ('127.0.0.1', 60265) - "WebSocket /ws/events" [accepted]
+INFO:     127.0.0.1:60266 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     127.0.0.1:60267 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56338 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 56339) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:56340 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 49920) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 52616) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60539 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64014 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53830 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53832 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53831 - "GET /api/v1/projects/ru_zhi_gui_mi/metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53833 - "GET /api/v1/projects/ru_zhi_gui_mi/characters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62676 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 57499) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:57500 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     127.0.0.1:58005 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 58006) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:51090 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 60045) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 51930) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 62515) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 61635) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 58336) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 49469) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 61828) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 55915) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 53069) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:49384 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60906 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53237 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53238 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51282 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51284 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64817 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60187 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60688 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60689 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57293 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57294 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51655 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62755 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65331 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65332 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49340 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49341 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50216 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55267 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55268 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49490 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49491 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64589 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51446 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50423 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50424 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63656 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63657 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62458 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61840 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     ('127.0.0.1', 64299) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:64300 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64301 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64302 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 50451) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50452 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 64833) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 49773) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:62041 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49612 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53604 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49614 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49613 - "GET /api/v1/projects/ru_zhi_gui_mi/metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49615 - "GET /api/v1/projects/ru_zhi_gui_mi/characters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54706 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62043 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 54707) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     127.0.0.1:63772 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 52962) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:52963 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 51144) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 62248) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 64312) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 58586) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:51717 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51718 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61476 - "POST /api/v1/projects/ru_zhi_gui_mi/pipeline/start HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 51902) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:54604 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 56186) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:52932 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     ('127.0.0.1', 58988) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60972 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     ('127.0.0.1', 64827) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 54542) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+Ö÷ LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+LLM µ÷ÓÃÊ§°Ü£¬ÇÒÎÞ Fallback ÅäÖÃ
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+µÚ 1 ÕÂ µÚ 1 ´Î³¢ÊÔÒì³£: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\batch_writer.py", line 180, in write_chapter
+    director_prompt = self._call_director(chapter_num, context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\batch_writer.py", line 777, in _call_director
+    return self.llm.call(system, user, temperature=0.1, max_tokens=4000)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 225, in call
+    raise RuntimeError(f"LLM µ÷ÓÃÊ§°Ü: {primary_exc}") from primary_exc
+RuntimeError: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+Ö÷ LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+LLM µ÷ÓÃÊ§°Ü£¬ÇÒÎÞ Fallback ÅäÖÃ
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+µÚ 1 ÕÂ µÚ 2 ´Î³¢ÊÔÒì³£: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\batch_writer.py", line 180, in write_chapter
+    director_prompt = self._call_director(chapter_num, context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\batch_writer.py", line 777, in _call_director
+    return self.llm.call(system, user, temperature=0.1, max_tokens=4000)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 225, in call
+    raise RuntimeError(f"LLM µ÷ÓÃÊ§°Ü: {primary_exc}") from primary_exc
+RuntimeError: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+Ö÷ LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+LLM µ÷ÓÃÊ§°Ü£¬ÇÒÎÞ Fallback ÅäÖÃ
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+µÚ 1 ÕÂ µÚ 3 ´Î³¢ÊÔÒì³£: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\batch_writer.py", line 180, in write_chapter
+    director_prompt = self._call_director(chapter_num, context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\batch_writer.py", line 777, in _call_director
+    return self.llm.call(system, user, temperature=0.1, max_tokens=4000)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 225, in call
+    raise RuntimeError(f"LLM µ÷ÓÃÊ§°Ü: {primary_exc}") from primary_exc
+RuntimeError: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+µÚ 1 ÕÂ ×îÖÕÊ§°Ü£¬ÒÑÓÃ¾¡ 3 ´ÎÖØÊÔ
+ÏîÄ¿ ru_zhi_gui_mi µÚ 1 ÕÂÊ§°Ü£¬Í£Ö¹Á÷Ë®Ïß (gate=BLOCKING)
+Ö÷ LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+LLM µ÷ÓÃÊ§°Ü£¬ÇÒÎÞ Fallback ÅäÖÃ
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+Director Agent ÈÎÎñ¿¨Éú³ÉÊ§°Ü: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+INFO:     127.0.0.1:61483 - "GET /api/v1/projects/ru_zhi_gui_mi/task-card?chapter=1 HTTP/1.1" 200 OK
+Ö÷ LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+LLM µ÷ÓÃÊ§°Ü£¬ÇÒÎÞ Fallback ÅäÖÃ
+Traceback (most recent call last):
+  File "D:\noveos\novel-os\core\llm_client.py", line 200, in call
+    return self._do_call(
+           ^^^^^^^^^^^^^^
+  File "D:\noveos\novel-os\core\llm_client.py", line 133, in _do_call
+    response = client.chat.completions.create(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_utils\_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1215, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - Invalid token
+Director Agent ÈÎÎñ¿¨Éú³ÉÊ§°Ü: LLM µ÷ÓÃÊ§°Ü: Error code: 401 - Invalid token
+INFO:     127.0.0.1:50493 - "GET /api/v1/projects/ru_zhi_gui_mi/task-card?chapter=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65143 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:54359 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49785 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51409 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58317 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58318 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64258 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49351 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49352 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53783 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53791 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62488 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62489 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51819 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51837 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59559 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59560 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61152 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59783 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59784 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56432 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56433 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62427 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62432 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53248 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53249 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51723 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51728 - "PATCH /api/v1/projects/ru_zhi_gui_mi/status HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:51872 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57891 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57892 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57894 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57893 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51699 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51701 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51700 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51702 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60200 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60201 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60202 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60203 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50440 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50441 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50443 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50442 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64600 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64601 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64603 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64604 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51188 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51189 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 53406) - "WebSocket /ws/events" [accepted]
+INFO:     127.0.0.1:53407 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     ('127.0.0.1', 62363) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 50187) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50188 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50189 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50190 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 52503) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59414) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 52521) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59381 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61261 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61260 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 61262) - "WebSocket /ws/events" [accepted]
+INFO:     127.0.0.1:61263 - "GET /api/v1/projects/ru_zhi_gui_mi/metrics HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     127.0.0.1:61265 - "GET /api/v1/projects/ru_zhi_gui_mi/characters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61264 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters/1/content HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57076 - "GET /api/v1/projects/ru_zhi_gui_mi/chapters HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65386 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     ('127.0.0.1', 57468) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:57469 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51529 - "GET /api/v1/projects/ru_zhi_gui_mi HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 56960) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 54632) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 50776) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 58130) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 60916) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 54755) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 50841) - "WebSocket /ws/events" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:58808 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54699 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54700 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     127.0.0.1:50174 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50175 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54197 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51909 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57141 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52286 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50319 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50320 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62515 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49697 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49698 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50296 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52222 - "GET /api/v1/system/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52223 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65057 - "GET /api/v1/projects/ru_zhi_gui_mi/pipeline HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed
+INFO:     connection closed

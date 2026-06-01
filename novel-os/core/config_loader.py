@@ -23,14 +23,16 @@ def _expand_env(value: str) -> str:
     return expanded
 
 def _resolve_llm(llm_cfg: dict[str, Any]) -> dict[str, Any]:
-    """对 llm 配置中的 api_key 做环境变量展开。"""
+    """对 llm 配置中的所有字符串字段做环境变量展开。"""
     if not llm_cfg:
         return llm_cfg
     resolved = dict(llm_cfg)
-    if "api_key" in resolved and isinstance(resolved["api_key"], str):
-        expanded = _expand_env(resolved["api_key"])
-        if "$" not in expanded and "%" not in expanded:
-            resolved["api_key"] = expanded
+    for key in ("model", "api_key", "api_base", "reasoning_effort"):
+        if key in resolved and isinstance(resolved[key], str):
+            expanded = _expand_env(resolved[key])
+            if "$" not in expanded and "%" not in expanded:
+                resolved[key] = expanded
+    # bool / int 字段不做展开
     return resolved
 
 
@@ -59,6 +61,12 @@ class BookConfig:
 
     # LLM 配置
     llm: dict[str, Any] = field(default_factory=dict)
+
+    # Fallback LLM 配置（主Provider失败时自动切换）
+    llm_fallback: dict[str, Any] = field(default_factory=dict)
+
+    # 外层 CrewAI 配置
+    outer_crew: dict[str, Any] = field(default_factory=dict)
 
     # 插件 ID
     plugin_id: str = ""
@@ -105,6 +113,8 @@ class BookConfig:
             agent_query=raw.get("agent_query", {}),
             writing=raw.get("writing", {}),
             llm=_resolve_llm(raw.get("llm", {})),
+            llm_fallback=_resolve_llm(raw.get("llm_fallback", {})),
+            outer_crew=raw.get("outer_crew", {}),
             plugin_id=raw.get("plugin_id", ""),
         )
 

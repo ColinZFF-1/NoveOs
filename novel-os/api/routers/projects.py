@@ -49,14 +49,14 @@ async def create_project(req: CreateProjectRequest):
             f"  max_retries: 3\n"
             f"  batch_size: 5\n"
             f"llm:\n"
-            f"  model: deepseek-v4-pro\n"
-            f"  api_key: ${{DEEPSEEK_API_KEY}}\n"
-            f"  api_base: https://api.deepseek.com/v1\n"
+            f"  model: deepseek-ai/DeepSeek-V3\n"
+            f"  api_key: ${{OPENAI_API_KEY}}\n"
+            f"  api_base: https://api.siliconflow.cn/v1\n"
             f"  temperature: 0.7\n"
             f"  max_tokens: 8000\n"
             f"  timeout: 300\n"
             f"  reasoning_effort: high\n"
-            f"  thinking_enabled: true\n"
+            f"  thinking_enabled: false\n"
         )
         yaml_path.write_text(yaml_content, encoding="utf-8")
 

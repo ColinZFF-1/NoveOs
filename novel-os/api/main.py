@@ -18,9 +18,10 @@ app.add_middleware(
 
 # 全局 Orchestrator 单例（必须在 routers 导入前定义，避免循环导入）
 orchestrator = Orchestrator(max_workers=10)
+app.state.orchestrator = orchestrator
 
-from api.routers import chapters, characters, emotions, guards, logs, pipeline, projects, reports, search, snapshots, system, task_card
-from api.websocket import websocket_router, manager
+from api.routers import chapters, characters, emotions, guards, logs, pipeline, projects, reports, search, snapshots, system, task_card, outline, tracker, metrics, import_data
+# from api.websocket import websocket_router, manager  # 已归档
 
 app.include_router(projects.router, prefix="/api/v1")
 app.include_router(pipeline.router, prefix="/api/v1")
@@ -34,7 +35,11 @@ app.include_router(task_card.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
 app.include_router(snapshots.router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
-app.include_router(websocket_router, prefix="/ws")
+app.include_router(outline.router, prefix="/api/v1")
+app.include_router(tracker.router, prefix="/api/v1")
+app.include_router(metrics.router, prefix="/api/v1")
+app.include_router(import_data.router, prefix="/api/v1")
+# app.include_router(websocket_router, prefix="/ws")  # WebSocket 已归档
 
 # 主线程事件循环引用（用于跨线程桥接）
 _main_loop: asyncio.AbstractEventLoop | None = None

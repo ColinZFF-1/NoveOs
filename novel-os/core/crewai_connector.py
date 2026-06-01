@@ -8,6 +8,12 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Generator
 
+try:
+    import yaml
+    _YAML_AVAILABLE = True
+except ImportError:
+    _YAML_AVAILABLE = False
+
 logger = logging.getLogger("novel-os.crew")
 
 
@@ -19,8 +25,9 @@ class CrewAIConnector:
 
     降级策略：
     1. 如果 crewai.db 存在，优先从 SQLite 查询；
-    2. 否则尝试从 crewai_entities_export.json 加载；
-    3. 最后回退到 MOCK 模式。
+    2. 否则尝试从 crewai/agents.yaml + tasks.yaml 加载；
+    3. 否则尝试从 crewai_entities_export.json 加载；
+    4. 最后回退到 MOCK 模式。
     """
 
     def __init__(
@@ -28,6 +35,7 @@ class CrewAIConnector:
         db_path: Path,
         mock_mode: bool = False,
         export_json_path: Path | None = None,
+        yaml_dir: Path | None = None,
     ) -> None:
         self.db_path = db_path
         self._agents: dict[str, dict[str, Any]] = {}
@@ -36,13 +44,47 @@ class CrewAIConnector:
         if db_path.exists():
             self.mock_mode = False
             logger.info("使用 crewai.db: %s", db_path)
+        elif yaml_dir and _YAML_AVAILABLE and self._try_load_from_yaml(yaml_dir):
+            self.mock_mode = False
+            logger.info("从 YAML 加载 Agent/Task: %s", yaml_dir)
         elif export_json_path and export_json_path.exists():
             self.mock_mode = False
             self._load_from_export(export_json_path)
             logger.info("从 JSON 导出加载 Agent/Task: %s", export_json_path)
         else:
             self.mock_mode = True
-            logger.warning("crewai.db 不存在且无导出文件，启用 MOCK 模式")
+            logger.warning("crewai.db / YAML / JSON 均不存在，启用 MOCK 模式")
+
+    def _try_load_from_yaml(self, yaml_dir: Path) -> bool:
+        """尝试从 YAML 目录加载 Agent 和 Task。返回是否成功。"""
+        agents_file = yaml_dir / "agents.yaml"
+        tasks_file = yaml_dir / "tasks.yaml"
+        if not agents_file.exists():
+            return False
+        try:
+            with agents_file.open("r", encoding="utf-8") as f:
+                agents_data = yaml.safe_load(f)
+            for agent_id, agent in (agents_data or {}).get("agents", {}).items():
+                self._agents[agent_id] = {
+                    "role": agent.get("role", ""),
+                    "goal": agent.get("goal", ""),
+                    "backstory": agent.get("backstory", ""),
+                    "temperature": agent.get("temperature", 0.1),
+                    "max_tokens": agent.get("max_tokens", 4000),
+                }
+            if tasks_file.exists():
+                with tasks_file.open("r", encoding="utf-8") as f:
+                    tasks_data = yaml.safe_load(f)
+                for task_id, task in (tasks_data or {}).get("tasks", {}).items():
+                    self._tasks[task_id] = {
+                        "agent_id": task.get("agent_id", ""),
+                        "description": task.get("description", ""),
+                        "expected_output": task.get("expected_output", ""),
+                    }
+            return True
+        except Exception as exc:
+            logger.warning("YAML 加载失败: %s", exc)
+            return False
 
     def _load_from_export(self, path: Path) -> None:
         """从 crewai_entities_export.json 加载 Agent 和 Task。"""

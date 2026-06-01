@@ -35,8 +35,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # Logs
-logs/
-*.log
+logs/*
+!logs/deep_optimize.log
+!logs/rugu_ch34_35_flash.log
 
 # Environment variables & secrets
 .env
@@ -71,3 +72,18 @@ import_outline.py
 *.png
 app/dist/
 app/frontend.log
+
+# Project structure: runtime data & archives
+data/
+archive/
+tools/__pycache__/
+
+# Keep specific logs as records
+!logs/deep_optimize.log
+!logs/rugu_ch34_35_flash.log
+
+# IDE & local settings
+.claude/
+
+# Generated docs
+docs/index.html

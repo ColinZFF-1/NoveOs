@@ -27,9 +27,9 @@ except ImportError:
 class LLMConfig:
     """LLM 调用配置。"""
 
-    model: str = "deepseek-v4-flash"
+    model: str = "deepseek-ai/DeepSeek-V3"
     api_key: str = ""
-    api_base: str = "https://api.deepseek.com/v1"
+    api_base: str = "https://api.siliconflow.cn/v1"
     temperature: float = 0.7
     max_tokens: int = 8000
     timeout: int = 300
@@ -40,9 +40,9 @@ class LLMConfig:
     def from_env(cls, model: str | None = None) -> "LLMConfig":
         """从环境变量加载配置。"""
         return cls(
-            model=model or os.getenv("LLM_MODEL", "deepseek-v4-flash"),
+            model=model or os.getenv("LLM_MODEL", "deepseek-ai/DeepSeek-V3"),
             api_key=os.getenv("OPENAI_API_KEY", ""),
-            api_base=os.getenv("OPENAI_API_BASE", "https://api.deepseek.com/v1"),
+            api_base=os.getenv("OPENAI_API_BASE", "https://api.siliconflow.cn/v1"),
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
             max_tokens=int(os.getenv("LLM_MAX_TOKENS", "8000")),
             timeout=int(os.getenv("LLM_TIMEOUT", "300")),
@@ -64,26 +64,104 @@ class LLMConfig:
 
 
 class LLMClient:
-    """统一的 LLM 调用客户端（基于 OpenAI SDK，兼容 DeepSeek 等 OpenAI 格式 API）。"""
+    """统一的 LLM 调用客户端（基于 OpenAI SDK，兼容 DeepSeek 等 OpenAI 格式 API）。
 
-    def __init__(self, config: LLMConfig | None = None) -> None:
+    支持 fallback 配置：当主 Provider 调用失败时自动切换到备用 Provider。
+    """
+
+    def __init__(self, config: LLMConfig | None = None, fallback_config: LLMConfig | None = None) -> None:
         self.cfg = config or LLMConfig.from_env()
         self.cfg.validate()
+        self._client, self._use_openai = self._build_client(self.cfg)
 
-        # 优先使用 OpenAI SDK（避免 litellm 大 max_tokens 下的假超时问题）
+        # Fallback Provider
+        self.fallback_cfg = fallback_config
+        self._fallback_client = None
+        self._fallback_use_openai = False
+        if self.fallback_cfg:
+            self.fallback_cfg.validate()
+            self._fallback_client, self._fallback_use_openai = self._build_client(self.fallback_cfg)
+
+    @staticmethod
+    def _build_client(cfg: LLMConfig):
+        """根据配置构建底层客户端，返回 (client, use_openai_flag)。"""
         if OPENAI_SDK_AVAILABLE:
-            self._client = OpenAI(
-                api_key=self.cfg.api_key,
-                base_url=self.cfg.api_base,
-                timeout=self.cfg.timeout,
+            client = OpenAI(
+                api_key=cfg.api_key,
+                base_url=cfg.api_base,
+                timeout=cfg.timeout,
             )
-            self._use_openai = True
+            return client, True
         else:
             # 降级到 litellm
-            os.environ["OPENAI_API_KEY"] = self.cfg.api_key
-            os.environ["OPENAI_API_BASE"] = self.cfg.api_base
-            self._client = None
-            self._use_openai = False
+            os.environ["OPENAI_API_KEY"] = cfg.api_key
+            os.environ["OPENAI_API_BASE"] = cfg.api_base
+            return None, False
+
+    def _do_call(
+        self,
+        client,
+        cfg: LLMConfig,
+        use_openai: bool,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float,
+        max_tokens: int,
+        timeout: int,
+    ) -> str:
+        """执行一次实际的 LLM 调用。"""
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        # DeepSeek V4 thinking mode 参数
+        extra_body: dict[str, Any] | None = None
+        if cfg.thinking_enabled and cfg.model.startswith("deepseek-v4"):
+            extra_body = {"thinking": {"type": "enabled"}}
+
+        if use_openai:
+            kwargs: dict[str, Any] = {
+                "model": cfg.model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "timeout": timeout,
+            }
+            if extra_body:
+                kwargs["extra_body"] = extra_body
+            response = client.chat.completions.create(**kwargs)
+            content = response.choices[0].message.content or ""
+        else:
+            # litellm 降级路径
+            import litellm
+
+            litellm.drop_params = True
+            response = completion(
+                model=f"openai/{cfg.model}",
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=timeout,
+                reasoning_effort=cfg.reasoning_effort
+                if cfg.thinking_enabled and cfg.model.startswith("deepseek-v4")
+                else None,
+                extra_body=extra_body,
+            )
+            content = response.choices[0].message.content or ""
+
+        # 防御 DeepSeek V4 thinking 内容泄漏到 content
+        if "<think>" in content:
+            original_len = len(content)
+            content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+            logger.warning(
+                "LLM 返回内容中包含 <think> 块，已过滤（移除 %d 字符）",
+                original_len - len(content),
+            )
+
+        if not content.strip():
+            raise ValueError("API 返回空内容")
+        return content
 
     def call(
         self,
@@ -93,7 +171,7 @@ class LLMClient:
         max_tokens: int | None = None,
         timeout: int | None = None,
     ) -> str:
-        """调用 LLM，返回生成的文本。
+        """调用 LLM，返回生成的文本。支持自动 fallback。
 
         Args:
             system_prompt: 系统提示（Agent 角色定义）。
@@ -106,7 +184,7 @@ class LLMClient:
             模型生成的文本。
 
         Raises:
-            RuntimeError: 调用失败或返回空内容。
+            RuntimeError: 主 Provider 和 Fallback 都调用失败。
         """
         temp = temperature if temperature is not None else self.cfg.temperature
         tokens = max_tokens if max_tokens is not None else self.cfg.max_tokens
@@ -117,62 +195,34 @@ class LLMClient:
             self.cfg.model, temp, tokens, to,
         )
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        # DeepSeek V4 thinking mode 参数
-        extra_body: dict[str, Any] | None = None
-        if self.cfg.thinking_enabled and self.cfg.model.startswith("deepseek-v4"):
-            extra_body = {"thinking": {"type": "enabled"}}
-
+        # 先尝试主 Provider
         try:
-            if self._use_openai:
-                kwargs: dict[str, Any] = {
-                    "model": self.cfg.model,
-                    "messages": messages,
-                    "temperature": temp,
-                    "max_tokens": tokens,
-                    "timeout": to,
-                }
-                if extra_body:
-                    kwargs["extra_body"] = extra_body
-                response = self._client.chat.completions.create(**kwargs)
-                content = response.choices[0].message.content or ""
-            else:
-                # litellm 降级路径
-                import litellm
+            return self._do_call(
+                self._client, self.cfg, self._use_openai,
+                system_prompt, user_prompt, temp, tokens, to,
+            )
+        except Exception as primary_exc:
+            logger.warning("主 LLM 调用失败: %s", primary_exc)
 
-                litellm.drop_params = True
-                response = completion(
-                    model=f"openai/{self.cfg.model}",
-                    messages=messages,
-                    temperature=temp,
-                    max_tokens=tokens,
-                    timeout=to,
-                    reasoning_effort=self.cfg.reasoning_effort
-                    if self.cfg.thinking_enabled and self.cfg.model.startswith("deepseek-v4")
-                    else None,
-                    extra_body=extra_body,
+            # 如果有 fallback，自动切换
+            if self._fallback_client is not None:
+                logger.info(
+                    "切换到 Fallback LLM: %s @ %s",
+                    self.fallback_cfg.model, self.fallback_cfg.api_base,
                 )
-                content = response.choices[0].message.content or ""
+                try:
+                    return self._do_call(
+                        self._fallback_client, self.fallback_cfg, self._fallback_use_openai,
+                        system_prompt, user_prompt, temp, tokens, to,
+                    )
+                except Exception as fallback_exc:
+                    logger.exception("Fallback LLM 也调用失败")
+                    raise RuntimeError(
+                        f"主 LLM 失败: {primary_exc}; Fallback 也失败: {fallback_exc}"
+                    ) from fallback_exc
 
-            # 防御 DeepSeek V4 thinking 内容泄漏到 content
-            if "<think>" in content:
-                original_len = len(content)
-                content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
-                logger.warning(
-                    "LLM 返回内容中包含 <think> 块，已过滤（移除 %d 字符）",
-                    original_len - len(content),
-                )
-
-            if not content.strip():
-                raise ValueError("API 返回空内容")
-            return content
-        except Exception as exc:
-            logger.exception("LLM 调用失败")
-            raise RuntimeError(f"LLM 调用失败: {exc}") from exc
+            logger.exception("LLM 调用失败，且无 Fallback 配置")
+            raise RuntimeError(f"LLM 调用失败: {primary_exc}") from primary_exc
 
     def call_json(
         self,

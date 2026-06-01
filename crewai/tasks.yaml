@@ -1,0 +1,52 @@
+# Novel-OS CrewAI Task 定义
+# 与 agents.yaml 配合使用
+
+tasks:
+  director:
+    agent_id: director
+    description: >
+      分析大纲和状态库，生成第{chapter}章的导演任务卡。
+      包含：核心情节、情绪节点、冗余标记、开头/结尾优化建议、对话优化建议。
+    expected_output: 导演任务卡（结构化的Markdown格式）
+
+  beat_planner:
+    agent_id: beat_planner
+    description: >
+      根据导演任务卡，生成六段式节拍分配表。
+      每段包含：段名、字数范围、核心内容简述。
+    expected_output: 六段式节拍分配表
+
+  scene_writer:
+    agent_id: scene_writer
+    description: >
+      基于节拍分配表和导演任务卡，创作第{chapter}章完整正文。
+      字数严格控制在目标范围内。
+    expected_output: 纯小说正文（不含任何标记）
+
+  hook_engineer:
+    agent_id: hook_engineer
+    description: >
+      优化第{chapter}章的开头50字和结尾100字。
+      确保IWR≥2.0，开头抛出情境悬念，结尾留下未解之谜。
+    expected_output: 优化后的完整正文
+
+  dialogue_tuner:
+    agent_id: dialogue_tuner
+    description: >
+      优化第{chapter}章的对话部分。
+      确保对话占比25%-45%，道说比接近品类DNA，每簇≤3段。
+    expected_output: 优化后的完整正文
+
+  polish:
+    agent_id: polish
+    description: >
+      对第{chapter}章进行去AI味润色。
+      消除模板词、高频副词、英文残留，提升画面感和年代质感。
+    expected_output: 润色后的纯小说正文
+
+  auditor:
+    agent_id: auditor
+    description: >
+      审计第{chapter}章的结构指标。
+      返回JSON格式报告：字数、他字密度、IWR、平台分、DNA匹配度。
+    expected_output: JSON格式的审计报告

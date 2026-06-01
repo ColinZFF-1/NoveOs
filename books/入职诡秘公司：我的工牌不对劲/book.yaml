@@ -1,0 +1,62 @@
+project: 入职诡秘公司，我的工牌不对劲
+platform: qimao
+genre: 诡秘职场+规则怪谈+心理惊悚
+target_tier: A+
+total_words_target: 216000
+chapters_target: 48
+words_per_chapter: 4500
+base_path: D:/noveos/books/入职诡秘公司：我的工牌不对劲
+crewai_db_path: D:/noveos/crewai/crewai.db
+output_dir: chapters
+v8_dir: chapters/V8.0
+plugin_id: ""
+
+agent_query:
+  director:
+    role: 诡秘职场小说导演
+    goal: 根据大纲和状态库生成本章任务卡，明确规则副本与情绪曲线
+  beat_planner:
+    role: 节拍分配师
+    goal: 将导演任务卡拆解为六段式节拍分配表，精确控制悬疑释放节奏
+  scene_writer:
+    role: 场景写作师
+    goal: 按节拍分配表创作高质量场景正文，强调五感描写与心理压迫
+  hook_engineer:
+    role: 钩子工程师
+    goal: 优化章节开头和结尾，确保IWR≥2.0，章末钩子令人窒息
+  dialogue_tuner:
+    role: 对话调优师
+    goal: 优化对话密度和道说比，规则条款用冷峻客观体，情感对话克制而撕裂
+  polish:
+    role: 小说润色师
+    goal: 消除AI痕迹，提升画面感和心理压迫感，只输出纯正文
+  auditor:
+    role: 小说审计师
+    goal: 审计字数、他字密度、禁用词、情绪一致性、IWR、品类DNA匹配度
+
+writing:
+  tolerance: 450
+  max_retries: 3
+  batch_size: 5
+
+# 主 Provider：DeepSeek 官方 V4 Pro
+llm:
+  model: deepseek-v4-pro
+  api_key: "${OPENAI_API_KEY}"
+  api_base: https://api.deepseek.com/v1
+  temperature: 0.7
+  max_tokens: 16000
+  timeout: 300
+  reasoning_effort: high
+  thinking_enabled: false
+
+# Fallback：DeepSeek 官方 V4 Pro（质量问题时自动切换）
+llm_fallback:
+  model: deepseek-v4-pro
+  api_key: "${OPENAI_API_KEY_FALLBACK}"
+  api_base: https://api.deepseek.com/v1
+  temperature: 0.7
+  max_tokens: 16000
+  timeout: 300
+  reasoning_effort: high
+  thinking_enabled: false

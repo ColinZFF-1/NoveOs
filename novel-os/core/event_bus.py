@@ -36,6 +36,11 @@ PIPELINE_START = "pipeline_start"
 PIPELINE_PAUSE = "pipeline_pause"
 PIPELINE_COMPLETE = "pipeline_complete"
 
+# 外层 CrewAI 事件
+OUTER_CREW_INSPECTION_START = "outer_crew_inspection_start"
+OUTER_CREW_INSPECTION_COMPLETE = "outer_crew_inspection_complete"
+OUTER_CREW_RETCON_TRIGGERED = "outer_crew_retcon_triggered"
+
 EVENT_TYPES: set[str] = {
     CHAPTER_START,
     CHAPTER_COMPLETE,
@@ -48,6 +53,9 @@ EVENT_TYPES: set[str] = {
     PIPELINE_START,
     PIPELINE_PAUSE,
     PIPELINE_COMPLETE,
+    OUTER_CREW_INSPECTION_START,
+    OUTER_CREW_INSPECTION_COMPLETE,
+    OUTER_CREW_RETCON_TRIGGERED,
 }
 
 

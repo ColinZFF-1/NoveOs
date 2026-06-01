@@ -198,10 +198,92 @@ class StateManager:
                     summary         TEXT,
                     word_count      INTEGER,
                     mode            TEXT,
+                    title           TEXT,
                     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (project_id, chapter),
                     FOREIGN KEY (project_id) REFERENCES projects(project_id)
                 );
+
+                CREATE TABLE IF NOT EXISTS outline (
+                    project_id      TEXT NOT NULL,
+                    chapter         INTEGER NOT NULL,
+                    arc             TEXT,
+                    core_event      TEXT,
+                    face_slap_target TEXT,
+                    face_slap_method TEXT,
+                    husband_moment  TEXT,
+                    chapter_hook    TEXT,
+                    emotion_ratio   TEXT,
+                    skill_unlocked  TEXT,
+                    questions       TEXT,
+                    reveal_at       INTEGER,
+                    beat_pattern    TEXT,
+                    PRIMARY KEY (project_id, chapter),
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_outline_chapter ON outline(project_id, chapter);
+
+                CREATE TABLE IF NOT EXISTS skill_tree (
+                    project_id      TEXT NOT NULL,
+                    skill_name      TEXT NOT NULL,
+                    unlock_chapter  INTEGER,
+                    description     TEXT,
+                    used_chapters   TEXT,
+                    PRIMARY KEY (project_id, skill_name),
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                );
+
+                CREATE TABLE IF NOT EXISTS chapter_metrics (
+                    project_id      TEXT NOT NULL,
+                    chapter         INTEGER NOT NULL,
+                    word_count      INTEGER,
+                    sentence_length REAL,
+                    dialogue_ratio  REAL,
+                    ta_density      REAL,
+                    iwr_score       REAL,
+                    questions_count INTEGER,
+                    answers_count   INTEGER,
+                    hook_ending     INTEGER,
+                    platform_score  REAL,
+                    platform_grade  TEXT,
+                    genre_dna_match REAL,
+                    oscillations    INTEGER,
+                    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (project_id, chapter),
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_metrics_chapter ON chapter_metrics(project_id, chapter);
+
+                CREATE TABLE IF NOT EXISTS genre_dna (
+                    project_id      TEXT PRIMARY KEY,
+                    genre           TEXT NOT NULL,
+                    target_sent_len INTEGER,
+                    sent_range_min  INTEGER,
+                    sent_range_max  INTEGER,
+                    dialogue_target REAL,
+                    dialogue_min    REAL,
+                    dialogue_max    REAL,
+                    dao_shuo_ratio  TEXT,
+                    ta_density_max  REAL,
+                    word_target     INTEGER,
+                    word_tolerance  INTEGER,
+                    iwr_target      REAL,
+                    iwr_min         REAL,
+                    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                );
+
+                CREATE TABLE IF NOT EXISTS outer_crew_reports (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    project_id      TEXT NOT NULL,
+                    chapter         INTEGER NOT NULL,
+                    agent_type      TEXT NOT NULL,
+                    report          TEXT NOT NULL,
+                    findings        TEXT,
+                    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_outer_crew ON outer_crew_reports(project_id, chapter, agent_type);
                 """
             )
 
@@ -324,6 +406,18 @@ class StateManager:
         plot = outline.get("plot", {})
         pid = self.project_id
 
+        # 确保 projects 表中存在当前 project_id 的记录（外键约束需要）
+        meta = outline.get("meta", {})
+        if meta:
+            self.init_project(
+                pid,
+                meta.get("project", "untitled"),
+                meta.get("genre", ""),
+                meta.get("platform", ""),
+                str(self.db_path.parent),
+                meta.get("chapters_target", 0),
+            )
+
         with self._connect() as conn:
             # 1. 人物初始状态（第 0 章表示"写第 1 章之前"的初始态）
             for role_key, c in characters.items():
@@ -405,6 +499,84 @@ class StateManager:
                     """,
                     (pid, "world_lock", lock, "hard"),
                 )
+
+            # 6. 章节大纲 (outline)
+            for ch in outline.get("chapters", []):
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO outline
+                    (project_id, chapter, arc, core_event, face_slap_target, face_slap_method,
+                     husband_moment, chapter_hook, emotion_ratio, skill_unlocked,
+                     questions, reveal_at, beat_pattern)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        pid, ch.get("chapter"), ch.get("arc"), ch.get("core_event"),
+                        ch.get("face_slap_target"), ch.get("face_slap_method"),
+                        ch.get("husband_moment"), ch.get("chapter_hook"),
+                        ch.get("emotion_ratio"), ch.get("skill_unlocked"),
+                        json.dumps(ch.get("questions", []), ensure_ascii=False),
+                        ch.get("reveal_at"),
+                        json.dumps(ch.get("beat_pattern", {}), ensure_ascii=False),
+                    ),
+                )
+
+            # 7. 技能树 (skill_tree)
+            for sk in outline.get("skills", []):
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO skill_tree
+                    (project_id, skill_name, unlock_chapter, description, used_chapters)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        pid, sk.get("name"), sk.get("unlock_chapter"),
+                        sk.get("description"), json.dumps(sk.get("used_chapters", []), ensure_ascii=False),
+                    ),
+                )
+
+    # ------------------------------------------------------------------
+    # 品类 DNA
+    # ------------------------------------------------------------------
+    def init_genre_dna(self, genre: str) -> None:
+        """根据品类初始化 DNA 参数（RAG 分析数据驱动）。"""
+        # RAG 分析得出的品类基准值
+        dna_map = {
+            "言情": {"sent": 23, "sent_min": 15, "sent_max": 35, "dialogue": 0.40, "dialogue_min": 0.25, "dialogue_max": 0.55, "dao_shuo": "0.4:0.6", "ta_max": 0.02, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+            "武侠": {"sent": 25, "sent_min": 15, "sent_max": 35, "dialogue": 0.35, "dialogue_min": 0.20, "dialogue_max": 0.50, "dao_shuo": "0.5:0.5", "ta_max": 0.015, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+            "都市": {"sent": 25, "sent_min": 15, "sent_max": 35, "dialogue": 0.40, "dialogue_min": 0.25, "dialogue_max": 0.55, "dao_shuo": "0.4:0.6", "ta_max": 0.02, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+            "穿越": {"sent": 28, "sent_min": 18, "sent_max": 38, "dialogue": 0.35, "dialogue_min": 0.20, "dialogue_max": 0.50, "dao_shuo": "0.5:0.5", "ta_max": 0.02, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+            "玄幻": {"sent": 31, "sent_min": 20, "sent_max": 42, "dialogue": 0.30, "dialogue_min": 0.15, "dialogue_max": 0.45, "dao_shuo": "0.55:0.45", "ta_max": 0.015, "words": 2500, "tolerance": 250, "iwr": 2.5, "iwr_min": 2.0},
+            "科幻": {"sent": 32, "sent_min": 20, "sent_max": 45, "dialogue": 0.28, "dialogue_min": 0.15, "dialogue_max": 0.40, "dao_shuo": "0.55:0.45", "ta_max": 0.015, "words": 2500, "tolerance": 250, "iwr": 2.5, "iwr_min": 2.0},
+            "竞技": {"sent": 28, "sent_min": 18, "sent_max": 38, "dialogue": 0.30, "dialogue_min": 0.15, "dialogue_max": 0.45, "dao_shuo": "0.5:0.5", "ta_max": 0.015, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+            "网游": {"sent": 35, "sent_min": 22, "sent_max": 48, "dialogue": 0.25, "dialogue_min": 0.15, "dialogue_max": 0.35, "dao_shuo": "0.35:0.65", "ta_max": 0.02, "words": 2500, "tolerance": 250, "iwr": 2.0, "iwr_min": 1.5},
+            "恐怖": {"sent": 28, "sent_min": 18, "sent_max": 38, "dialogue": 0.30, "dialogue_min": 0.15, "dialogue_max": 0.45, "dao_shuo": "0.55:0.45", "ta_max": 0.015, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+            "历史": {"sent": 30, "sent_min": 20, "sent_max": 40, "dialogue": 0.30, "dialogue_min": 0.15, "dialogue_max": 0.45, "dao_shuo": "0.45:0.55", "ta_max": 0.015, "words": 2500, "tolerance": 250, "iwr": 2.5, "iwr_min": 2.0},
+            "军事": {"sent": 28, "sent_min": 18, "sent_max": 38, "dialogue": 0.35, "dialogue_min": 0.20, "dialogue_max": 0.50, "dao_shuo": "0.5:0.5", "ta_max": 0.015, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+            "腹黑": {"sent": 26, "sent_min": 16, "sent_max": 36, "dialogue": 0.45, "dialogue_min": 0.30, "dialogue_max": 0.60, "dao_shuo": "0.45:0.55", "ta_max": 0.02, "words": 2000, "tolerance": 200, "iwr": 2.5, "iwr_min": 2.0},
+        }
+        d = dna_map.get(genre, dna_map["都市"])
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO genre_dna
+                (project_id, genre, target_sent_len, sent_range_min, sent_range_max,
+                 dialogue_target, dialogue_min, dialogue_max, dao_shuo_ratio,
+                 ta_density_max, word_target, word_tolerance, iwr_target, iwr_min)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (self.project_id, genre, d["sent"], d["sent_min"], d["sent_max"],
+                 d["dialogue"], d["dialogue_min"], d["dialogue_max"], d["dao_shuo"],
+                 d["ta_max"], d["words"], d["tolerance"], d["iwr"], d["iwr_min"]),
+            )
+
+    def get_genre_dna(self) -> dict[str, Any]:
+        """读取当前项目的品类 DNA。"""
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM genre_dna WHERE project_id = ?", (self.project_id,)
+            ).fetchone()
+            return dict(row) if row else {}
 
     # ------------------------------------------------------------------
     # 查询接口
@@ -550,6 +722,80 @@ class StateManager:
                 (self.project_id, chapter_num, summary, word_count, mode, title, datetime.now().isoformat()),
             )
 
+    def update_emotion_history(
+        self, chapter_num: int, mode: str, nue: float, tian: float, shuang: float,
+        coord_x: float, coord_y: float, desc: str = ""
+    ) -> None:
+        """更新情感坐标历史。"""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO emotion_history
+                (project_id, chapter, mode, nue_density, tian_density, shuang_density,
+                 coordinate_x, coordinate_y, desc, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (self.project_id, chapter_num, mode, nue, tian, shuang, coord_x, coord_y, desc, datetime.now().isoformat()),
+            )
+
+    def update_chapter_metrics(
+        self, chapter_num: int, metrics: dict[str, Any]
+    ) -> None:
+        """写入章节结构指标（IWR、平台适配度等）。"""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO chapter_metrics
+                (project_id, chapter, word_count, sentence_length, dialogue_ratio,
+                 ta_density, iwr_score, questions_count, answers_count, hook_ending,
+                 platform_score, platform_grade, genre_dna_match, oscillations, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    self.project_id, chapter_num,
+                    metrics.get("word_count"),
+                    metrics.get("sentence_length"),
+                    metrics.get("dialogue_ratio"),
+                    metrics.get("ta_density"),
+                    metrics.get("iwr_score"),
+                    metrics.get("questions_count"),
+                    metrics.get("answers_count"),
+                    metrics.get("hook_ending"),
+                    metrics.get("platform_score"),
+                    metrics.get("platform_grade"),
+                    metrics.get("genre_dna_match"),
+                    metrics.get("oscillations"),
+                    datetime.now().isoformat(),
+                ),
+            )
+
+    def get_chapter_metrics(self, chapter_num: int | None = None) -> list[dict[str, Any]]:
+        """查询章节结构指标。"""
+        with self._connect() as conn:
+            if chapter_num is not None:
+                row = conn.execute(
+                    "SELECT * FROM chapter_metrics WHERE project_id = ? AND chapter = ?",
+                    (self.project_id, chapter_num),
+                ).fetchone()
+                return [dict(row)] if row else []
+            cursor = conn.execute(
+                "SELECT * FROM chapter_metrics WHERE project_id = ? ORDER BY chapter",
+                (self.project_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def update_project_status(self, current_chapter: int, status: str) -> None:
+        """更新项目当前章节和状态。"""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                UPDATE projects
+                SET current_chapter = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE project_id = ?
+                """,
+                (current_chapter, status, self.project_id),
+            )
+
     # ------------------------------------------------------------------
     # 查询接口（供 API 层使用）
     # ------------------------------------------------------------------
@@ -581,12 +827,83 @@ class StateManager:
             )
             return [dict(row) for row in cursor.fetchall()]
 
+    def list_outline(self) -> list[dict[str, Any]]:
+        """列出当前项目的章节大纲。"""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                """
+                SELECT chapter, arc, core_event, face_slap_target, face_slap_method,
+                       husband_moment, chapter_hook, emotion_ratio, skill_unlocked
+                FROM outline
+                WHERE project_id = ?
+                ORDER BY chapter
+                """,
+                (self.project_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def list_debts(self) -> list[dict[str, Any]]:
+        """列出当前项目的所有债务。"""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                """
+                SELECT debt_id, type, content, bury_chapter, collect_chapter, status
+                FROM debts
+                WHERE project_id = ?
+                ORDER BY bury_chapter
+                """,
+                (self.project_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def list_foreshadowing(self) -> list[dict[str, Any]]:
+        """列出当前项目的所有伏笔。"""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                """
+                SELECT fs_id, bury_chapter, content, collect_chapter, type, status
+                FROM foreshadowing
+                WHERE project_id = ?
+                ORDER BY bury_chapter
+                """,
+                (self.project_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def list_skills(self) -> list[dict[str, Any]]:
+        """列出当前项目的技能树。"""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                """
+                SELECT skill_name, unlock_chapter, description, used_chapters
+                FROM skill_tree
+                WHERE project_id = ?
+                ORDER BY unlock_chapter
+                """,
+                (self.project_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def list_rules(self) -> list[dict[str, Any]]:
+        """列出当前项目的写作规则。"""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                """
+                SELECT rule_type, rule_content, enforcement_level
+                FROM consistency_rules
+                WHERE project_id = ?
+                ORDER BY rule_type
+                """,
+                (self.project_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
     def list_chapters(self) -> list[dict[str, Any]]:
         """列出当前项目的章节历史。"""
         with self._connect() as conn:
             cursor = conn.execute(
                 """
-                SELECT chapter, summary, word_count, mode, created_at
+                SELECT chapter, title, summary, word_count, mode, created_at
                 FROM chapter_history
                 WHERE project_id = ?
                 ORDER BY chapter

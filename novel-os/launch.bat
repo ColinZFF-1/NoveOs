@@ -7,8 +7,10 @@ REM 使用 crewai-venv 虚拟环境
 
 set NOVEL_BASE_PATH=D:\noveos\books
 set CREWAI_STUDIO_PATH=D:\noveos\crewai
-set OPENAI_API_KEY=sk-fb280471a3c74eefb8ba38be416a76b8
-set OPENAI_API_BASE=https://api.deepseek.com/v1
+REM SiliconFlow 硅基流动 API（注册送 2000万 Tokens）
+REM 获取 Key: https://cloud.siliconflow.cn → 账户管理 → API 密钥
+set OPENAI_API_KEY=sk-zkozfzpgsgzcdpuuvtwqvedubzmaxmbwtbxmhlfvmsjepcix
+set OPENAI_API_BASE=https://api.siliconflow.cn/v1
 set PYTHONIOENCODING=utf-8
 
 set PYTHON=E:\crewai-venv\Scripts\python.exe

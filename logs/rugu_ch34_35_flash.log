@@ -1,0 +1,114 @@
+[92m15:44:05 - LiteLLM:WARNING[0m: common_utils.py:979 - litellm: could not pre-load bedrock-runtime response stream shape ¡ª Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+2026-05-31 15:44:05,202 - LiteLLM - WARNING - litellm: could not pre-load bedrock-runtime response stream shape ¡ª Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+[92m15:44:05 - LiteLLM:WARNING[0m: common_utils.py:24 - litellm: could not pre-load sagemaker-runtime response stream shape ¡ª SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+2026-05-31 15:44:05,748 - LiteLLM - WARNING - litellm: could not pre-load sagemaker-runtime response stream shape ¡ª SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+2026-05-31 15:44:06,859 - deep_optimize - INFO - ============================================================
+2026-05-31 15:44:06,861 - deep_optimize - INFO - ¿ªÊ¼Éî¶ÈÓÅ»¯ - ÍêÕû7-Agent²Î¿¼¸åÄ£Ê½
+2026-05-31 15:44:06,861 - deep_optimize - INFO - Ñ¡Ôñ: rugu
+2026-05-31 15:44:06,861 - deep_optimize - INFO - ============================================================
+2026-05-31 15:44:06,878 - novel-os.crew - WARNING - crewai.db / YAML / JSON ¾ù²»´æÔÚ£¬ÆôÓÃ MOCK Ä£Ê½
+2026-05-31 15:44:07,158 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: word_count
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: sensitive_word
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: quality_gate
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: deai_interceptor
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: continuity
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: hallucination
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: causality
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: reader_pull
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: voice_consistency
+2026-05-31 15:44:07,160 - novel-os.guard_registry - INFO - Guard ÒÑ×¢²á: pacing
+2026-05-31 15:44:07,161 - deep_optimize - INFO - ·¢ÏÖ½ø¶ÈÎÄ¼ş£¬ÒÑÌø¹ı 26 ÕÂ
+2026-05-31 15:44:07,164 - deep_optimize - INFO - ============================================================
+2026-05-31 15:44:07,164 - deep_optimize - INFO - Éî¶ÈÓÅ»¯ µÚ 34 ÕÂ | ±êÌâ: Å¼Óö¹ÊÈË£¬ÍùÊÂÈçÑÌ | Ä¿±ê: 3500 ×Ö
+2026-05-31 15:44:07,181 - deep_optimize - INFO - Ô­¸å: 5752×Ö | IWR=2.8 | ¶Ô»°=55% | ¾ä³¤=16
+2026-05-31 15:44:30,510 - deep_optimize - INFO - µÚ 34 ÕÂ Director Íê³É
+2026-05-31 15:44:50,711 - deep_optimize - INFO - µÚ 34 ÕÂ BeatPlanner Íê³É
+2026-05-31 15:45:16,185 - deep_optimize - INFO - µÚ 34 ÕÂ SceneWriter Íê³É
+2026-05-31 15:45:44,520 - deep_optimize - INFO - µÚ 34 ÕÂ ×ÖÊıĞŞÕı: 2544×Ö ¡ú 3983×Ö (Ä¿±ê3500)
+2026-05-31 15:46:08,257 - deep_optimize - INFO - µÚ 34 ÕÂ HookEngineer Íê³É
+2026-05-31 15:46:30,148 - deep_optimize - INFO - µÚ 34 ÕÂ DialogueTuner Íê³É
+2026-05-31 15:46:30,156 - novel-os.interceptor - INFO - Interceptor µÚ 34 ÕÂÉ¨ÃèÍê³É: 3 issues, Ëû×ÖÃÜ¶È 2.25%
+2026-05-31 15:46:30,158 - deep_optimize - INFO - µÚ 34 ÕÂ Interceptor ĞŞ¸´ 3 ´¦
+2026-05-31 15:46:48,712 - deep_optimize - INFO - µÚ 34 ÕÂ Polish Íê³É
+2026-05-31 15:46:58,751 - novel-os.batch_writer - INFO - µÚ 34 ÕÂ LLMÉî¶ÈÉó¼ÆÍê³É
+2026-05-31 15:46:58,811 - deep_optimize - INFO - ÓÅ»¯ºó: 3823×Ö | IWR=1.3 | ¶Ô»°=50% | ¾ä³¤=10 | Æ½Ì¨=53·Ö(C)
+2026-05-31 15:46:58,811 - deep_optimize - WARNING - µÚ 34 ÕÂ Î´´ï±ê(×ÖÊı=3823, IWR=1.3)£¬ÖØÊÔ
+2026-05-31 15:47:19,076 - deep_optimize - INFO - µÚ 34 ÕÂ Director Íê³É
+2026-05-31 15:47:42,776 - deep_optimize - INFO - µÚ 34 ÕÂ BeatPlanner Íê³É
+2026-05-31 15:48:02,191 - deep_optimize - INFO - µÚ 34 ÕÂ SceneWriter Íê³É
+2026-05-31 15:48:35,149 - deep_optimize - INFO - µÚ 34 ÕÂ ×ÖÊıĞŞÕı: 2115×Ö ¡ú 4916×Ö (Ä¿±ê3500)
+2026-05-31 15:49:14,653 - deep_optimize - INFO - µÚ 34 ÕÂ HookEngineer Íê³É
+2026-05-31 15:49:38,150 - deep_optimize - INFO - µÚ 34 ÕÂ DialogueTuner Íê³É
+2026-05-31 15:49:38,156 - novel-os.interceptor - INFO - Interceptor µÚ 34 ÕÂÉ¨ÃèÍê³É: 5 issues, Ëû×ÖÃÜ¶È 3.66%
+2026-05-31 15:49:38,156 - deep_optimize - INFO - µÚ 34 ÕÂ Interceptor ĞŞ¸´ 5 ´¦
+2026-05-31 15:49:57,758 - deep_optimize - INFO - µÚ 34 ÕÂ Polish Íê³É
+2026-05-31 15:50:10,941 - novel-os.batch_writer - INFO - µÚ 34 ÕÂ LLMÉî¶ÈÉó¼ÆÍê³É
+2026-05-31 15:50:10,949 - deep_optimize - INFO - ÓÅ»¯ºó: 4067×Ö | IWR=1.2 | ¶Ô»°=41% | ¾ä³¤=15 | Æ½Ì¨=54·Ö(C)
+2026-05-31 15:50:10,949 - deep_optimize - WARNING - µÚ 34 ÕÂ Î´´ï±ê(×ÖÊı=4067, IWR=1.2)£¬ÖØÊÔ
+2026-05-31 15:50:37,524 - deep_optimize - INFO - µÚ 34 ÕÂ Director Íê³É
+2026-05-31 15:51:01,001 - deep_optimize - INFO - µÚ 34 ÕÂ BeatPlanner Íê³É
+2026-05-31 15:51:21,014 - deep_optimize - INFO - µÚ 34 ÕÂ SceneWriter Íê³É
+2026-05-31 15:51:53,196 - deep_optimize - INFO - µÚ 34 ÕÂ ×ÖÊıĞŞÕı: 2653×Ö ¡ú 4718×Ö (Ä¿±ê3500)
+2026-05-31 15:52:19,344 - deep_optimize - INFO - µÚ 34 ÕÂ HookEngineer Íê³É
+2026-05-31 15:52:45,055 - deep_optimize - INFO - µÚ 34 ÕÂ DialogueTuner Íê³É
+2026-05-31 15:52:45,058 - novel-os.interceptor - INFO - Interceptor µÚ 34 ÕÂÉ¨ÃèÍê³É: 6 issues, Ëû×ÖÃÜ¶È 2.61%
+2026-05-31 15:52:45,058 - deep_optimize - INFO - µÚ 34 ÕÂ Interceptor ĞŞ¸´ 6 ´¦
+2026-05-31 15:53:09,328 - deep_optimize - INFO - µÚ 34 ÕÂ Polish Íê³É
+2026-05-31 15:53:20,461 - novel-os.batch_writer - INFO - µÚ 34 ÕÂ LLMÉî¶ÈÉó¼ÆÍê³É
+2026-05-31 15:53:20,465 - deep_optimize - INFO - ÓÅ»¯ºó: 3959×Ö | IWR=1.1 | ¶Ô»°=39% | ¾ä³¤=17 | Æ½Ì¨=63·Ö(B)
+2026-05-31 15:53:20,465 - deep_optimize - WARNING - µÚ 34 ÕÂ Î´´ï±ê(×ÖÊı=3959, IWR=1.1)£¬ÖØÊÔ
+2026-05-31 15:53:20,486 - deep_optimize - INFO - µÚ 34 ÕÂ ±£´æ: D:\noveos\books\ÈëÓüÁùÄê£¬ÎÒµÄ¹ÉÆ±±©ÕÇÒ»Ç§±¶\chapters_optimized\µÚ034ÕÂ_Å¼Óö¹ÊÈË£¬ÍùÊÂÈçÑÌ_ÕıÎÄ.txt | ³É¹¦=False
+2026-05-31 15:53:20,492 - deep_optimize - INFO - ============================================================
+2026-05-31 15:53:20,492 - deep_optimize - INFO - Éî¶ÈÓÅ»¯ µÚ 35 ÕÂ | ±êÌâ: ÏşĞÇÖØ¹¤£¬áÛ·åÊ±¿Ì | Ä¿±ê: 3500 ×Ö
+2026-05-31 15:53:20,499 - deep_optimize - INFO - Ô­¸å: 5641×Ö | IWR=6.0 | ¶Ô»°=48% | ¾ä³¤=15
+2026-05-31 15:53:49,641 - deep_optimize - INFO - µÚ 35 ÕÂ Director Íê³É
+2026-05-31 15:54:04,578 - deep_optimize - INFO - µÚ 35 ÕÂ BeatPlanner Íê³É
+2026-05-31 15:54:28,568 - deep_optimize - INFO - µÚ 35 ÕÂ SceneWriter Íê³É
+2026-05-31 15:54:59,339 - deep_optimize - INFO - µÚ 35 ÕÂ ×ÖÊıĞŞÕı: 1935×Ö ¡ú 4064×Ö (Ä¿±ê3500)
+2026-05-31 15:55:21,992 - deep_optimize - INFO - µÚ 35 ÕÂ HookEngineer Íê³É
+2026-05-31 15:55:42,324 - deep_optimize - INFO - µÚ 35 ÕÂ DialogueTuner Íê³É
+2026-05-31 15:55:42,326 - novel-os.interceptor - INFO - Interceptor µÚ 35 ÕÂÉ¨ÃèÍê³É: 5 issues, Ëû×ÖÃÜ¶È 1.38%
+2026-05-31 15:55:42,326 - deep_optimize - INFO - µÚ 35 ÕÂ Interceptor ĞŞ¸´ 5 ´¦
+2026-05-31 15:56:01,882 - deep_optimize - INFO - µÚ 35 ÕÂ Polish Íê³É
+2026-05-31 15:56:15,958 - novel-os.batch_writer - INFO - µÚ 35 ÕÂ LLMÉî¶ÈÉó¼ÆÍê³É
+2026-05-31 15:56:15,961 - deep_optimize - INFO - ÓÅ»¯ºó: 3829×Ö | IWR=2.2 | ¶Ô»°=18% | ¾ä³¤=16 | Æ½Ì¨=67·Ö(B)
+2026-05-31 15:56:15,961 - deep_optimize - INFO - µÚ 35 ÕÂ Í¨¹ıÉó¼Æ
+2026-05-31 15:56:15,965 - deep_optimize - INFO - µÚ 35 ÕÂ ±£´æ: D:\noveos\books\ÈëÓüÁùÄê£¬ÎÒµÄ¹ÉÆ±±©ÕÇÒ»Ç§±¶\chapters_optimized\µÚ035ÕÂ_ÏşĞÇÖØ¹¤£¬áÛ·åÊ±¿Ì_ÕıÎÄ.txt | ³É¹¦=True
+2026-05-31 15:56:15,966 - deep_optimize - INFO - 
+============================================================
+2026-05-31 15:56:15,966 - deep_optimize - INFO - ¡¶rugu_gupiao¡·ÓÅ»¯Íê³É»ã×Ü
+2026-05-31 15:56:15,966 - deep_optimize - INFO - ============================================================
+2026-05-31 15:56:15,966 - deep_optimize - INFO - ³É¹¦: 1 / 2
+2026-05-31 15:56:15,966 - deep_optimize - INFO - Æ½¾ùIWR: 4.4 ¡ú 1.7
+2026-05-31 15:56:15,966 - deep_optimize - INFO - Æ½¾ùÆ½Ì¨ÊÊÅä¶È: 65 ·Ö
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u274c' in position 49: illegal multibyte sequence
+Call stack:
+  File "D:\noveos\novel-os\scripts\deep_optimize_books.py", line 450, in <module>
+    sys.exit(main())
+  File "D:\noveos\novel-os\scripts\deep_optimize_books.py", line 434, in main
+    run_book_optimization(book1, "rugu_gupiao", target_words=3500, start_from=args.start, end_at=args.end)
+  File "D:\noveos\novel-os\scripts\deep_optimize_books.py", line 411, in run_book_optimization
+    logger.info("%s µÚ%03dÕÂ | IWR %.1f¡ú%.1f | %d×Ö | %d´Î | %s",
+Message: '%s µÚ%03dÕÂ | IWR %.1f¡ú%.1f | %d×Ö | %d´Î | %s'
+Arguments: ('\u274c', 34, 2.75, 1.14, 3959, 3, WindowsPath('D:/noveos/books/ÈëÓüÁùÄê£¬ÎÒµÄ¹ÉÆ±±©ÕÇÒ»Ç§±¶/chapters_optimized/µÚ034ÕÂ_Å¼Óö¹ÊÈË£¬ÍùÊÂÈçÑÌ_ÕıÎÄ.txt'))
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2705' in position 49: illegal multibyte sequence
+Call stack:
+  File "D:\noveos\novel-os\scripts\deep_optimize_books.py", line 450, in <module>
+    sys.exit(main())
+  File "D:\noveos\novel-os\scripts\deep_optimize_books.py", line 434, in main
+    run_book_optimization(book1, "rugu_gupiao", target_words=3500, start_from=args.start, end_at=args.end)
+  File "D:\noveos\novel-os\scripts\deep_optimize_books.py", line 411, in run_book_optimization
+    logger.info("%s µÚ%03dÕÂ | IWR %.1f¡ú%.1f | %d×Ö | %d´Î | %s",
+Message: '%s µÚ%03dÕÂ | IWR %.1f¡ú%.1f | %d×Ö | %d´Î | %s'
+Arguments: ('\u2705', 35, 6.0, 2.2, 3829, 1, WindowsPath('D:/noveos/books/ÈëÓüÁùÄê£¬ÎÒµÄ¹ÉÆ±±©ÕÇÒ»Ç§±¶/chapters_optimized/µÚ035ÕÂ_ÏşĞÇÖØ¹¤£¬áÛ·åÊ±¿Ì_ÕıÎÄ.txt'))
+2026-05-31 15:56:16,013 - deep_optimize - INFO - ============================================================
+2026-05-31 15:56:16,013 - deep_optimize - INFO - È«²¿Éî¶ÈÓÅ»¯Íê³É
+2026-05-31 15:56:16,013 - deep_optimize - INFO - ============================================================

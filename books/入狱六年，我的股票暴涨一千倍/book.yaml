@@ -1,0 +1,45 @@
+project: 入狱六年，我的股票暴涨一千倍
+platform: fanqie
+genre: 都市重生+复仇爽文+商战+股票
+base_path: D:/noveos/books/入狱六年，我的股票暴涨一千倍
+crewai_db_path: D:/noveos/crewai/crewai.db
+total_words_target: 300000
+chapters_target: 80
+words_per_chapter: 3500
+output_dir: chapters
+plugin_id: ""
+agent_query:
+  director:
+    role: 小说导演
+    goal: 根据大纲和状态库生成本章任务卡，明确节拍分配和情绪曲线
+  beat_planner:
+    role: 节拍分配师
+    goal: 将导演任务卡拆解为六段式节拍分配表
+  scene_writer:
+    role: 场景写作师
+    goal: 按节拍分配表创作高质量场景正文
+  hook_engineer:
+    role: 钩子工程师
+    goal: 优化章节开头和结尾，确保IWR≥2.0和钩子密度
+  dialogue_tuner:
+    role: 对话调优师
+    goal: 优化全章对话密度和道说比
+  polish:
+    role: 小说润色师
+    goal: 消除AI痕迹，提升画面感和节奏感
+  auditor:
+    role: 小说审计师
+    goal: 审计字数、他字密度、禁用词、情绪一致性、IWR、平台适配度
+writing:
+  tolerance: 350
+  max_retries: 3
+  batch_size: 5
+llm:
+  model: Qwen/Qwen3-32B
+  api_key: "${OPENAI_API_KEY}"
+  api_base: https://api.siliconflow.cn/v1
+  temperature: 0.7
+  max_tokens: 8000
+  timeout: 300
+  reasoning_effort: high
+  thinking_enabled: false
