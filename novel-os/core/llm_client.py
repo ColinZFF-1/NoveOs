@@ -131,7 +131,8 @@ class LLMClient:
             if extra_body:
                 kwargs["extra_body"] = extra_body
             response = client.chat.completions.create(**kwargs)
-            content = response.choices[0].message.content or ""
+            msg = response.choices[0].message
+            content = msg.content or msg.reasoning_content or ""
         else:
             # litellm 降级路径
             import litellm
@@ -148,7 +149,8 @@ class LLMClient:
                 else None,
                 extra_body=extra_body,
             )
-            content = response.choices[0].message.content or ""
+            msg = response.choices[0].message
+            content = msg.content or msg.reasoning_content or ""
 
         # 防御 DeepSeek V4 thinking 内容泄漏到 content
         if "<think>" in content:

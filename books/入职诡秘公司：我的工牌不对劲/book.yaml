@@ -11,6 +11,28 @@ output_dir: chapters
 v8_dir: chapters/V8.0
 plugin_id: ""
 
+# 作者人格注入——从减法去AI味升级为加法注入人格
+author_persona:
+  voice: "冷峻观察者"
+  core_wound: "一个冷静到残忍的前HR，用裁人的精确度来分析吃人的规则，偶尔在数字里看见自己也被裁掉了"
+  sentence_rhythm:
+    - "紧张场景：连续5句不超过10个字，制造窒息感"
+    - "规则宣读后：用……省略号沉默，让读者自己补完恐惧"
+    - "死亡确认后：单句号成段，制造空白停顿"
+  sensory_priority:
+    - "触觉>听觉>视觉"
+  signature_moves:
+    - "数字恐怖：精确到秒的倒计时、存在性折旧百分比、裁掉第373人"
+    - "反身动词：他看见自己的手在抖"
+    - "动作先于心理：先写行为，再写（或不写）心理"
+    - "二选一暴力：遵守规则=被改造。违反规则=被吞噬。没有第三条路。"
+  forbidden_rhetoric:
+    - "概括性时间：过了一会儿/不久之后/几天后"
+    - "情绪标签：恐惧/绝望/愤怒"
+    - "被动语态"
+    - "假设性例子：比如有一次"
+    - "AI套话：首先…其次…最后/综上所述/值得注意的是"
+
 agent_query:
   director:
     role: 诡秘职场小说导演
@@ -41,22 +63,18 @@ writing:
 
 # 主 Provider：DeepSeek 官方 V4 Pro
 llm:
-  model: deepseek-v4-pro
+  model: deepseek-chat
   api_key: "${OPENAI_API_KEY}"
   api_base: https://api.deepseek.com/v1
   temperature: 0.7
   max_tokens: 16000
   timeout: 300
-  reasoning_effort: high
-  thinking_enabled: false
 
 # Fallback：DeepSeek 官方 V4 Pro（质量问题时自动切换）
 llm_fallback:
-  model: deepseek-v4-pro
+  model: deepseek-chat
   api_key: "${OPENAI_API_KEY_FALLBACK}"
   api_base: https://api.deepseek.com/v1
   temperature: 0.7
   max_tokens: 16000
   timeout: 300
-  reasoning_effort: high
-  thinking_enabled: false

@@ -18,6 +18,19 @@ from typing import Any
 from core.guards.registry import GuardRegistry
 
 # ============================================================================
+# ★ 强制术语字典 —— 世界观核心术语，必须在指定章节后出现
+# ============================================================================
+TERM_MANDATORY: dict[str, dict] = {
+    "永夜集团": {"first_chapter": 1, "category": "公司名", "severity": "BLOCK"},
+    "规则裂隙审计": {"first_chapter": 1, "category": "异能", "severity": "BLOCK"},
+    "存在性折旧": {"first_chapter": 1, "category": "代价", "severity": "BLOCK"},
+    "留白者": {"first_chapter": 1, "category": "怪物", "severity": "BLOCK"},
+    "临终感知同步": {"first_chapter": 2, "category": "病症", "severity": "BLOCK"},
+    "职场奴性模因": {"first_chapter": 3, "category": "副作用", "severity": "WARN"},
+    "HR模式": {"first_chapter": 7, "category": "技能", "severity": "WARN"},
+}
+
+# ============================================================================
 # ★ 唯一阈值源 —— 所有硬指标在这里定义，不散落各处
 # ============================================================================
 THRESHOLDS = {
@@ -167,6 +180,20 @@ class ChapterValidator:
         if metrics["redline_hits"] > self.thresholds["max_redline"]:
             issues.append(ValidationIssue("BLOCK", "红线词", f"红线词命中: {redline_hits}"))
 
+        # ── P0: 强制术语命中 ──
+        ch_num = ctx.get("chapter_num", 0)
+        missing_terms = self._check_mandatory_terms(text, ch_num)
+        metrics["mandatory_terms_hit"] = len(TERM_MANDATORY) - len(missing_terms)
+        metrics["mandatory_terms_miss"] = missing_terms
+        if missing_terms:
+            for term, cfg in missing_terms.items():
+                level = cfg.get("severity", "WARN")
+                issues.append(ValidationIssue(
+                    level, "术语",
+                    f"强制术语缺失: '{term}'（{cfg['category']}，第{cfg['first_chapter']}章起必须出现）",
+                    term
+                ))
+
         # ── P1: 禁用词 ──
         banned_hits: dict[str, list[str]] = {}
         for cat in ["禁用词", "AI万能结尾", "模板比喻", "标志性AI表情"]:
@@ -286,6 +313,16 @@ class ChapterValidator:
     @staticmethod
     def _count_chinese(text: str) -> int:
         return len(re.findall(r"[一-鿿]", text))
+
+    def _check_mandatory_terms(self, text: str, chapter_num: int) -> dict[str, dict]:
+        """检查强制术语是否命中。返回缺失的术语字典。"""
+        missing = {}
+        if chapter_num <= 0:
+            return missing
+        for term, cfg in TERM_MANDATORY.items():
+            if chapter_num >= cfg["first_chapter"] and term not in text:
+                missing[term] = cfg
+        return missing
 
     def _scan_category(self, text: str, category: str) -> list[str]:
         pat = self._re_banned.get(category)

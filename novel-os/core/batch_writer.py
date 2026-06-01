@@ -321,6 +321,24 @@ class BatchWriter:
                     f"\n【平台适配修正】当前等级{grade}。请整体调整结构。"
                 )
 
+        # ── 强制术语缺失 → 注入补全指令 ──
+        missing_terms = []
+        for issue in validation.issues:
+            if issue.category == "术语" and issue.level in ("BLOCK", "WARN"):
+                # 从 message 中提取术语名
+                m = re.search(r"'(.+?)'", issue.message)
+                if m:
+                    missing_terms.append(m.group(1))
+        if missing_terms:
+            corrections["scene_writer"] += (
+                f"\n【术语补全——绝对优先】当前正文缺失以下世界观核心术语，"
+                f"必须在正文中准确出现（禁止意译或替换）：{', '.join(missing_terms)}。"
+                f"请在合适场景自然嵌入这些术语，确保读者能看到准确的专有名词。"
+            )
+            corrections["global"] += (
+                f"\n【术语铁律】本章必须包含：{', '.join(missing_terms)}。"
+            )
+
         return corrections
 
     def set_outer_crew_feedback(
@@ -573,6 +591,49 @@ class BatchWriter:
             logger.warning("读取 outline 失败: %s", exc)
         return {}
 
+    def _load_chapter_outline_from_markdown(self, chapter_num: int) -> str:
+        """从项目目录的大纲 markdown 文件中提取指定章节的完整内容，作为设定铁律注入。"""
+        import re
+        from pathlib import Path
+
+        base = Path(self.cfg.base_path)
+        # 查找大纲文件（支持多种命名）
+        candidates = list(base.glob("*大纲*.md")) + list(base.glob("*outline*.md"))
+        if not candidates:
+            return ""
+
+        md_path = candidates[0]
+        try:
+            text = md_path.read_text(encoding="utf-8")
+        except Exception:
+            return ""
+
+        # 匹配 ### 第X章 或 ### 第 X 章 开头的区块，直到下一个 ### 或文件结束
+        pattern = rf"###\s*第\s*{chapter_num}\s*章[：:：]\s*(.+?)\n(.*?)(?=\n###\s*第|\Z)"
+        match = re.search(pattern, text, re.DOTALL)
+        if not match:
+            return ""
+
+        title = match.group(1).strip()
+        body = match.group(2).strip()
+        # 清理 markdown 标记，保留纯文本结构
+        body = re.sub(r"^\*\*|\*\*$", "", body, flags=re.MULTILINE)
+        body = re.sub(r"\*\*(.+?)\*\*", r"\1", body)
+        body = re.sub(r"^---+$", "", body, flags=re.MULTILINE)
+
+        # 截断过长内容（保留前 2000 字符）
+        if len(body) > 2000:
+            body = body[:2000] + "\n...（后续内容省略）"
+
+        return (
+            f"1. 本章官方标题：第{chapter_num}章：{title}\n"
+            f"2. 以下大纲内容必须严格遵循，禁止擅自增删核心设定、替换公司/人物名称、改变关键情节走向：\n"
+            f"{body}\n"
+            f"3. 【术语铁律】公司名必须写作'永夜集团'，绝对禁止出现'云鼎科技'或其他替代名称。\n"
+            f"4. 【术语铁律】主角异能必须称为'规则裂隙审计'，代价称为'存在性折旧'，晚期员工称为'留白者'。\n"
+            f"5. 【情节铁律】核心事件中的每一个关键节点（规则漏洞、逻辑冲突、代价呈现、章末钩子）必须完整呈现，不可遗漏。"
+        )
+
     def _get_character_states(self) -> list[dict]:
         """从 world_state.db 读取活跃人物状态。"""
         try:
@@ -691,6 +752,39 @@ class BatchWriter:
     # ------------------------------------------------------------------
     # Agent 调用（真实 LLM）
     # ------------------------------------------------------------------
+    def _load_worldview_rules(self) -> str:
+        """从 world_state.db 读取术语字典和世界观铁律，注入 system prompt。"""
+        rules_parts = []
+        try:
+            import sqlite3
+            db_path = self.cfg.base_path / "world_state.db"
+            with sqlite3.connect(str(db_path)) as conn:
+                # 读取术语字典
+                c = conn.execute(
+                    "SELECT term, category, first_chapter, description FROM term_dict WHERE project_id = ? ORDER BY first_chapter",
+                    (self.state.project_id,),
+                )
+                terms = c.fetchall()
+                if terms:
+                    rules_parts.append("【世界观铁律——出现任何一条术语错误，整章废弃重写】")
+                    for term, cat, first_ch, desc in terms:
+                        rules_parts.append(f"- {term}（{cat}，第{first_ch}章首次出现）：{desc}")
+
+                # 读取 chapter_specs 中的 title 和 core_event（最近3章）
+                c = conn.execute(
+                    "SELECT chapter, spec_key, spec_value FROM chapter_specs WHERE project_id = ? AND spec_key IN ('title','core_event') ORDER BY chapter LIMIT 30",
+                    (self.state.project_id,),
+                )
+                specs = c.fetchall()
+                if specs:
+                    rules_parts.append("\n【章节任务——必须严格呈现以下核心事件】")
+                    for ch, key, val in specs:
+                        if key == "core_event" and val:
+                            rules_parts.append(f"- 第{ch}章：{val[:80]}")
+        except Exception as exc:
+            logger.warning("读取世界观铁律失败: %s", exc)
+        return "\n".join(rules_parts)
+
     def _build_system_prompt(self, agent_type: str) -> str:
         """根据 Agent 类型构造 system prompt。"""
         query = self.cfg.agent_query.get(agent_type, {})
@@ -702,7 +796,26 @@ class BatchWriter:
         except ValueError:
             cfg = {}
 
-        parts = [f"你是 {role}。"]
+        # ★★★ 世界观铁律注入 system prompt 最前面 ★★★
+        worldview = self._load_worldview_rules()
+
+        parts = []
+        if worldview:
+            parts.append(worldview)
+            parts.append("\n【网文禁区——出现即FAIL】")
+            parts.append("- 禁止'不知道为什么/仿佛/似乎/好像/他意识到'")
+            parts.append("- 禁止'一些/实际上/在一定程度上/本质上/换句话说'")
+            parts.append("- 禁止被动语态：'被拖走/被吞噬'→改成主动描述")
+            parts.append("- 禁止公共比喻：比喻必须锚定到主角的HR职业记忆")
+            parts.append("- 禁止概括性时间：'过了一会儿/不久之后'")
+            parts.append("- 禁止情绪标签：'恐惧/绝望'→改成生理反应")
+            parts.append("\n【人物对话指纹——逐句核对】")
+            parts.append("- 林默：精确、带数字、像HR谈判，'第12条，主语是谁？'")
+            parts.append("- 苏晚：短句、冷、不带感情，'别碰。系统会标记。'")
+            parts.append("- 张经理：像公司制度条文，没有主语")
+            parts.append("- 陈雨：颤音、断句、自我否定")
+
+        parts.append(f"你是 {role}。")
         if cfg.get("goal"):
             parts.append(f"你的目标是：{cfg['goal']}")
         if cfg.get("backstory"):
