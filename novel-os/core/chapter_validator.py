@@ -15,6 +15,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from core.guards.registry import GuardRegistry
+
 # ============================================================================
 # ★ 唯一阈值源 —— 所有硬指标在这里定义，不散落各处
 # ============================================================================
@@ -85,12 +87,20 @@ class ValidationResult:
 class ChapterValidator:
     """统一校验层。"""
 
-    def __init__(self, extra_blacklist: dict[str, list[str]] | None = None):
+    def __init__(
+        self,
+        extra_blacklist: dict[str, list[str]] | None = None,
+        guard_registry: GuardRegistry | None = None,
+        thresholds: dict[str, Any] | None = None,
+    ):
         self.thresholds = THRESHOLDS.copy()
+        if thresholds:
+            self.thresholds.update(thresholds)
         self.banned = {k: v.copy() for k, v in BANNED_PATTERNS.items()}
         if extra_blacklist:
             for k, v in extra_blacklist.items():
                 self.banned.setdefault(k, []).extend(v)
+        self.guard_registry = guard_registry
         self._compile_regexes()
 
     def _compile_regexes(self):
@@ -217,6 +227,15 @@ class ChapterValidator:
         if sensory_count < expected_sensory:
             issues.append(ValidationIssue("INFO", "感官密度",
                 f"感官描写 {sensory_count} 处 < 预期 {expected_sensory} 处"))
+
+        # ── 运行 GuardRegistry 中的插件化 Guard ──
+        if self.guard_registry:
+            guard_results = self.guard_registry.run_all(text, ctx, stop_on_blocking=False)
+            for gr in guard_results:
+                if gr.level == "PASS":
+                    continue
+                level = "BLOCK" if gr.level == "BLOCKING" else gr.level
+                issues.append(ValidationIssue(level, gr.guard_id, gr.message, gr.metadata))
 
         # ── 判定 ──
         blocks = [i for i in issues if i.level == "BLOCK"]

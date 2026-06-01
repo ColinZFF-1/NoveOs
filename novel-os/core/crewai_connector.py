@@ -77,7 +77,7 @@ class CrewAIConnector:
                     tasks_data = yaml.safe_load(f)
                 for task_id, task in (tasks_data or {}).get("tasks", {}).items():
                     self._tasks[task_id] = {
-                        "agent_id": task.get("agent_id", ""),
+                        "agent_id": task.get("agent_id") or task.get("agent", ""),
                         "description": task.get("description", ""),
                         "expected_output": task.get("expected_output", ""),
                     }
@@ -114,9 +114,9 @@ class CrewAIConnector:
 
         if self._agents:
             for aid, data in self._agents.items():
-                if data.get("role") == role or agent_type in data.get("role", ""):
+                if aid == agent_type or data.get("role") == role or agent_type in data.get("role", ""):
                     return aid
-            raise ValueError(f"未找到 Agent: role={role!r}")
+            raise ValueError(f"未找到 Agent: role={role!r}, agent_type={agent_type!r}")
 
         with self._connect() as conn:
             cursor = conn.execute(
@@ -159,13 +159,19 @@ class CrewAIConnector:
             return f"mock-task-{task_type}"
 
         if self._tasks:
+            # 精确匹配：agent_id + task_type 在 task_id 中
             for tid, data in self._tasks.items():
-                if data.get("agent_id") == agent_id and task_type in data.get("description", ""):
+                if data.get("agent_id") == agent_id and task_type in tid:
                     return tid
+            # agent_id 匹配
             for tid, data in self._tasks.items():
                 if data.get("agent_id") == agent_id:
                     return tid
-            raise ValueError(f"未找到 Task: agent_id={agent_id!r}")
+            # task_type 模糊匹配（兜底）
+            for tid in self._tasks:
+                if task_type in tid:
+                    return tid
+            raise ValueError(f"未找到 Task: agent_id={agent_id!r}, task_type={task_type!r}")
 
         with self._connect() as conn:
             cursor = conn.execute(

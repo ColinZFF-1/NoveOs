@@ -328,6 +328,14 @@ class Orchestrator:
                     )
                     break
 
+                # resume 模式下跳过已存在的章节
+                if resume and writer._chapter_exists(num):
+                    logger.info("项目 %s 第 %d 章已存在，跳过", project_id, num)
+                    with self._lock:
+                        runtime.current_chapter = num
+                        self._persist_project(project_id, runtime)
+                    continue
+
                 self._event_bus.emit(
                     CHAPTER_START,
                     {

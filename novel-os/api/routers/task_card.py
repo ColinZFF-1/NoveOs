@@ -36,8 +36,8 @@ async def get_task_card(project_id: str, chapter: int = 1):
         context = runtime.batch_writer._build_chapter_context(chapter)
         director_card = runtime.batch_writer._call_director(chapter, context)
     except Exception as exc:
-        logger = __import__("logging").getLogger("novel-os.task_card")
-        logger.warning("Director Agent 任务卡生成失败: %s", exc)
+        import logging
+        logging.getLogger("novel-os.task_card").warning("Director Agent 任务卡生成失败: %s", exc)
 
     task_card = {
         "chapter": chapter,

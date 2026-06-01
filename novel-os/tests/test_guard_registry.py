@@ -5,10 +5,10 @@ import pytest
 
 from core.guards.registry import GuardRegistry
 from core.guards.base import BaseGuard, GuardResult
-from core.guards.word_count_guard import WordCountGuard
 from core.guards.quality_gate_guard import QualityGateGuard
 from core.guards.interceptor_guard import InterceptorGuard
 from core.guards.continuity_guard import ContinuityGuard
+from core.quality_gates import QualityGates
 
 
 class DummyGuard(BaseGuard):
@@ -93,13 +93,13 @@ class TestGuardRegistry:
 
     def test_calibrate(self, registry: GuardRegistry) -> None:
         """校准循环。"""
-        registry.register(WordCountGuard(target=1000, tolerance=100))
+        registry.register(QualityGateGuard(QualityGates()))
         # 模拟100次检查，0次命中（命中率0% < 10%阈值）
         for _ in range(100):
-            registry.record("word_count", "PASS")
+            registry.record("quality_gate", "PASS")
         adj = registry.calibrate_all(threshold=0.1)
-        assert "word_count" in adj
-        assert adj["word_count"].get("tolerance_adjustment") == -50
+        assert "quality_gate" in adj
+        assert "tighten" in adj["quality_gate"]
 
     def test_continuity_guard_no_state(self, registry: GuardRegistry) -> None:
         """ContinuityGuard无state时跳过。"""

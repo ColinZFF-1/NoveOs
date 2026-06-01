@@ -96,7 +96,12 @@ class BatchWriter:
             self.llm = LLMClient(LLMConfig.from_env())
 
         # ChapterValidator：统一校验层（替代 QualityGates + Interceptor + 8 Guards）
-        self.validator = ChapterValidator()
+        # 阈值与 Prompt 保持一致，消除 4000/5000 硬编码与 book_config 的偏差
+        validator_thresholds = {
+            "min_words": self.cfg.words_per_chapter - self.cfg.words_tolerance,
+            "max_words": self.cfg.words_per_chapter + self.cfg.words_tolerance,
+        }
+        self.validator = ChapterValidator(thresholds=validator_thresholds)
 
         self.output_dir = book_config.base_path / book_config.output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)

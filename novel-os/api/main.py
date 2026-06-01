@@ -1,7 +1,18 @@
 import asyncio
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException as FastAPIHTTPException
 from core.orchestrator import Orchestrator
+
+# 统一日志格式
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 app = FastAPI(
     title="Novel-OS API",
@@ -21,7 +32,6 @@ orchestrator = Orchestrator(max_workers=10)
 app.state.orchestrator = orchestrator
 
 from api.routers import chapters, characters, emotions, guards, logs, pipeline, projects, reports, search, snapshots, system, task_card, outline, tracker, metrics, import_data
-# from api.websocket import websocket_router, manager  # 已归档
 
 app.include_router(projects.router, prefix="/api/v1")
 app.include_router(pipeline.router, prefix="/api/v1")
@@ -39,34 +49,29 @@ app.include_router(outline.router, prefix="/api/v1")
 app.include_router(tracker.router, prefix="/api/v1")
 app.include_router(metrics.router, prefix="/api/v1")
 app.include_router(import_data.router, prefix="/api/v1")
-# app.include_router(websocket_router, prefix="/ws")  # WebSocket 已归档
-
-# 主线程事件循环引用（用于跨线程桥接）
-_main_loop: asyncio.AbstractEventLoop | None = None
 
 
-async def _broadcast_event(event_type: str, payload: dict) -> None:
-    """将事件推送到 WebSocket，支持按项目订阅广播。"""
-    project_id = payload.get("project_id", "")
-    message = {
-        "event": event_type,
-        "project_id": project_id,
-        "payload": payload,
-    }
-    # 如果有 project_id，仅推送给订阅了该项目的连接
-    await manager.broadcast(message, project_id=project_id or None)
+# 全局异常处理
+@app.exception_handler(FastAPIHTTPException)
+async def http_exception_handler(request: Request, exc: FastAPIHTTPException) -> JSONResponse:
+    """统一 HTTP 异常响应格式。"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"code": exc.status_code, "message": exc.detail, "data": None},
+    )
 
 
-def _event_bridge(event_type: str, payload: dict) -> None:
-    """同步事件处理器，将事件从 Worker 线程异步推送到 WebSocket。"""
-    global _main_loop
-    if _main_loop is not None and _main_loop.is_running():
-        asyncio.run_coroutine_threadsafe(_broadcast_event(event_type, payload), _main_loop)
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """捕获未处理异常，记录日志并返回统一格式。"""
+    logging.getLogger("novel-os.api").exception("未处理异常: %s", exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"code": 500, "message": "服务器内部错误", "data": None},
+    )
 
 
 @app.on_event("startup")
 async def startup():
-    global _main_loop
-    _main_loop = asyncio.get_running_loop()
-    # 注册 EventBus → WebSocket 桥接
-    orchestrator.on_event(_event_bridge)
+    """启动事件：Orchestrator 已在模块级初始化完成。"""
+    pass
