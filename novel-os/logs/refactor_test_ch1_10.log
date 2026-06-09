@@ -1,0 +1,18 @@
+[92m22:11:00 - LiteLLM:WARNING[0m: common_utils.py:979 - litellm: could not pre-load bedrock-runtime response stream shape �� Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+[92m22:11:00 - LiteLLM:WARNING[0m: common_utils.py:24 - litellm: could not pre-load sagemaker-runtime response stream shape �� SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+2026-06-09 22:11:01,450 [novel-os.batch_writer] INFO: project_id 校验通过: 重生七八老娘要搞钱
+2026-06-09 22:11:01,645 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:11:01,645 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 1 章
+2026-06-09 22:11:01,650 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:11:01,650 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 1 章
+2026-06-09 22:11:01,650 [novel-os.pipeline] INFO: [Pipeline] 第 1 章 第 1 次尝试
+2026-06-09 22:11:01,650 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:11:50,861 [novel-os.steps.director] INFO: [Director] 第 1 章 任务卡已生成，标题=入职即审计
+2026-06-09 22:11:50,861 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:13:03,690 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 1 章 节拍分配完成
+2026-06-09 22:13:03,690 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:13:03,690 [novel-os.input_governor] INFO: [InputGovernor] 编译第 1 章输入
+2026-06-09 22:13:03,700 [novel-os.input_governor] INFO: [InputGovernor] 第 1 章编译完成: 意图=6字, 人物=0行, 伏笔=0行, 债务=0行
+2026-06-09 22:13:03,700 [novel-os.steps.scene_writer] INFO: 第 1 章 启动 SceneWriter 单次写作（目标4500字）
+2026-06-09 22:16:03,712 [openai._base_client] INFO: Retrying request to /chat/completions in 0.483370 seconds
+2026-06-09 22:19:04,304 [openai._base_client] INFO: Retrying request to /chat/completions in 0.793915 seconds

@@ -13,6 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Generator
 
+from core.state.repositories.base import UnitOfWork
+
 
 class StateManager:
     """管理小说跨章状态的 SQLite 后端。
@@ -320,34 +322,18 @@ class StateManager:
         total_chapters: int,
     ) -> None:
         """初始化 projects 表记录。若已存在则替换。"""
-        with self._connect() as conn:
-            conn.execute(
-                """
-                INSERT OR REPLACE INTO projects
-                (project_id, name, genre, platform, base_path, total_chapters, status, current_chapter, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    project_id,
-                    name,
-                    genre,
-                    platform,
-                    base_path,
-                    total_chapters,
-                    "pending",
-                    0,
-                    datetime.now().isoformat(),
-                ),
-            )
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.project import ProjectRepository
+            repo = ProjectRepository(uow.conn, self.project_id)
+            repo.init(project_id, name, genre, platform, base_path, total_chapters)
 
     def get_project_info(self) -> dict[str, Any]:
         """读取当前 project_id 对应的项目信息。"""
-        with self._connect() as conn:
-            row = conn.execute(
-                "SELECT * FROM projects WHERE project_id = ?",
-                (self.project_id,),
-            ).fetchone()
-            return dict(row) if row else {}
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.project import ProjectRepository
+            repo = ProjectRepository(uow.conn, self.project_id)
+            info = repo.get()
+            return info.__dict__ if info else {}
 
     # ------------------------------------------------------------------
     # 日志接口
@@ -603,73 +589,26 @@ class StateManager:
     # ------------------------------------------------------------------
     def get_character_state(self, chapter: int, character: str) -> dict[str, Any]:
         """获取某章某人物的完整状态。"""
-        with self._connect() as conn:
-            row = conn.execute(
-                """
-                SELECT * FROM character_states
-                WHERE project_id = ? AND chapter = ? AND character_name = ?
-                """,
-                (self.project_id, chapter, character),
-            ).fetchone()
-            return dict(row) if row else {}
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.character import CharacterRepository
+            repo = CharacterRepository(uow.conn, self.project_id)
+            state = repo.get(chapter, character)
+            return state.__dict__ if state else {}
 
     def update_character_state(self, chapter: int, character: str, **kwargs: Any) -> None:
         """增量更新人物状态；若记录不存在则自动插入。"""
-        allowed = {
-            "location", "emotional_state", "known_secrets", "unknown_secrets",
-            "abilities_active", "abilities_locked", "dialog_fingerprint",
-            "body_language", "physical_description",
-        }
-        updates = {k: v for k, v in kwargs.items() if k in allowed}
-        if not updates:
-            return
-
-        columns = ", ".join(updates.keys())
-        placeholders = ", ".join(["?"] * len(updates))
-        pid = self.project_id
-        # 使用 INSERT OR REPLACE 简化 upsert 逻辑
-        with self._connect() as conn:
-            existing = conn.execute(
-                """
-                SELECT 1 FROM character_states
-                WHERE project_id = ? AND chapter = ? AND character_name = ?
-                """,
-                (pid, chapter, character),
-            ).fetchone()
-            if existing:
-                set_clause = ", ".join([f"{k} = ?" for k in updates.keys()])
-                conn.execute(
-                    f"""
-                    UPDATE character_states SET {set_clause}
-                    WHERE project_id = ? AND chapter = ? AND character_name = ?
-                    """,
-                    (*updates.values(), pid, chapter, character),
-                )
-            else:
-                conn.execute(
-                    f"""
-                    INSERT INTO character_states
-                    (project_id, chapter, character_name, {columns})
-                    VALUES (?, ?, ?, {placeholders})
-                    """,
-                    (pid, chapter, character, *updates.values()),
-                )
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.character import CharacterRepository
+            repo = CharacterRepository(uow.conn, self.project_id)
+            repo.update(chapter, character, **kwargs)
 
     def get_active_debts(self, current_chapter: int) -> list[dict[str, Any]]:
         """查询在当前章节应该被回收的债务（collect_chapter <= current_chapter 且 status=active）。"""
-        with self._connect() as conn:
-            cursor = conn.execute(
-                """
-                SELECT * FROM debts
-                WHERE project_id = ?
-                  AND status = 'active'
-                  AND collect_chapter IS NOT NULL
-                  AND collect_chapter <= ?
-                ORDER BY collect_chapter
-                """,
-                (self.project_id, current_chapter),
-            )
-            return [dict(row) for row in cursor.fetchall()]
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.debt import DebtRepository
+            repo = DebtRepository(uow.conn, self.project_id)
+            debts = repo.get_active(current_chapter)
+            return [d.__dict__ for d in debts]
 
     def get_active_foreshadowing(self, current_chapter: int) -> list[dict[str, Any]]:
         """查询在当前章节应该被回收的伏笔。"""
@@ -699,15 +638,10 @@ class StateManager:
     # ------------------------------------------------------------------
     def create_snapshot(self, chapter: int, snapshot_type: str, data: dict[str, Any]) -> None:
         """为指定章节创建快照。"""
-        with self._connect() as conn:
-            conn.execute(
-                """
-                INSERT INTO chapter_snapshots
-                (project_id, chapter, snapshot_type, snapshot_data)
-                VALUES (?, ?, ?, ?)
-                """,
-                (self.project_id, chapter, snapshot_type, json.dumps(data, ensure_ascii=False)),
-            )
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.chapter import ChapterRepository
+            repo = ChapterRepository(uow.conn, self.project_id)
+            repo.create_snapshot(chapter, snapshot_type, data)
 
     def rollback_to_snapshot(self, chapter: int, snapshot_type: str) -> dict[str, Any]:
         """回滚到指定章节的最新快照，并返回快照数据。"""
@@ -732,15 +666,10 @@ class StateManager:
         self, chapter_num: int, summary: str, word_count: int, mode: str, title: str = ""
     ) -> None:
         """每章写完后更新历史与情感坐标。"""
-        with self._connect() as conn:
-            conn.execute(
-                """
-                INSERT OR REPLACE INTO chapter_history
-                (project_id, chapter, summary, word_count, mode, title, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """,
-                (self.project_id, chapter_num, summary, word_count, mode, title, datetime.now().isoformat()),
-            )
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.chapter import ChapterRepository
+            repo = ChapterRepository(uow.conn, self.project_id)
+            repo.save_history(chapter_num, summary, word_count, mode, title)
 
     def update_emotion_history(
         self, chapter_num: int, mode: str, nue: float, tian: float, shuang: float,
@@ -806,38 +735,21 @@ class StateManager:
 
     def update_project_status(self, current_chapter: int, status: str) -> None:
         """更新项目当前章节和状态。"""
-        with self._connect() as conn:
-            conn.execute(
-                """
-                UPDATE projects
-                SET current_chapter = ?, status = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE project_id = ?
-                """,
-                (current_chapter, status, self.project_id),
-            )
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.project import ProjectRepository
+            repo = ProjectRepository(uow.conn, self.project_id)
+            repo.update_status(current_chapter, status)
 
     # ------------------------------------------------------------------
     # 查询接口（供 API 层使用）
     # ------------------------------------------------------------------
     def list_characters(self) -> list[dict[str, Any]]:
         """列出当前项目的所有角色的最新状态（按 chapter 降序取最新）。"""
-        with self._connect() as conn:
-            cursor = conn.execute(
-                """
-                SELECT character_name, location, emotional_state, known_secrets,
-                       dialog_fingerprint, body_language, physical_description
-                FROM character_states cs1
-                WHERE project_id = ?
-                  AND chapter = (
-                      SELECT MAX(chapter) FROM character_states cs2
-                      WHERE cs2.project_id = cs1.project_id
-                        AND cs2.character_name = cs1.character_name
-                  )
-                ORDER BY character_name
-                """,
-                (self.project_id,),
-            )
-            return [dict(row) for row in cursor.fetchall()]
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.character import CharacterRepository
+            repo = CharacterRepository(uow.conn, self.project_id)
+            states = repo.list_all()
+            return [s.__dict__ for s in states]
 
     def get_emotion_history(self) -> list[dict[str, Any]]:
         """查询情感坐标历史。"""
@@ -870,31 +782,19 @@ class StateManager:
 
     def list_debts(self) -> list[dict[str, Any]]:
         """列出当前项目的所有债务。"""
-        with self._connect() as conn:
-            cursor = conn.execute(
-                """
-                SELECT debt_id, type, content, bury_chapter, collect_chapter, status
-                FROM debts
-                WHERE project_id = ?
-                ORDER BY bury_chapter
-                """,
-                (self.project_id,),
-            )
-            return [dict(row) for row in cursor.fetchall()]
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.debt import DebtRepository
+            repo = DebtRepository(uow.conn, self.project_id)
+            debts = repo.list_all()
+            return [d.__dict__ for d in debts]
 
     def list_foreshadowing(self) -> list[dict[str, Any]]:
         """列出当前项目的所有伏笔。"""
-        with self._connect() as conn:
-            cursor = conn.execute(
-                """
-                SELECT fs_id, bury_chapter, content, collect_chapter, type, status
-                FROM foreshadowing
-                WHERE project_id = ?
-                ORDER BY bury_chapter
-                """,
-                (self.project_id,),
-            )
-            return [dict(row) for row in cursor.fetchall()]
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.foreshadowing import ForeshadowingRepository
+            repo = ForeshadowingRepository(uow.conn, self.project_id)
+            items = repo.list_all()
+            return [i.__dict__ for i in items]
 
     def list_skills(self) -> list[dict[str, Any]]:
         """列出当前项目的技能树。"""
@@ -926,37 +826,19 @@ class StateManager:
 
     def list_chapters(self) -> list[dict[str, Any]]:
         """列出当前项目的章节历史。"""
-        with self._connect() as conn:
-            cursor = conn.execute(
-                """
-                SELECT chapter, title, summary, word_count, mode, created_at
-                FROM chapter_history
-                WHERE project_id = ?
-                ORDER BY chapter
-                """,
-                (self.project_id,),
-            )
-            return [dict(row) for row in cursor.fetchall()]
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.chapter import ChapterRepository
+            repo = ChapterRepository(uow.conn, self.project_id)
+            chapters = repo.list_all()
+            return [c.__dict__ for c in chapters]
 
     def list_snapshots(self, chapter: int | None = None) -> list[dict[str, Any]]:
         """列出当前项目的章节快照。"""
-        conditions = ["project_id = ?"]
-        params: list[Any] = [self.project_id]
-        if chapter is not None:
-            conditions.append("chapter = ?")
-            params.append(chapter)
-        where_clause = " AND ".join(conditions)
-        with self._connect() as conn:
-            cursor = conn.execute(
-                f"""
-                SELECT id, chapter, snapshot_type, created_at
-                FROM chapter_snapshots
-                WHERE {where_clause}
-                ORDER BY chapter, created_at DESC
-                """,
-                tuple(params),
-            )
-            return [dict(row) for row in cursor.fetchall()]
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.chapter import ChapterRepository
+            repo = ChapterRepository(uow.conn, self.project_id)
+            snaps = repo.list_snapshots(chapter)
+            return [s.__dict__ for s in snaps]
 
     # ------------------------------------------------------------------
     # 导出视图
@@ -1033,20 +915,17 @@ class StateManager:
     # ------------------------------------------------------------------
     def get_chapter_title(self, chapter_num: int) -> str:
         """获取指定章节的标题。"""
-        with self._connect() as conn:
-            row = conn.execute(
-                "SELECT title FROM chapter_history WHERE project_id = ? AND chapter = ?",
-                (self.project_id, chapter_num),
-            ).fetchone()
-            return row["title"] if row and row["title"] else ""
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.chapter import ChapterRepository
+            repo = ChapterRepository(uow.conn, self.project_id)
+            return repo.get_title(chapter_num)
 
     def set_chapter_title(self, chapter_num: int, title: str) -> None:
         """保存章节标题到 chapter_history。"""
-        with self._connect() as conn:
-            conn.execute(
-                "INSERT OR REPLACE INTO chapter_history (project_id, chapter, title, created_at) VALUES (?, ?, ?, datetime('now'))",
-                (self.project_id, chapter_num, title),
-            )
+        with UnitOfWork(self.db_path, self.project_id) as uow:
+            from core.state.repositories.chapter import ChapterRepository
+            repo = ChapterRepository(uow.conn, self.project_id)
+            repo.set_title(chapter_num, title)
 
     def get_chapter_outline(self, chapter_num: int) -> dict[str, str]:
         """获取指定章节的大纲规划。"""

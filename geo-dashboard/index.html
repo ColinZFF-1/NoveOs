@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GEO 成熟度观测站 — 双引擎情报终端</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0a0a0b',
+            panel: '#111113',
+            card: '#18181b',
+            border: '#27272a',
+            copper: '#b87333',
+            'copper-light': '#d4a574',
+            'copper-dim': 'rgba(184,115,51,0.12)',
+            amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+            blue: { 400: '#60a5fa', 500: '#3b82f6', 700: '#1d4ed8' },
+            emerald: { 400: '#34d399', 500: '#10b981' },
+            rose: { 400: '#fb7185', 500: '#f43f5e' },
+            slate: { 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a' },
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['"Noto Sans SC"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root { --copper: #b87333; }
+    body { background: #0a0a0b; color: #e4e4e7; font-family: 'Noto Sans SC', sans-serif; -webkit-font-smoothing: antialiased; }
+    ::selection { background: var(--copper); color: #0a0a0b; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    .scanline::after {
+      content: ''; position: absolute; inset: 0; border-radius: inherit;
+      overflow: hidden; pointer-events: none; opacity: 0;
+      transition: opacity .3s;
+    }
+    .scanline:hover::after {
+      opacity: 1;
+      background: repeating-linear-gradient(transparent, transparent 2px, rgba(184,115,51,0.04) 2px, rgba(184,115,51,0.04) 4px);
+    }
+    .scanline:hover::before {
+      content: ''; position: absolute; left: 0; right: 0; height: 1px;
+      background: rgba(184,115,51,0.25); animation: scanline 3s linear infinite;
+    }
+
+    @keyframes dash-draw {
+      to { stroke-dashoffset: 0; }
+    }
+    .dash-draw {
+      stroke-dasharray: 800;
+      stroke-dashoffset: 800;
+      animation: dash-draw 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .dash-draw-delay {
+      animation-delay: .3s;
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .reveal { animation: reveal .45s cubic-bezier(0.16,1,0.3,1) both; }
+  </style>
+</head>
+<body>
+<div id="app" class="min-h-screen">
+
+  <!-- Header -->
+  <header class="relative overflow-hidden border-b border-border">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image: linear-gradient(var(--copper) 1px, transparent 1px), linear-gradient(90deg, var(--copper) 1px, transparent 1px); background-size: 28px 28px;"></div>
+    <div class="max-w-[1440px] mx-auto px-6 py-6 relative">
+      <div class="flex items-end justify-between">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-1 h-7 bg-copper rounded-full"></div>
+            <h1 class="text-3xl font-semibold tracking-tight font-serif">GEO 成熟度观测站</h1>
+          </div>
+          <p class="text-sm text-slate-400 max-w-2xl leading-relaxed">
+            基于 Kimi 与 DeepSeek 双引擎引用行为差异，评估品牌在生成式搜索生态中的结构化水平、实体一致性与自动化能力。
+          </p>
+        </div>
+        <div class="flex items-end gap-8 text-right">
+          <div>
+            <div class="text-[10px] text-slate-500 font-mono uppercase tracking-widest mb-1">平均成熟度</div>
+            <div class="text-4xl font-bold font-mono text-copper-light">{{ avgScore }}</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-500 font-mono uppercase tracking-widest mb-1">观测品牌</div>
+            <div class="text-4xl font-bold font-mono text-white">{{ brands.length }}</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-500 font-mono uppercase tracking-widest mb-1">数据更新</div>
+            <div class="text-sm font-mono text-slate-400">2026-06-10</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1440px] mx-auto px-6 py-6 space-y-6">
+
+    <!-- Brand Table -->
+    <section class="bg-panel border border-border rounded-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Filter</span>
+          <button v-for="lvl in maturityLevels" :key="lvl" @click="filterLevel = lvl"
+            class="px-2.5 py-1 rounded text-[11px] font-medium transition-colors"
+            :class="filterLevel === lvl ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'">
+            {{ lvl }}
+          </button>
+        </div>
+        <div class="text-[10px] text-slate-500 font-mono">MIN {{ minScore }} / MAX {{ maxScore }}</div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-border bg-ink text-[10px] text-slate-500 font-mono uppercase tracking-wider">
+              <th class="px-4 py-2.5 w-[260px]">品牌 / 行业</th>
+              <th class="px-4 py-2.5 w-[90px]">阶段</th>
+              <th class="px-4 py-2.5 w-[90px]">综合分</th>
+              <th class="px-4 py-2.5">八维雷达</th>
+              <th class="px-4 py-2.5 w-[100px]">双引擎</th>
+              <th class="px-4 py-2.5 w-[100px]">趋势</th>
+              <th class="px-4 py-2.5 w-[80px] text-right"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(brand, idx) in filteredBrands" :key="brand.id"
+              @click="selectedBrandId = brand.id"
+              class="border-b border-border cursor-pointer transition-colors"
+              :class="selectedBrandId === brand.id ? 'bg-slate-800/60' : 'hover:bg-slate-800/30'"
+              :style="{ animationDelay: idx*50+'ms' }" style="animation: reveal .4s both;">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded flex items-center justify-center text-xs font-bold shrink-0"
+                    :style="{ background: maturityColors[brand.maturityLevel], color: '#0a0a0b' }">
+                    {{ brand.logo }}
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-white">{{ brand.name }}</div>
+                    <div class="text-[10px] text-slate-500">{{ brand.industry }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                  :style="{ background: maturityColors[brand.maturityLevel]+'22', color: maturityColors[brand.maturityLevel] }">
+                  {{ brand.maturityLevel }}
+                </span>
+              </td>
+              <td class="px-4 py-3 font-mono text-lg font-semibold"
+                :class="brand.overallScore >= 70 ? 'text-emerald-400' : brand.overallScore >= 50 ? 'text-amber-400' : 'text-rose-400'">
+                {{ brand.overallScore }}
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-[3px]">
+                  <div v-for="d in dimensions" :key="d.key" class="w-1.5 rounded-full bg-slate-800 relative overflow-hidden" style="height: 28px;" :title="d.label">
+                    <div class="absolute bottom-0 left-0 right-0 rounded-full transition-all duration-500"
+                      :class="getBarColor(brand, d.key)"
+                      :style="{ height: getBarHeight(brand, d.key) + '%' }"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-[10px] font-mono leading-tight">
+                <div class="text-amber-400">K {{ engineAvg(brand, 'kim') }}</div>
+                <div class="text-blue-400">D {{ engineAvg(brand, 'deepSeek') }}</div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <svg width="50" height="18" class="opacity-80">
+                    <polyline :points="sparkline(brand.trend)" fill="none" :stroke="brand.trend >= 0 ? '#10b981' : '#f43f5e'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="text-[10px] font-mono" :class="brand.trend >= 0 ? 'text-emerald-400' : 'text-rose-400'">
+                    {{ brand.trend >= 0 ? '+' : '' }}{{ brand.trend }}%
+                  </span>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button @click.stop="selectedBrandId = brand.id" class="text-[10px] px-2 py-1 rounded border border-border text-slate-400 hover:text-white hover:border-copper transition-colors">
+                  诊断
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Detail Panel -->
+    <section v-if="selectedBrand" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: Radar + Metrics -->
+      <div class="space-y-4">
+        <div class="bg-panel border border-border rounded-lg p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-white">双引擎雷达</h3>
+            <div class="flex items-center gap-3 text-[10px]">
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Kimi</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>DeepSeek</span>
+            </div>
+          </div>
+          <div class="flex justify-center">
+            <radar-chart :data="selectedBrand.dimensions" :size="280"></radar-chart>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-panel border border-border rounded-lg p-4">
+            <div class="text-[10px] text-slate-500 font-mono uppercase tracking-wider mb-1">AI 可见度</div>
+            <div class="text-2xl font-bold font-mono text-white">{{ selectedBrand.metrics.aiVisibility }}%</div>
+            <div class="text-[10px] text-slate-500 mt-1">被引用概率</div>
+          </div>
+          <div class="bg-panel border border-border rounded-lg p-4">
+            <div class="text-[10px] text-slate-500 font-mono uppercase tracking-wider mb-1">Top1 推荐率</div>
+            <div class="text-2xl font-bold font-mono text-white">{{ selectedBrand.metrics.top1Rate }}%</div>
+            <div class="text-[10px] text-slate-500 mt-1">首位提及占比</div>
+          </div>
+          <div class="bg-panel border border-border rounded-lg p-4">
+            <div class="text-[10px] text-slate-500 font-mono uppercase tracking-wider mb-1">引用次数</div>
+            <div class="text-2xl font-bold font-mono text-white">{{ selectedBrand.metrics.citationCount }}</div>
+            <div class="text-[10px] text-slate-500 mt-1">近30天累计</div>
+          </div>
+          <div class="bg-panel border border-border rounded-lg p-4">
+            <div class="text-[10px] text-slate-500 font-mono uppercase tracking-wider mb-1">内容新鲜度</div>
+            <div class="text-2xl font-bold font-mono" :class="selectedBrand.metrics.contentFreshness >= 60 ? 'text-emerald-400' : 'text-amber-400'">{{ selectedBrand.metrics.contentFreshness }}%</div>
+            <div class="text-[10px] text-slate-500 mt-1">90天内更新占比</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle: Score Cards -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="text-sm font-medium text-white">八维成熟度拆解</h3>
+          <span class="text-[10px] text-slate-500 font-mono">WEIGHTED AVG</span>
+        </div>
+
+        <div v-for="d in dimensions" :key="d.key"
+          class="scanline relative bg-panel border border-border rounded-lg p-4 hover:border-copper transition-colors duration-300 overflow-hidden">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <h4 class="text-sm font-medium text-white">{{ d.label }}</h4>
+              <p class="text-[10px] text-slate-500 mt-0.5">{{ d.description }}</p>
+            </div>
+            <span class="text-[10px] px-1.5 py-0.5 rounded font-mono"
+              :class="diffClass(selectedBrand.dimensions[d.key])">
+              {{ diffLabel(selectedBrand.dimensions[d.key]) }}
+            </span>
+          </div>
+          <div class="space-y-2.5">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] w-16 text-right text-slate-500 font-mono">Kimi</span>
+              <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-700" :style="{ width: (selectedBrand.dimensions[d.key]?.kim || 0) + '%' }"></div>
+              </div>
+              <span class="text-xs w-8 text-right font-mono text-amber-400">{{ selectedBrand.dimensions[d.key]?.kim || 0 }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] w-16 text-right text-slate-500 font-mono">DeepSeek</span>
+              <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-blue-700 to-blue-400 transition-all duration-700" :style="{ width: (selectedBrand.dimensions[d.key]?.deepSeek || 0) + '%' }"></div>
+              </div>
+              <span class="text-xs w-8 text-right font-mono text-blue-400">{{ selectedBrand.dimensions[d.key]?.deepSeek || 0 }}</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-border flex items-center justify-between">
+            <span class="text-[10px] text-slate-500">权重 {{ (d.weight * 100).toFixed(0) }}%</span>
+            <span class="text-sm font-semibold font-mono" :class="dimAvg(selectedBrand.dimensions[d.key]) >= 70 ? 'text-emerald-400' : dimAvg(selectedBrand.dimensions[d.key]) >= 50 ? 'text-amber-400' : 'text-rose-400'">
+              {{ dimAvg(selectedBrand.dimensions[d.key]) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Comparison + Insights -->
+      <div class="space-y-4">
+        <div class="bg-panel border border-border rounded-lg overflow-hidden">
+          <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+            <h3 class="text-sm font-medium text-white">引擎差异分析</h3>
+            <div class="flex items-center gap-3 text-[10px] font-mono">
+              <span class="text-amber-400">Kimi 均值 {{ kimAvg }}</span>
+              <span class="text-slate-600">vs</span>
+              <span class="text-blue-400">DeepSeek 均值 {{ dsAvg }}</span>
+            </div>
+          </div>
+          <div class="divide-y divide-border">
+            <div v-for="d in dimensions" :key="d.key" class="px-4 py-2.5 flex items-center gap-4 hover:bg-slate-800/40 transition-colors">
+              <span class="w-24 text-xs text-slate-400 shrink-0">{{ d.label }}</span>
+              <div class="flex-1 flex items-center gap-3">
+                <div class="flex-1 flex items-center gap-2 justify-end">
+                  <div class="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full bg-amber-500" :style="{ width: (selectedBrand.dimensions[d.key]?.kim || 0) + '%' }"></div>
+                  </div>
+                  <span class="text-[10px] font-mono w-5 text-right text-amber-400">{{ selectedBrand.dimensions[d.key]?.kim || 0 }}</span>
+                </div>
+                <div class="w-10 flex justify-center">
+                  <span class="text-[10px] font-mono" :class="((selectedBrand.dimensions[d.key]?.kim || 0) - (selectedBrand.dimensions[d.key]?.deepSeek || 0)) > 0 ? 'text-amber-400' : ((selectedBrand.dimensions[d.key]?.kim || 0) - (selectedBrand.dimensions[d.key]?.deepSeek || 0)) < 0 ? 'text-blue-400' : 'text-slate-500'">
+                    {{ ((selectedBrand.dimensions[d.key]?.kim || 0) - (selectedBrand.dimensions[d.key]?.deepSeek || 0)) > 0 ? '+' : '' }}{{ (selectedBrand.dimensions[d.key]?.kim || 0) - (selectedBrand.dimensions[d.key]?.deepSeek || 0) }}
+                  </span>
+                </div>
+                <div class="flex-1 flex items-center gap-2">
+                  <span class="text-[10px] font-mono w-5 text-left text-blue-400">{{ selectedBrand.dimensions[d.key]?.deepSeek || 0 }}</span>
+                  <div class="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full bg-blue-500" :style="{ width: (selectedBrand.dimensions[d.key]?.deepSeek || 0) + '%' }"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-panel border border-border rounded-lg p-4">
+          <h3 class="text-sm font-medium text-white mb-3">诊断建议</h3>
+          <div class="space-y-3">
+            <div v-if="(selectedBrand.dimensions.schema?.deepSeek || 0) < 60" class="flex gap-2">
+              <span class="text-blue-400 text-xs mt-0.5">&#9679;</span>
+              <p class="text-xs text-slate-300 leading-relaxed">DeepSeek 对 Schema 结构化数据敏感度较高，建议优先部署 JSON-LD 格式的 Organization + FAQPage 标记，可提升引用率 30-40%。</p>
+            </div>
+            <div v-if="(selectedBrand.dimensions.engineAdapt?.kim || 0) < 60" class="flex gap-2">
+              <span class="text-amber-400 text-xs mt-0.5">&#9679;</span>
+              <p class="text-xs text-slate-300 leading-relaxed">Kimi 偏好学术论文与权威媒体来源，当前内容在 Kimi 的适配度不足。建议增加深度分析类文章，并在 GitHub / CSDN 建立技术背书。</p>
+            </div>
+            <div v-if="selectedBrand.metrics.schemaCoverage < 50" class="flex gap-2">
+              <span class="text-rose-400 text-xs mt-0.5">&#9679;</span>
+              <p class="text-xs text-slate-300 leading-relaxed">Schema 覆盖率低于 50%，AI 引擎难以准确识别品牌实体。这是当前最大的结构性短板，建议 2 周内完成全站 Schema 审计与补全。</p>
+            </div>
+            <div v-if="selectedBrand.trend < 0" class="flex gap-2">
+              <span class="text-rose-400 text-xs mt-0.5">&#9679;</span>
+              <p class="text-xs text-slate-300 leading-relaxed">趋势为负，AI 引用率在下降。可能原因：竞品内容更新更频繁、或近期有负面信息被 AI 抓取。需立即启动舆情监测与内容刷新。</p>
+            </div>
+            <div v-if="selectedBrand.overallScore >= 75" class="flex gap-2">
+              <span class="text-emerald-400 text-xs mt-0.5">&#9679;</span>
+              <p class="text-xs text-slate-300 leading-relaxed">该品牌 GEO 成熟度处于头部水平。建议将经验沉淀为标准化模板，向旗下子品牌或经销商输出 GEO 能力，形成认知壁垒。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-[10px] text-slate-600 font-mono text-right">
+          数据更新于 {{ selectedBrand.lastUpdated }} &#183; 基于 Kimi + DeepSeek 双引擎采样
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const { createApp, ref, computed } = Vue;
+
+const dimensions = [
+  { key: 'schema', label: 'Schema结构化', description: 'JSON-LD / 实体标记覆盖率', weight: 0.2 },
+  { key: 'engineAdapt', label: '双引擎适配', description: 'Kimi vs DeepSeek 差异化策略', weight: 0.15 },
+  { key: 'automation', label: '自动化能力', description: '内容生成与监测自动化程度', weight: 0.1 },
+  { key: 'entityTrust', label: '实体一致性', description: '跨平台 NAP / 知识图谱一致性', weight: 0.15 },
+  { key: 'eeat', label: 'E-E-A-T权威', description: '经验&#183;专业&#183;权威&#183;可信度', weight: 0.15 },
+  { key: 'freshness', label: '内容新鲜度', description: '近90天内内容更新占比', weight: 0.1 },
+  { key: 'compliance', label: '合规安全', description: '事实核查与来源标注', weight: 0.08 },
+  { key: 'promptCov', label: 'Prompt覆盖', description: '高频Query内容占位率', weight: 0.07 },
+];
+
+const maturityColors = {
+  '萌芽': '#94a3b8',
+  '起步': '#fbbf24',
+  '成长': '#f59e0b',
+  '成熟': '#d97706',
+  '领先': '#b45309',
+};
+
+const brands = [
+  {
+    id: '1', name: '飞鹤乳业', industry: '母婴/快消', logo: 'FH', overallScore: 78, maturityLevel: '成熟',
+    dimensions: {
+      schema: { kim: 82, deepSeek: 75 }, engineAdapt: { kim: 70, deepSeek: 88 }, automation: { kim: 60, deepSeek: 65 },
+      entityTrust: { kim: 85, deepSeek: 80 }, eeat: { kim: 80, deepSeek: 78 }, freshness: { kim: 75, deepSeek: 72 },
+      compliance: { kim: 90, deepSeek: 92 }, promptCov: { kim: 68, deepSeek: 74 },
+    },
+    metrics: { aiVisibility: 73.5, top1Rate: 44.2, citationCount: 128, contentFreshness: 68, schemaCoverage: 82, entityConsistency: 85 },
+    trend: 12.5, lastUpdated: '2026-06-08',
+  },
+  {
+    id: '2', name: '美素佳儿', industry: '母婴/快消', logo: 'MS', overallScore: 71, maturityLevel: '成长',
+    dimensions: {
+      schema: { kim: 65, deepSeek: 70 }, engineAdapt: { kim: 72, deepSeek: 68 }, automation: { kim: 55, deepSeek: 58 },
+      entityTrust: { kim: 78, deepSeek: 75 }, eeat: { kim: 82, deepSeek: 80 }, freshness: { kim: 70, deepSeek: 65 },
+      compliance: { kim: 88, deepSeek: 85 }, promptCov: { kim: 60, deepSeek: 62 },
+    },
+    metrics: { aiVisibility: 65.2, top1Rate: 32.8, citationCount: 96, contentFreshness: 62, schemaCoverage: 68, entityConsistency: 78 },
+    trend: 8.3, lastUpdated: '2026-06-09',
+  },
+  {
+    id: '3', name: '某头部云商', industry: 'B2B/SaaS', logo: 'YD', overallScore: 64, maturityLevel: '成长',
+    dimensions: {
+      schema: { kim: 70, deepSeek: 82 }, engineAdapt: { kim: 55, deepSeek: 78 }, automation: { kim: 75, deepSeek: 72 },
+      entityTrust: { kim: 60, deepSeek: 68 }, eeat: { kim: 65, deepSeek: 70 }, freshness: { kim: 58, deepSeek: 62 },
+      compliance: { kim: 85, deepSeek: 88 }, promptCov: { kim: 52, deepSeek: 60 },
+    },
+    metrics: { aiVisibility: 58.4, top1Rate: 28.5, citationCount: 84, contentFreshness: 55, schemaCoverage: 75, entityConsistency: 65 },
+    trend: -2.1, lastUpdated: '2026-06-07',
+  },
+  {
+    id: '4', name: '某新能源品牌', industry: '汽车/制造', logo: 'NE', overallScore: 52, maturityLevel: '起步',
+    dimensions: {
+      schema: { kim: 45, deepSeek: 50 }, engineAdapt: { kim: 40, deepSeek: 48 }, automation: { kim: 35, deepSeek: 38 },
+      entityTrust: { kim: 55, deepSeek: 52 }, eeat: { kim: 58, deepSeek: 55 }, freshness: { kim: 48, deepSeek: 50 },
+      compliance: { kim: 75, deepSeek: 72 }, promptCov: { kim: 38, deepSeek: 42 },
+    },
+    metrics: { aiVisibility: 42.1, top1Rate: 15.3, citationCount: 56, contentFreshness: 45, schemaCoverage: 48, entityConsistency: 55 },
+    trend: 18.7, lastUpdated: '2026-06-09',
+  },
+  {
+    id: '5', name: '某新锐茶饮', industry: '餐饮/零售', logo: 'CY', overallScore: 41, maturityLevel: '萌芽',
+    dimensions: {
+      schema: { kim: 30, deepSeek: 35 }, engineAdapt: { kim: 32, deepSeek: 38 }, automation: { kim: 25, deepSeek: 28 },
+      entityTrust: { kim: 40, deepSeek: 42 }, eeat: { kim: 45, deepSeek: 48 }, freshness: { kim: 55, deepSeek: 52 },
+      compliance: { kim: 60, deepSeek: 58 }, promptCov: { kim: 28, deepSeek: 30 },
+    },
+    metrics: { aiVisibility: 35.6, top1Rate: 8.7, citationCount: 34, contentFreshness: 52, schemaCoverage: 32, entityConsistency: 40 },
+    trend: 5.4, lastUpdated: '2026-06-06',
+  },
+  {
+    id: '6', name: '某折叠屏手机', industry: '3C/数码', logo: 'FS', overallScore: 85, maturityLevel: '领先',
+    dimensions: {
+      schema: { kim: 88, deepSeek: 85 }, engineAdapt: { kim: 82, deepSeek: 90 }, automation: { kim: 78, deepSeek: 80 },
+      entityTrust: { kim: 90, deepSeek: 88 }, eeat: { kim: 88, deepSeek: 86 }, freshness: { kim: 85, deepSeek: 82 },
+      compliance: { kim: 92, deepSeek: 94 }, promptCov: { kim: 80, deepSeek: 84 },
+    },
+    metrics: { aiVisibility: 82.3, top1Rate: 56.8, citationCount: 156, contentFreshness: 78, schemaCoverage: 88, entityConsistency: 92 },
+    trend: 22.4, lastUpdated: '2026-06-10',
+  },
+];
+
+const RadarChart = {
+  props: ['data', 'size'],
+  setup(props) {
+    const size = props.size || 280;
+    const center = size / 2;
+    const radius = size / 2 - 32;
+    const dims = dimensions.map((d, i) => {
+      const angle = (Math.PI * 2 * i) / dimensions.length - Math.PI / 2;
+      return { ...d, angle,
+        x: center + Math.cos(angle) * radius,
+        y: center + Math.sin(angle) * radius,
+        lx: center + Math.cos(angle) * (radius + 22),
+        ly: center + Math.sin(angle) * (radius + 22),
+      };
+    });
+    function poly(scores) {
+      return scores.map((s, i) => {
+        const a = dims[i].angle;
+        const r = (s / 100) * radius;
+        return `${center + Math.cos(a) * r},${center + Math.sin(a) * r}`;
+      }).join(' ');
+    }
+    const kimScores = computed(() => dims.map(d => props.data[d.key]?.kim || 0));
+    const dsScores = computed(() => dims.map(d => props.data[d.key]?.deepSeek || 0));
+    const grid = Array.from({ length: 5 }, (_, i) => {
+      const r = ((i + 1) / 5) * radius;
+      return dims.map(d => `${center + Math.cos(d.angle) * r},${center + Math.sin(d.angle) * r}`).join(' ');
+    });
+    return { size, dims, grid, poly, kimScores, dsScores };
+  },
+  template: `
+    <svg :width="size" :height="size" class="overflow-visible">
+      <polygon v-for="(p,i) in grid" :key="i" :points="p" fill="none" stroke="rgba(184,115,51,0.1)" stroke-width="1"/>
+      <line v-for="d in dims" :key="d.key" :x1="size/2" :y1="size/2" :x2="d.x" :y2="d.y" stroke="rgba(184,115,51,0.12)" stroke-width="1"/>
+      <polygon :points="poly(dsScores)" fill="rgba(59,130,246,0.12)" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round" class="dash-draw"/>
+      <polygon :points="poly(kimScores)" fill="rgba(217,119,6,0.12)" stroke="#d97706" stroke-width="2" stroke-linejoin="round" class="dash-draw dash-draw-delay"/>
+      <text v-for="d in dims" :key="d.key+'l'" :x="d.lx" :y="d.ly" text-anchor="middle" dominant-baseline="middle" class="text-[9px] fill-slate-500" style="font-family:'JetBrains Mono',monospace">{{ d.label }}</text>
+      <circle :cx="size/2" :cy="size/2" r="2" fill="#b87333"/>
+    </svg>
+  `
+};
+
+createApp({
+  components: { 'radar-chart': RadarChart },
+  setup() {
+    const selectedBrandId = ref(brands[0].id);
+    const filterLevel = ref('全部');
+    const maturityLevels = ['全部', '萌芽', '起步', '成长', '成熟', '领先'];
+
+    const selectedBrand = computed(() => brands.find(b => b.id === selectedBrandId.value) || brands[0]);
+    const filteredBrands = computed(() => filterLevel.value === '全部' ? brands : brands.filter(b => b.maturityLevel === filterLevel.value));
+    const avgScore = computed(() => Math.round(brands.reduce((s, b) => s + b.overallScore, 0) / brands.length));
+    const minScore = computed(() => Math.min(...brands.map(b => b.overallScore)));
+    const maxScore = computed(() => Math.max(...brands.map(b => b.overallScore)));
+
+    const kimAvg = computed(() => Math.round(dimensions.reduce((s, d) => s + (selectedBrand.value.dimensions[d.key]?.kim || 0), 0) / dimensions.length));
+    const dsAvg = computed(() => Math.round(dimensions.reduce((s, d) => s + (selectedBrand.value.dimensions[d.key]?.deepSeek || 0), 0) / dimensions.length));
+
+    function getBarHeight(brand, key) {
+      const v = brand.dimensions[key];
+      return v ? Math.round((v.kim + v.deepSeek) / 2) : 0;
+    }
+    function getBarColor(brand, key) {
+      const v = getBarHeight(brand, key);
+      return v >= 70 ? 'bg-emerald-500' : v >= 50 ? 'bg-amber-500' : 'bg-rose-500';
+    }
+    function engineAvg(brand, engine) {
+      return Math.round(dimensions.reduce((s, d) => s + (brand.dimensions[d.key]?.[engine] || 0), 0) / dimensions.length);
+    }
+    function sparkline(trend) {
+      const pts = Array.from({ length: 8 }, (_, i) => {
+        const base = 50 + trend * 2;
+        const noise = Math.sin(i * 1.3) * 15 + Math.cos(i * 0.7) * 10;
+        return Math.max(10, Math.min(90, base + noise));
+      });
+      return pts.map((v, i) => `${(i / 7) * 50},${18 - (v / 100) * 18}`).join(' ');
+    }
+    function dimAvg(dim) {
+      return dim ? Math.round((dim.kim + dim.deepSeek) / 2) : 0;
+    }
+    function diffClass(dim) {
+      if (!dim) return 'bg-slate-700 text-slate-400';
+      const diff = dim.kim - dim.deepSeek;
+      return diff > 3 ? 'bg-amber-500/10 text-amber-400' : diff < -3 ? 'bg-blue-500/10 text-blue-400' : 'bg-slate-700 text-slate-400';
+    }
+    function diffLabel(dim) {
+      if (!dim) return '均衡';
+      const diff = dim.kim - dim.deepSeek;
+      return diff > 3 ? 'Kimi ↑' : diff < -3 ? 'DeepSeek ↑' : '均衡';
+    }
+
+    return {
+      brands, dimensions, maturityLevels, maturityColors,
+      selectedBrandId, filterLevel, selectedBrand, filteredBrands,
+      avgScore, minScore, maxScore, kimAvg, dsAvg,
+      getBarHeight, getBarColor, engineAvg, sparkline, dimAvg, diffClass, diffLabel
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

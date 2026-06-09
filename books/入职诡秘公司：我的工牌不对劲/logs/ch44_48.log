@@ -1,0 +1,206 @@
+[92m22:22:33 - LiteLLM:WARNING[0m: common_utils.py:979 - litellm: could not pre-load bedrock-runtime response stream shape �� Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+[92m22:22:33 - LiteLLM:WARNING[0m: common_utils.py:24 - litellm: could not pre-load sagemaker-runtime response stream shape �� SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+2026-06-09 22:22:34,606 [novel-os.batch_writer] INFO: project_id 校验通过: 入职诡秘公司：我的工牌不对劲
+2026-06-09 22:22:35,007 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:22:35,007 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 44 章
+2026-06-09 22:22:35,032 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:22:35,032 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 44 章
+2026-06-09 22:22:35,032 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 第 1 次尝试
+2026-06-09 22:22:35,032 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:23:00,969 [novel-os.steps.director] INFO: [Director] 第 44 章 任务卡已生成，标题=NULL-003
+2026-06-09 22:23:00,969 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:23:25,818 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 44 章 节拍分配完成
+2026-06-09 22:23:25,818 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:23:25,818 [novel-os.input_governor] INFO: [InputGovernor] 编译第 44 章输入
+2026-06-09 22:23:25,831 [novel-os.input_governor] INFO: [InputGovernor] 第 44 章编译完成: 意图=0字, 人物=9行, 伏笔=9行, 债务=0行
+2026-06-09 22:23:25,831 [novel-os.steps.scene_writer] INFO: 第 44 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:24:06,502 [novel-os.steps.scene_writer] INFO: 第 44 章 SceneWriter 完成: 2452字
+2026-06-09 22:24:06,502 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:24:06,503 [novel-os.pipeline] INFO: [Pipeline] SceneWriter 字数达标(2452)，跳过 HookEngineer
+2026-06-09 22:24:06,503 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:24:06,503 [novel-os.pipeline] INFO: [Pipeline] HookEngineer 后字数达标(2452)，跳过 DialogueTuner
+2026-06-09 22:24:06,503 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:24:38,069 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:24:38,082 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 PostWriteValidator 命中 3 处
+2026-06-09 22:24:38,082 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:24:38,090 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 Validator 标红 10 处
+2026-06-09 22:24:38,101 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ["强制术语缺失: '规则裂隙审计'（异能，第1章起必须出现）", "强制术语缺失: '留白者'（怪物，第1章起必须出现）", "强制术语缺失: '临终感知同步'（病症，第2章起必须出现）"]
+2026-06-09 22:24:38,101 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 结构问题，回退修正
+2026-06-09 22:24:38,101 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 第 2 次尝试
+2026-06-09 22:24:38,101 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:24:38,101 [novel-os.steps.director] INFO: [Director] 第 44 章 复用已有任务卡
+2026-06-09 22:24:38,101 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:24:38,101 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 44 章 复用已有节拍表
+2026-06-09 22:24:38,101 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:24:38,101 [novel-os.steps.scene_writer] INFO: 第 44 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:25:31,253 [novel-os.steps.scene_writer] INFO: 第 44 章 SceneWriter 完成: 4951字
+2026-06-09 22:25:31,253 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:25:56,188 [novel-os.steps.hook_engineer] WARNING: 第 44 章 HookEngineer 字数损失 48.1% (4951→2569)，回退原稿
+2026-06-09 22:25:56,188 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:25:56,189 [novel-os.steps.dialogue_tuner] WARNING: 第 44 章 DialogueTuner 输入已超标(4951 > 4000)，跳过
+2026-06-09 22:25:56,189 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:26:17,461 [novel-os.steps.polish] WARNING: 第 44 章 Polish 后字数损失 51.4% (4951→2405)，回退到原稿
+2026-06-09 22:26:17,461 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:26:17,469 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 PostWriteValidator 命中 2 处
+2026-06-09 22:26:17,470 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:26:17,477 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 Validator 标红 11 处
+2026-06-09 22:26:17,491 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ['字数超标: 4951 > 4000', "强制术语缺失: '永夜集团'（公司名，第1章起必须出现）", "强制术语缺失: '留白者'（怪物，第1章起必须出现）"]
+2026-06-09 22:26:17,492 [novel-os.pipeline] INFO: [Pipeline] 第 44 章 截断到 4000 中文字符
+2026-06-09 22:26:17,500 [novel-os.pipeline] ERROR: [Pipeline] 第 44 章 最终失败，已用尽 2 次重试
+2026-06-09 22:26:17,500 [novel-os.content.title] INFO: 第 44 章 标题兜底：插入标题 'NULL-003'
+2026-06-09 22:26:17,509 [novel-os.batch_writer] INFO: 第 44 章 草稿已保存: D:\noveos\books\入职诡秘公司：我的工牌不对劲\chapters\第044章_NULL-003.txt
+2026-06-09 22:26:17,510 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:26:17,510 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 45 章
+2026-06-09 22:26:17,516 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:26:17,516 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 45 章
+2026-06-09 22:26:17,516 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 第 1 次尝试
+2026-06-09 22:26:17,516 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:26:36,955 [novel-os.steps.director] INFO: [Director] 第 45 章 任务卡已生成，标题=地铁陌生人
+2026-06-09 22:26:36,955 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:27:14,491 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 45 章 节拍分配完成
+2026-06-09 22:27:14,491 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:27:14,491 [novel-os.input_governor] INFO: [InputGovernor] 编译第 45 章输入
+2026-06-09 22:27:14,496 [novel-os.input_governor] INFO: [InputGovernor] 第 45 章编译完成: 意图=21字, 人物=9行, 伏笔=9行, 债务=0行
+2026-06-09 22:27:14,496 [novel-os.steps.scene_writer] INFO: 第 45 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:28:07,425 [novel-os.steps.scene_writer] INFO: 第 45 章 SceneWriter 完成: 4902字
+2026-06-09 22:28:07,425 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:28:25,720 [novel-os.steps.hook_engineer] WARNING: 第 45 章 HookEngineer 字数损失 55.5% (4902→2179)，回退原稿
+2026-06-09 22:28:25,720 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:28:25,722 [novel-os.steps.dialogue_tuner] WARNING: 第 45 章 DialogueTuner 输入已超标(4902 > 4000)，跳过
+2026-06-09 22:28:25,722 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:28:45,258 [novel-os.steps.polish] WARNING: 第 45 章 Polish 后字数损失 42.8% (4902→2806)，回退到原稿
+2026-06-09 22:28:45,258 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:28:45,267 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 PostWriteValidator 命中 3 处
+2026-06-09 22:28:45,267 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:28:45,273 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 Validator 标红 11 处
+2026-06-09 22:28:45,286 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ['字数超标: 4897 > 4000', "强制术语缺失: '存在性折旧'（代价，第1章起必须出现）", "强制术语缺失: '临终感知同步'（病症，第2章起必须出现）"]
+2026-06-09 22:28:45,287 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 截断到 4000 中文字符
+2026-06-09 22:28:45,294 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 第 2 次尝试
+2026-06-09 22:28:45,294 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:28:45,294 [novel-os.steps.director] INFO: [Director] 第 45 章 复用已有任务卡
+2026-06-09 22:28:45,294 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:28:45,294 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 45 章 复用已有节拍表
+2026-06-09 22:28:45,294 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:28:45,294 [novel-os.steps.scene_writer] INFO: 第 45 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:29:28,539 [novel-os.steps.scene_writer] INFO: 第 45 章 SceneWriter 完成: 3210字
+2026-06-09 22:29:28,539 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:29:28,541 [novel-os.pipeline] INFO: [Pipeline] SceneWriter 字数达标(3210)，跳过 HookEngineer
+2026-06-09 22:29:28,541 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:29:28,541 [novel-os.pipeline] INFO: [Pipeline] HookEngineer 后字数达标(3210)，跳过 DialogueTuner
+2026-06-09 22:29:28,541 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:30:03,340 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:30:03,347 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 PostWriteValidator 命中 2 处
+2026-06-09 22:30:03,347 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:30:03,351 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 Validator 标红 7 处
+2026-06-09 22:30:03,362 [novel-os.pipeline] INFO: 第 45 章 AI 痕迹分数 0.20，无需改写
+2026-06-09 22:30:03,362 [novel-os.pipeline] WARNING: [Pipeline] 第 45 章 WARN: ["强制术语缺失: 'HR模式'（技能，第7章起必须出现）", "环境/身体描写中精确数字+量词出现 56 次（阈值5），疑似AI量化铺陈。请改为身体体感描述（如'扎进肉里''震得牙根发酸'）。", '对话占比 16.7% 不在 [20%, 45%] 范围', "揭示词 9 个 > 阈值 5: ['明白', '明白', '发现', '发现', '发现']，信息过度释放", "发现 15 个非术语英文词: ['AX', 'Logo', 'AX', 'AX', 'AX']", '疑似遗漏核心事件: 视角切换现实世界，三个月后。年轻人在地铁上收到陌生人递来的工牌', '连续短句(12字以内)最多 8 句 > 阈值 5', '189 个段落未包含≥30字的长句']
+2026-06-09 22:30:03,362 [novel-os.pipeline] INFO: [Pipeline] 第 45 章 完成，字数=3283
+2026-06-09 22:30:03,364 [novel-os.content.title] INFO: 第 45 章 标题兜底：插入标题 '地铁陌生人'
+2026-06-09 22:30:03,390 [novel-os.batch_writer] INFO: 第 45 章 角色状态已传播: 4 人
+2026-06-09 22:30:03,406 [novel-os.batch_writer] INFO: 第 45 章 完成，中文字数=3283，路径=D:\noveos\books\入职诡秘公司：我的工牌不对劲\chapters\第045章_地铁陌生人.txt
+2026-06-09 22:30:03,407 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:30:03,407 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 46 章
+2026-06-09 22:30:03,413 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:30:03,413 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 46 章
+2026-06-09 22:30:03,413 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 第 1 次尝试
+2026-06-09 22:30:03,413 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:30:28,150 [novel-os.steps.director] INFO: [Director] 第 46 章 任务卡已生成，标题=未提取
+2026-06-09 22:30:28,150 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:31:01,315 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 46 章 节拍分配完成
+2026-06-09 22:31:01,315 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:31:01,315 [novel-os.input_governor] INFO: [InputGovernor] 编译第 46 章输入
+2026-06-09 22:31:01,318 [novel-os.input_governor] INFO: [InputGovernor] 第 46 章编译完成: 意图=14字, 人物=9行, 伏笔=9行, 债务=0行
+2026-06-09 22:31:01,318 [novel-os.steps.scene_writer] INFO: 第 46 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:31:40,334 [novel-os.steps.scene_writer] INFO: 第 46 章 SceneWriter 完成: 2465字
+2026-06-09 22:31:40,334 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:31:40,334 [novel-os.pipeline] INFO: [Pipeline] SceneWriter 字数达标(2465)，跳过 HookEngineer
+2026-06-09 22:31:40,334 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:31:40,334 [novel-os.pipeline] INFO: [Pipeline] HookEngineer 后字数达标(2465)，跳过 DialogueTuner
+2026-06-09 22:31:40,334 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:32:07,907 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:32:07,913 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 PostWriteValidator 命中 2 处
+2026-06-09 22:32:07,913 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:32:07,916 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 Validator 标红 7 处
+2026-06-09 22:32:07,925 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ["强制术语缺失: '永夜集团'（公司名，第1章起必须出现）"]
+2026-06-09 22:32:07,925 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 结构问题，回退修正
+2026-06-09 22:32:07,925 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 第 2 次尝试
+2026-06-09 22:32:07,925 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:32:07,925 [novel-os.steps.director] INFO: [Director] 第 46 章 复用已有任务卡
+2026-06-09 22:32:07,925 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:32:07,925 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 46 章 复用已有节拍表
+2026-06-09 22:32:07,925 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:32:07,925 [novel-os.steps.scene_writer] INFO: 第 46 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:32:49,358 [novel-os.steps.scene_writer] INFO: 第 46 章 SceneWriter 完成: 3082字
+2026-06-09 22:32:49,358 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:32:49,358 [novel-os.pipeline] INFO: [Pipeline] SceneWriter 字数达标(3082)，跳过 HookEngineer
+2026-06-09 22:32:49,358 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:32:49,359 [novel-os.pipeline] INFO: [Pipeline] HookEngineer 后字数达标(3082)，跳过 DialogueTuner
+2026-06-09 22:32:49,359 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:33:15,648 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:33:15,654 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 PostWriteValidator 命中 2 处
+2026-06-09 22:33:15,654 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:33:15,659 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 Validator 标红 9 处
+2026-06-09 22:33:15,667 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ["强制术语缺失: '规则裂隙审计'（异能，第1章起必须出现）", "强制术语缺失: '存在性折旧'（代价，第1章起必须出现）"]
+2026-06-09 22:33:15,667 [novel-os.pipeline] INFO: [Pipeline] 第 46 章 结构问题，回退修正
+2026-06-09 22:33:15,668 [novel-os.pipeline] ERROR: [Pipeline] 第 46 章 最终失败，已用尽 2 次重试
+2026-06-09 22:33:15,668 [novel-os.content.title] INFO: 第 46 章 标题兜底：插入标题 '地铁的倒影'
+2026-06-09 22:33:15,671 [novel-os.batch_writer] INFO: 第 46 章 草稿已保存: D:\noveos\books\入职诡秘公司：我的工牌不对劲\chapters\第046章_地铁的倒影.txt
+2026-06-09 22:33:15,673 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:33:15,673 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 47 章
+2026-06-09 22:33:15,677 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:33:15,677 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 47 章
+2026-06-09 22:33:15,679 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 第 1 次尝试
+2026-06-09 22:33:15,679 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:33:33,343 [novel-os.steps.director] INFO: [Director] 第 47 章 任务卡已生成，标题=噪音：替身留信
+2026-06-09 22:33:33,343 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:34:06,201 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 47 章 节拍分配完成
+2026-06-09 22:34:06,201 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:34:06,201 [novel-os.input_governor] INFO: [InputGovernor] 编译第 47 章输入
+2026-06-09 22:34:06,206 [novel-os.input_governor] INFO: [InputGovernor] 第 47 章编译完成: 意图=6字, 人物=9行, 伏笔=9行, 债务=0行
+2026-06-09 22:34:06,206 [novel-os.steps.scene_writer] INFO: 第 47 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:34:39,747 [novel-os.steps.scene_writer] INFO: 第 47 章 SceneWriter 完成: 2140字
+2026-06-09 22:34:39,747 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:35:01,294 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:35:20,949 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:35:41,007 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:35:41,013 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 PostWriteValidator 命中 3 处
+2026-06-09 22:35:41,013 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:35:41,016 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 Validator 标红 7 处
+2026-06-09 22:35:41,024 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ['字数不足: 2195 < 2400', "强制术语缺失: '临终感知同步'（病症，第2章起必须出现）"]
+2026-06-09 22:35:41,024 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 调用 Expander，缺口 205 字
+2026-06-09 22:35:56,103 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 第 2 次尝试
+2026-06-09 22:35:56,103 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:35:56,103 [novel-os.steps.director] INFO: [Director] 第 47 章 复用已有任务卡
+2026-06-09 22:35:56,103 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:35:56,103 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 47 章 复用已有节拍表
+2026-06-09 22:35:56,103 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:35:56,103 [novel-os.steps.scene_writer] INFO: 第 47 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:36:26,691 [novel-os.steps.scene_writer] INFO: 第 47 章 SceneWriter 完成: 1665字
+2026-06-09 22:36:26,691 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:36:41,380 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:37:28,176 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:37:46,960 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:37:46,964 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 PostWriteValidator 命中 2 处
+2026-06-09 22:37:46,964 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:37:46,967 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 Validator 标红 14 处
+2026-06-09 22:37:46,974 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ['字数不足: 1825 < 2400', "强制术语缺失: '永夜集团'（公司名，第1章起必须出现）", "强制术语缺失: '规则裂隙审计'（异能，第1章起必须出现）", "强制术语缺失: '存在性折旧'（代价，第1章起必须出现）", "强制术语缺失: '留白者'（怪物，第1章起必须出现）", "强制术语缺失: '临终感知同步'（病症，第2章起必须出现）"]
+2026-06-09 22:37:46,974 [novel-os.pipeline] INFO: [Pipeline] 第 47 章 调用 Expander，缺口 575 字
+2026-06-09 22:38:03,392 [novel-os.pipeline] ERROR: [Pipeline] 第 47 章 最终失败，已用尽 2 次重试
+2026-06-09 22:38:03,392 [novel-os.content.title] INFO: 第 47 章 标题兜底：插入标题 '噪音：替身留信'
+2026-06-09 22:38:03,396 [novel-os.batch_writer] INFO: 第 47 章 草稿已保存: D:\noveos\books\入职诡秘公司：我的工牌不对劲\chapters\第047章_消逝的重量.txt
+2026-06-09 22:38:03,396 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:38:03,396 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 48 章
+2026-06-09 22:38:03,402 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:38:03,402 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 48 章
+2026-06-09 22:38:03,402 [novel-os.pipeline] INFO: [Pipeline] 第 48 章 第 1 次尝试
+2026-06-09 22:38:03,402 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:38:25,170 [novel-os.steps.director] INFO: [Director] 第 48 章 任务卡已生成，标题=终章：传承
+2026-06-09 22:38:25,170 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:38:56,175 [novel-os.llm] WARNING: LLM 返回内容中包含 Kimi 思考过程（前缀: 好的，），已过滤（移除 58 字符）
+2026-06-09 22:38:56,175 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 48 章 节拍分配完成
+2026-06-09 22:38:56,175 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:38:56,175 [novel-os.input_governor] INFO: [InputGovernor] 编译第 48 章输入
+2026-06-09 22:38:56,180 [novel-os.input_governor] INFO: [InputGovernor] 第 48 章编译完成: 意图=14字, 人物=9行, 伏笔=9行, 债务=0行
+2026-06-09 22:38:56,180 [novel-os.steps.scene_writer] INFO: 第 48 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:39:36,028 [novel-os.steps.scene_writer] INFO: 第 48 章 SceneWriter 完成: 2357字
+2026-06-09 22:39:36,028 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer

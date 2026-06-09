@@ -2,77 +2,157 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  /* ── Monument Minimal: 纯黑白 + 一点红 ── */
-  --color-white: #FFFFFF;
-  --color-black: #000000;
-  --color-gray-50: #FAFAFA;
-  --color-gray-100: #F5F5F5;
-  --color-gray-200: #E5E5E5;
-  --color-gray-400: #999999;
-  --color-gray-600: #666666;
-  --color-gray-900: #111111;
+  /* ── 纤细主题 ── */
+  --color-bg: #000000;
+  --color-bg-raised: #0a0a0c;
 
-  /* 唯一强调色：朱砂 */
-  --color-vermilion: #C82626;
-  --color-vermilion-soft: rgba(200, 38, 38, 0.08);
+  --color-text: rgba(255, 255, 255, 0.88);
+  --color-text-secondary: rgba(255, 255, 255, 0.42);
+  --color-text-tertiary: rgba(255, 255, 255, 0.18);
 
-  /* ── Typography ── */
-  --font-sans: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* 边框：像发丝 */
+  --color-border: rgba(255, 255, 255, 0.045);
+  --color-border-hover: rgba(255, 255, 255, 0.09);
+
+  /* 颜色：低饱和、淡雅 */
+  --color-accent: #8ab4f8;
+  --color-accent-dim: rgba(138, 180, 248, 0.15);
+  --color-green: #81c995;
+  --color-green-dim: rgba(129, 201, 149, 0.12);
+  --color-orange: #f9ab00;
+  --color-orange-dim: rgba(249, 171, 0, 0.12);
+  --color-red: #f28b82;
+  --color-red-dim: rgba(242, 139, 130, 0.12);
+
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 }
 
-/* ── Base ── */
 * {
   scroll-behavior: smooth;
-}
-
-html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background: var(--color-white);
-  color: var(--color-black);
-  font-family: var(--font-sans);
+html, body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.45;
 }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-gray-200);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gray-400);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
 }
 
-/* ── Selection ── */
 ::selection {
-  background: var(--color-black);
-  color: var(--color-white);
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
 }
 
-/* ── Animations ── */
-@keyframes reveal {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ── 动画 ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes line-grow {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+.s1 { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.00s both; }
+.s2 { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both; }
+.s3 { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
+.s4 { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+.s5 { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both; }
+.s6 { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.30s both; }
+
+/* ── 纤细卡片 ── */
+.fine {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.35s ease, background 0.35s ease;
+}
+.fine:hover {
+  border-color: var(--color-border-hover);
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.animate-reveal {
-  animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.fine-active {
+  background: rgba(138, 180, 248, 0.06);
+  border: 1px solid rgba(138, 180, 248, 0.15);
 }
 
-.animate-line {
-  animation: line-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  transform-origin: left;
+/* ── 纤细按钮 ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.01em;
+}
+.btn:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-accent {
+  background: var(--color-accent-dim);
+  border-color: rgba(138, 180, 248, 0.25);
+  color: var(--color-accent);
+}
+.btn-accent:hover {
+  background: rgba(138, 180, 248, 0.22);
+  border-color: rgba(138, 180, 248, 0.4);
+}
+
+/* ── 列表行 ── */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+.row:last-child { border-bottom: none; }
+.row:hover { background: rgba(255, 255, 255, 0.02); }
+
+/* ── 排版 ── */
+.display {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.caption {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.02em;
 }

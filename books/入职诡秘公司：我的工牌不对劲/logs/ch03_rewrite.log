@@ -1,0 +1,82 @@
+[92m22:40:15 - LiteLLM:WARNING[0m: common_utils.py:979 - litellm: could not pre-load bedrock-runtime response stream shape �� Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+[92m22:40:15 - LiteLLM:WARNING[0m: common_utils.py:24 - litellm: could not pre-load sagemaker-runtime response stream shape �� SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+2026-06-09 22:40:16,645 [novel-os.batch_writer] INFO: project_id 校验通过: 入职诡秘公司：我的工牌不对劲
+2026-06-09 22:40:17,067 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:40:17,067 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 3 章
+2026-06-09 22:40:17,077 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:40:17,077 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 3 章
+2026-06-09 22:40:17,077 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 第 1 次尝试
+2026-06-09 22:40:17,077 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:40:42,471 [novel-os.steps.director] INFO: [Director] 第 3 章 任务卡已生成，标题=主管问我KPI，我报了一个归零指标
+2026-06-09 22:40:42,471 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:41:17,381 [novel-os.llm] WARNING: LLM 返回内容中包含 Kimi 思考过程（前缀: 好的，），已过滤（移除 42 字符）
+2026-06-09 22:41:17,381 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 3 章 节拍分配完成
+2026-06-09 22:41:17,381 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:41:17,381 [novel-os.input_governor] INFO: [InputGovernor] 编译第 3 章输入
+2026-06-09 22:41:17,386 [novel-os.input_governor] INFO: [InputGovernor] 第 3 章编译完成: 意图=49字, 人物=9行, 伏笔=0行, 债务=0行
+2026-06-09 22:41:17,386 [novel-os.steps.scene_writer] INFO: 第 3 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:41:55,062 [novel-os.steps.scene_writer] INFO: 第 3 章 SceneWriter 完成: 2168字
+2026-06-09 22:41:55,062 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:42:15,890 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:42:35,969 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:43:20,620 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:43:20,628 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 PostWriteValidator 命中 3 处
+2026-06-09 22:43:20,628 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:43:20,632 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 Validator 标红 7 处
+2026-06-09 22:43:20,640 [novel-os.pipeline] INFO: 第 3 章 AI 痕迹分数 0.20，无需改写
+2026-06-09 22:43:20,642 [novel-os.pipeline] WARNING: [Pipeline] 第 3 章 WARN: ["环境/身体描写中精确数字+量词出现 43 次（阈值5），疑似AI量化铺陈。请改为身体体感描述（如'扎进肉里''震得牙根发酸'）。", "揭示词 7 个 > 阈值 5: ['知道', '知道', '知道', '知道', '明白']，信息过度释放", '章末未检测到悬念收尾（最后200字无问句/动作悬念/认知缺口）', "'不是X，是Y'句式出现 1 次：['不是为了面试，而是——审计']。这是典型的AI结构化表达，请改为直接描述。", "发现 1 个非术语英文词: ['Word']", '疑似遗漏核心事件: 月度KPI面谈，未达成目标将扣除生理机能。林默发现考核表使用废止口径，无效化惩罚协议', '连续短句(12字以内)最多 6 句 > 阈值 5', '81 个段落未包含≥30字的长句']
+2026-06-09 22:43:20,642 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 完成，字数=2444
+2026-06-09 22:43:20,642 [novel-os.content.title] INFO: 第 3 章 标题兜底：插入标题 '主管问我KPI，我报了一个归零指标'
+2026-06-09 22:43:20,659 [novel-os.batch_writer] INFO: 第 3 章 角色状态已传播: 4 人
+2026-06-09 22:43:20,670 [novel-os.batch_writer] INFO: 第 3 章 完成，中文字数=2444，路径=D:\noveos\books\入职诡秘公司：我的工牌不对劲\chapters\第003章_主管问我KPI，我报了一个归零指标.txt
+第 3 章: success=True, level=WARN
+[92m22:53:15 - LiteLLM:WARNING[0m: common_utils.py:979 - litellm: could not pre-load bedrock-runtime response stream shape �� Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+[92m22:53:15 - LiteLLM:WARNING[0m: common_utils.py:24 - litellm: could not pre-load sagemaker-runtime response stream shape �� SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+2026-06-09 22:53:16,484 [novel-os.batch_writer] INFO: project_id 校验通过: 入职诡秘公司：我的工牌不对劲
+2026-06-09 22:53:16,883 [novel-os.batch_writer] INFO: ============================================================
+2026-06-09 22:53:16,883 [novel-os.batch_writer] INFO: BatchWriter 开始写作 第 3 章
+2026-06-09 22:53:16,891 [novel-os.pipeline] INFO: ============================================================
+2026-06-09 22:53:16,891 [novel-os.pipeline] INFO: [Pipeline] 开始写作 第 3 章
+2026-06-09 22:53:16,891 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 第 1 次尝试
+2026-06-09 22:53:16,891 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:53:37,866 [novel-os.steps.director] INFO: [Director] 第 3 章 任务卡已生成，标题=主管问我KPI，我报了一个归零指标
+2026-06-09 22:53:37,866 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:54:04,684 [novel-os.llm] WARNING: LLM 返回内容中包含 Kimi 思考过程（前缀: 好的，），已过滤（移除 51 字符）
+2026-06-09 22:54:04,684 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 3 章 节拍分配完成
+2026-06-09 22:54:04,684 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:54:04,684 [novel-os.input_governor] INFO: [InputGovernor] 编译第 3 章输入
+2026-06-09 22:54:04,691 [novel-os.input_governor] INFO: [InputGovernor] 第 3 章编译完成: 意图=23字, 人物=9行, 伏笔=0行, 债务=0行
+2026-06-09 22:54:04,691 [novel-os.steps.scene_writer] INFO: 第 3 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:55:03,044 [novel-os.steps.scene_writer] INFO: 第 3 章 SceneWriter 完成: 4171字
+2026-06-09 22:55:03,044 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:55:32,576 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:55:32,577 [novel-os.steps.dialogue_tuner] WARNING: 第 3 章 DialogueTuner 输入已超标(4558 > 4000)，跳过
+2026-06-09 22:55:32,577 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:56:02,912 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:56:02,923 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 PostWriteValidator 命中 2 处
+2026-06-09 22:56:02,923 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:56:02,931 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 Validator 标红 10 处
+2026-06-09 22:56:02,944 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ['字数超标: 4563 > 4000', "强制术语缺失: '永夜集团'（公司名，第1章起必须出现）", "强制术语缺失: '临终感知同步'（病症，第2章起必须出现）"]
+2026-06-09 22:56:02,945 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 截断到 4000 中文字符
+2026-06-09 22:56:02,952 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 第 2 次尝试
+2026-06-09 22:56:02,952 [novel-os.pipeline] INFO: [Pipeline] 执行 Director
+2026-06-09 22:56:02,952 [novel-os.steps.director] INFO: [Director] 第 3 章 复用已有任务卡
+2026-06-09 22:56:02,952 [novel-os.pipeline] INFO: [Pipeline] 执行 BeatPlanner
+2026-06-09 22:56:02,952 [novel-os.steps.beat_planner] INFO: [BeatPlanner] 第 3 章 复用已有节拍表
+2026-06-09 22:56:02,952 [novel-os.pipeline] INFO: [Pipeline] 执行 SceneWriter
+2026-06-09 22:56:02,952 [novel-os.steps.scene_writer] INFO: 第 3 章 启动 SceneWriter 单次写作（目标3200字）
+2026-06-09 22:57:01,884 [novel-os.steps.scene_writer] INFO: 第 3 章 SceneWriter 完成: 4083字
+2026-06-09 22:57:01,884 [novel-os.pipeline] INFO: [Pipeline] 执行 HookEngineer
+2026-06-09 22:57:31,254 [novel-os.pipeline] INFO: [Pipeline] 执行 DialogueTuner
+2026-06-09 22:57:31,256 [novel-os.steps.dialogue_tuner] WARNING: 第 3 章 DialogueTuner 输入已超标(4419 > 4000)，跳过
+2026-06-09 22:57:31,256 [novel-os.pipeline] INFO: [Pipeline] 执行 Polish
+2026-06-09 22:58:03,167 [novel-os.pipeline] INFO: [Pipeline] 执行 Auditor
+2026-06-09 22:58:03,175 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 PostWriteValidator 命中 2 处
+2026-06-09 22:58:03,175 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 跳过 SpotFix，保留原始内容
+2026-06-09 22:58:03,181 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 Validator 标红 7 处
+2026-06-09 22:58:03,194 [novel-os.pipeline] WARNING: ChapterValidator BLOCK: ['字数超标: 4432 > 4000', "强制术语缺失: '临终感知同步'（病症，第2章起必须出现）"]
+2026-06-09 22:58:03,195 [novel-os.pipeline] INFO: [Pipeline] 第 3 章 截断到 4000 中文字符
+2026-06-09 22:58:03,201 [novel-os.pipeline] ERROR: [Pipeline] 第 3 章 最终失败，已用尽 2 次重试
+2026-06-09 22:58:03,201 [novel-os.content.title] INFO: 第 3 章 标题兜底：插入标题 '主管问我KPI，我报了一个归零指标'
+2026-06-09 22:58:03,209 [novel-os.batch_writer] INFO: 第 3 章 草稿已保存: D:\noveos\books\入职诡秘公司：我的工牌不对劲\chapters\第003章_主管问我KPI，我报了一个归零指标.txt
+第 3 章: success=False, level=BLOCKING
