@@ -49,8 +49,8 @@ class BookConfig:
     chapters_target: int
     words_per_chapter: int
     base_path: Path
-    crewai_db_path: Path
     output_dir: str
+    crewai_db_path: Path = field(default_factory=lambda: Path("."))  # 已废弃，保留兼容旧 book.yaml
     v8_dir: str | None = None
 
     # Agent 查询配置
@@ -70,6 +70,9 @@ class BookConfig:
 
     # 外层 CrewAI 配置
     outer_crew: dict[str, Any] = field(default_factory=dict)
+
+    # 探索模式配置（前N章轻量验证）
+    exploration_mode: dict[str, Any] = field(default_factory=dict)
 
     # 插件 ID
     plugin_id: str = ""
@@ -91,15 +94,19 @@ class BookConfig:
 
         raw: dict[str, Any] = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
 
-        # 必需字段校验
-        required = ["project", "platform", "genre", "base_path", "crewai_db_path"]
+        # 必需字段校验（crewai_db_path 已废弃，不再强制要求）
+        required = ["project", "platform", "genre", "base_path"]
         missing = [k for k in required if k not in raw]
         if missing:
             raise ValueError(f"book.yaml 缺少必需字段: {missing}")
 
         # 解析路径并展开环境变量
         base_path = cls._resolve_path(raw["base_path"], "NOVEL_BASE_PATH")
-        crewai_db_path = cls._resolve_path(raw["crewai_db_path"], "CREWAI_STUDIO_PATH")
+        crewai_db_path = (
+            cls._resolve_path(raw["crewai_db_path"], "CREWAI_STUDIO_PATH")
+            if raw.get("crewai_db_path")
+            else Path(".")
+        )
 
         return cls(
             project=raw["project"],
@@ -119,6 +126,7 @@ class BookConfig:
             llm_fallback=_resolve_llm(raw.get("llm_fallback", {})),
             author_persona=raw.get("author_persona", {}),
             outer_crew=raw.get("outer_crew", {}),
+            exploration_mode=raw.get("exploration_mode", {}),
             plugin_id=raw.get("plugin_id", ""),
         )
 
@@ -166,5 +174,6 @@ class BookConfig:
             "writing": self.writing,
             "llm": self.llm,
             "author_persona": self.author_persona,
+            "exploration_mode": self.exploration_mode,
             "plugin_id": self.plugin_id,
         }

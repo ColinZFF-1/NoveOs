@@ -21,13 +21,41 @@ from core.guards.registry import GuardRegistry
 # ★ 强制术语字典 —— 世界观核心术语，必须在指定章节后出现
 # ============================================================================
 TERM_MANDATORY: dict[str, dict] = {
-    "永夜集团": {"first_chapter": 1, "category": "公司名", "severity": "BLOCK"},
-    "规则裂隙审计": {"first_chapter": 1, "category": "异能", "severity": "BLOCK"},
-    "存在性折旧": {"first_chapter": 1, "category": "代价", "severity": "BLOCK"},
-    "留白者": {"first_chapter": 1, "category": "怪物", "severity": "BLOCK"},
-    "临终感知同步": {"first_chapter": 2, "category": "病症", "severity": "BLOCK"},
-    "职场奴性模因": {"first_chapter": 3, "category": "副作用", "severity": "WARN"},
-    "HR模式": {"first_chapter": 7, "category": "技能", "severity": "WARN"},
+    "永夜集团": {
+        "first_chapter": 1, "category": "公司名", "severity": "BLOCK",
+        "good_example": "电梯停在十七楼，门开的瞬间，林默看到了墙面上缓慢呼吸的永夜集团Logo——不是印刷的，是某种生物荧光在墙皮下脉动。",
+        "bad_example": "永夜集团是一家神秘的公司，林默知道这里很危险。",
+    },
+    "规则裂隙审计": {
+        "first_chapter": 1, "category": "异能", "severity": "BLOCK",
+        "good_example": "规则裂隙审计让他看见了一条不该存在的条款——在'禁止'和'允许'之间，藏着一道裂缝。",
+        "bad_example": "林默拥有规则裂隙审计能力，可以看见规则中的漏洞。",
+    },
+    "存在性折旧": {
+        "first_chapter": 1, "category": "代价", "severity": "BLOCK",
+        "good_example": "工牌上的照片正在褪色，从彩色向黑白转变，边缘出现锯齿状的缺失。存在性折旧正在收取利息。",
+        "bad_example": "存在性折旧是指员工的存在权重被公司扣除的过程。",
+    },
+    "留白者": {
+        "first_chapter": 1, "category": "怪物", "severity": "BLOCK",
+        "good_example": "走廊尽头站着一个人形轮廓，五官像是被橡皮擦过，只剩下平滑的肤色。留白者转过脸，那上面没有眼睛，却像是在'看'。",
+        "bad_example": "留白者是被系统优化的员工，失去了自我意识。",
+    },
+    "临终感知同步": {
+        "first_chapter": 2, "category": "病症", "severity": "BLOCK",
+        "good_example": "女同事倒下的瞬间，林默的右手掌心传来一阵刺痛——不是他的痛，是另一个人的。临终感知同步，他尝到了别人的死亡。",
+        "bad_example": "林默的临终感知同步能力让他能感受到别人的死亡。",
+    },
+    "职场奴性模因": {
+        "first_chapter": 3, "category": "副作用", "severity": "WARN",
+        "good_example": "他开始觉得加班是对的，服从是天经地义的。这不是他的想法，是职场奴性模因在改写他的神经突触。",
+        "bad_example": "职场奴性模因是一种让员工变得顺从的机制。",
+    },
+    "HR模式": {
+        "first_chapter": 7, "category": "技能", "severity": "WARN",
+        "good_example": "林默切换到HR模式，情绪像被关进了静音舱。他看着面前哭泣的同事，心里只有一张表格和三个选项。",
+        "bad_example": "HR模式是林默的一种特殊状态，让他变得冷酷无情。",
+    },
 }
 
 # ============================================================================
@@ -35,16 +63,26 @@ TERM_MANDATORY: dict[str, dict] = {
 # ============================================================================
 THRESHOLDS = {
     # P0 阻塞级
-    "min_words": 4000,
-    "max_words": 5000,
-    "max_ta_density": 0.10,        # 统一用 10%，消除旧版 interceptor(10%) vs QualityGates(15%) 冲突
+    "min_words": 2800,
+    "max_words": 4000,
+    "max_ta_density": 0.06,        # 从10%降至6%，与 genre_dna 对齐，实际优质网文通常<5%
     "max_redline": 0,              # 红线词 = 0 容忍
     # P1 警告级
     "max_forbidden_patterns": 3,    # 禁用模式命中 > 3 个
-    "dialogue_ratio": (0.25, 0.45),
+    "dialogue_ratio": (0.20, 0.45),
     "max_dash_count": 3,
     "max_ellipsis_count": 2,
     "max_english_words": 0,
+    # 新增：句长 / IWR 结构
+    "sentence_length_min": 15,
+    "iwr_target": 2.5,
+    "question_count_min": 3,
+    "reveal_count_max": 5,
+    "max_sudden_count": 3,
+    "suspense_ending_min": 1,
+    "short_sentence_max": 12,
+    "long_sentence_min": 30,
+    "max_consecutive_short": 5,
     # P2 信息级
     "sensory_min_per_500": 1,      # 每 500 字至少 1 处非视觉感官
 }
@@ -68,6 +106,8 @@ BANNED_PATTERNS: dict[str, list[str]] = {
     ],
     "模板比喻": [
         "像一把刀", "像一条蛇", "像铁板", "像灯泡", "像离水的鱼",
+        "像提线木偶", "像蜡像", "像木偶", "像纸片", "像瓷器",
+        "像被加热的蜡像", "像离弦的箭", "像断了线的风筝",
     ],
     "标志性AI表情": [
         "嘴角微微上扬", "眼眸中闪过一丝", "眼底浮现", "眸色幽深",
@@ -105,6 +145,7 @@ class ChapterValidator:
         extra_blacklist: dict[str, list[str]] | None = None,
         guard_registry: GuardRegistry | None = None,
         thresholds: dict[str, Any] | None = None,
+        mandatory_terms: dict[str, dict] | None = None,
     ):
         self.thresholds = THRESHOLDS.copy()
         if thresholds:
@@ -114,6 +155,8 @@ class ChapterValidator:
             for k, v in extra_blacklist.items():
                 self.banned.setdefault(k, []).extend(v)
         self.guard_registry = guard_registry
+        # 强制术语字典：优先使用传入的配置，fallback 到模块级 TERM_MANDATORY
+        self.mandatory_terms = mandatory_terms if mandatory_terms is not None else TERM_MANDATORY
         self._compile_regexes()
 
     def _compile_regexes(self):
@@ -141,8 +184,18 @@ class ChapterValidator:
             r"(闻到|听见|触到|摸到|冰凉|温热|粗糙|滑腻|刺痛|麻木"
             r"|气味|声音|温度|触感|舌尖|鼻腔|耳膜|皮肤|指尖传来)"
         )
+        # 检测精确数字铺陈环境（连续数字+量词/名词组合）
+        self._re_precise_number = re.compile(
+            r"(?:\d+\.?\d*|[一二两三四五六七八九十百千万亿零半]+)\s*"
+            r"(?:个|颗|条|张|页|行|米|秒|分|度|次|种|份|件|只|把|本|支|块|片|粒|根|双|副|座|扇|层|步|颗|枚|具|头|匹|张|间|扇|艘|架|辆|台|部|套|滴|缕|丝|寸|尺|丈|里|亩|顷|吨|斤|两|克|千克|毫升|升|度|伏|瓦|赫兹|%)"
+        )
         self._re_chinese = re.compile(r"[一-鿿]")
         self._re_ta = re.compile(r"[他她它]")
+        self._re_question = re.compile(r"难道|究竟|怎么|会不会|为什么|什么|谁|哪里|为何|到底")
+        self._re_reveal = re.compile(r"原来|终于|发现|明白|知道|看来|果然|竟然|突然|顿时")
+        self._re_sudden = re.compile(r"突然")
+        self._re_ending_hook = re.compile(r"[？?]|正要|就要|刚要|即将|不知道|不明白|然而")
+        self._re_metaphor = re.compile(r"像.{1,10}一样|如同|仿佛|好似|犹如|宛如|好比|就像.{1,10}般")
 
     # ------------------------------------------------------------------
     # 公共接口
@@ -183,7 +236,7 @@ class ChapterValidator:
         # ── P0: 强制术语命中 ──
         ch_num = ctx.get("chapter_num", 0)
         missing_terms = self._check_mandatory_terms(text, ch_num)
-        metrics["mandatory_terms_hit"] = len(TERM_MANDATORY) - len(missing_terms)
+        metrics["mandatory_terms_hit"] = len(self.mandatory_terms) - len(missing_terms)
         metrics["mandatory_terms_miss"] = missing_terms
         if missing_terms:
             for term, cfg in missing_terms.items():
@@ -208,6 +261,21 @@ class ChapterValidator:
                 f"禁用模式命中 {total_banned} 次（阈值 {self.thresholds['max_forbidden_patterns']}）",
                 banned_hits))
 
+        # ── P1: 精确数字铺陈 ──
+        # 排除引号内内容（规则条文等允许精确数字）
+        non_dialogue_text = re.sub(r'[""].*?[ ""]', '', text)
+        pn_hits = self._re_precise_number.findall(non_dialogue_text)
+        # 过滤剧情必需数字（楼层、时间、章节编号等）
+        _story_essential = re.compile(
+            r'(?:第?[一二两三四五六七八九十百千万亿\d]+\s*(?:分钟|秒|小时|天|章|楼|层|号|室))'
+        )
+        pn_hits_filtered = [h for h in pn_hits if not _story_essential.search(h[0] if isinstance(h, tuple) else h)]
+        metrics["precise_number_count"] = len(pn_hits_filtered)
+        if len(pn_hits_filtered) > 5:  # 从20降至5
+            issues.append(ValidationIssue("WARN", "AI模式",
+                f"环境/身体描写中精确数字+量词出现 {len(pn_hits_filtered)} 次（阈值5），疑似AI量化铺陈。请改为身体体感描述（如'扎进肉里''震得牙根发酸'）。",
+                pn_hits_filtered[:5]))
+
         # ── P1: X秒凝视 ──
         xsec_hits = self._re_x_second.findall(text)
         metrics["x_second_count"] = len(xsec_hits)
@@ -226,6 +294,65 @@ class ChapterValidator:
         lo, hi = self.thresholds["dialogue_ratio"]
         if not (lo <= dialogue_ratio <= hi):
             issues.append(ValidationIssue("WARN", "对话", f"对话占比 {dialogue_ratio:.1%} 不在 [{lo:.0%}, {hi:.0%}] 范围"))
+
+        # ── P1: 句长结构 ──
+        sentence_issues = self._check_sentence_length(text, metrics)
+        issues.extend(sentence_issues)
+
+        # ── P1: IWR 悬念结构 ──
+        iwr_issues = self._check_iwr_structure(text, metrics)
+        issues.extend(iwr_issues)
+
+        # ── P1: "突然"专项计数 ──
+        sudden_hits = self._re_sudden.findall(text)
+        metrics["sudden_count"] = len(sudden_hits)
+        max_sudden = self.thresholds.get("max_sudden_count", 3)
+        if len(sudden_hits) > max_sudden:
+            issues.append(ValidationIssue(
+                "WARN", "禁用词",
+                f"'突然'出现 {len(sudden_hits)} 次 > 阈值 {max_sudden} 次",
+                sudden_hits[:5],
+            ))
+
+        # ── P1: 章末悬念收尾检查 ──
+        last_100 = text[-200:]
+        ending_hook_hits = self._re_ending_hook.findall(last_100)
+        metrics["ending_hook_count"] = len(ending_hook_hits)
+        suspense_min = self.thresholds.get("suspense_ending_min", 1)
+        if len(ending_hook_hits) < suspense_min:
+            issues.append(ValidationIssue(
+                "WARN", "悬念结构",
+                f"章末未检测到悬念收尾（最后200字无问句/动作悬念/认知缺口）",
+                last_100[-50:],
+            ))
+
+        # ── P1: 结尾结构同质化检测 ──
+        ending_issues = self._check_ending_structure(text, ctx)
+        issues.extend(ending_issues)
+
+        # ── P1: 排版检查 ──
+        paragraphs = [p for p in text.split('\n') if p.strip()]
+        para_cn_counts = [len(self._re_chinese.findall(p)) for p in paragraphs]
+        long_paras = [c for c in para_cn_counts if c > 30]
+        metrics["paragraph_count"] = len(paragraphs)
+        metrics["long_paragraph_count"] = len(long_paras)
+        metrics["avg_para_length"] = round(sum(para_cn_counts) / max(len(para_cn_counts), 1), 1)
+        if len(long_paras) > len(paragraphs) * 0.3 and len(paragraphs) > 5:
+            issues.append(ValidationIssue(
+                "WARN", "排版",
+                f"{len(long_paras)}/{len(paragraphs)} 段落超过30字，不符合网文移动端排版（应15-25字/段）",
+                {"avg": metrics["avg_para_length"]},
+            ))
+
+        # ── P1: 比喻检测 ──
+        metaphor_hits = self._re_metaphor.findall(text)
+        metrics["metaphor_count"] = len(metaphor_hits)
+        if len(metaphor_hits) > 3:
+            issues.append(ValidationIssue(
+                "WARN", "AI模式",
+                f"比喻/类比出现 {len(metaphor_hits)} 次 > 阈值3: {metaphor_hits[:5]}",
+                metaphor_hits,
+            ))
 
         # ── P1: 英文残留 ──
         eng_words = self._re_english.findall(text)
@@ -319,7 +446,7 @@ class ChapterValidator:
         missing = {}
         if chapter_num <= 0:
             return missing
-        for term, cfg in TERM_MANDATORY.items():
+        for term, cfg in self.mandatory_terms.items():
             if chapter_num >= cfg["first_chapter"] and term not in text:
                 missing[term] = cfg
         return missing
@@ -332,27 +459,37 @@ class ChapterValidator:
 
     @staticmethod
     def _calc_dialogue_ratio(text: str) -> float:
-        """估算对话占比：中文引号内容 / 总字数。"""
-        # 匹配多种中文引号：“...” 或 "..." 或 「...」
-        contents = (
-            re.findall(r'“([^”]*)”', text) +  # "..."
-            re.findall(r'「([^」]*)」', text) +  # 「...」
-            re.findall(r'『([^』]*)』', text)      # 『...』
-        )
-        chinese = len(re.findall(r'[一-鿿]', text))
-        if chinese == 0:
+        """估算对话占比：有对话标记的段落 / 总段落。"""
+        paragraphs = [p for p in text.split('\n') if p.strip()]
+        if not paragraphs:
             return 0.0
-        dialogue_chars = sum(len(re.findall(r'[一-鿿]', q)) for q in contents)
-        return min(dialogue_chars / chinese, 1.0)
+        dial_paras = 0
+        for p in paragraphs:
+            if re.search(r'[\u201c\u201d\u2018\u2019""''「」『』]', p):
+                dial_paras += 1
+        return dial_paras / len(paragraphs)
 
     @staticmethod
     def _verify_core_event(text: str, core_event: str) -> bool:
-        """检查核心事件关键词是否在正文中出现。"""
+        """检查核心事件关键词是否在正文中出现。
+
+        过滤掉通用词（角色名、常见动词），只检查事件特异性词汇，
+        提高阈值到 70% 以减少误报。
+        """
+        # 通用词过滤：这些词在每章都会出现，不能作为遵循度指标
+        stopwords = {
+            "林默", "苏晚", "张经理", "陈雨", "老周", "发现", "知道",
+            "规则", "公司", "系统", "员工", "部门", "办公室", "工作",
+            "时间", "时候", "开始", "已经", "进行", "需要", "必须",
+            "没有", "不能", "可以", "还是", "但是", "因为", "所以",
+            "一个", "什么", "怎么", "为什么", "如何", "哪里",
+        }
         keywords = re.findall(r"[一-鿿]{2,}", core_event)
+        keywords = [kw for kw in keywords if kw not in stopwords]
         if not keywords:
             return True
         match_count = sum(1 for kw in keywords if kw in text)
-        return match_count >= len(keywords) * 0.5
+        return match_count >= len(keywords) * 0.70
 
     @staticmethod
     def _check_continuity(text: str, state_manager, chapter_num: int) -> list[ValidationIssue]:
@@ -373,6 +510,128 @@ class ChapterValidator:
                             f"人物'{name}'位置从'{prev_loc}'跳变到'{curr_loc}'，正文未提及"))
         except Exception:
             pass
+        return issues
+
+    def _check_sentence_length(self, text: str, metrics: dict[str, Any]) -> list[ValidationIssue]:
+        """检查句长均值和连续短句，返回问题列表。"""
+        issues: list[ValidationIssue] = []
+        sentences = [s for s in re.split(r"[。！？…]+", text) if s.strip()]
+        sent_lens = [
+            len(re.findall(r"[一-鿿]", s))
+            for s in sentences
+            if len(re.findall(r"[一-鿿]", s)) > 0
+        ]
+        if not sent_lens:
+            return issues
+
+        avg_len = sum(sent_lens) / len(sent_lens)
+        metrics["avg_sentence_length"] = round(avg_len, 1)
+
+        if avg_len > 30:
+            issues.append(ValidationIssue(
+                "WARN", "句长",
+                f"平均句长 {avg_len:.1f} 字 > 推荐上限 30 字，影响移动端可读性",
+                avg_len,
+            ))
+
+        short_threshold = self.thresholds.get("short_sentence_max", 12)
+        max_consec = self.thresholds.get("max_consecutive_short", 3)
+        consecutive = 0
+        max_consecutive = 0
+        for length in sent_lens:
+            if length <= short_threshold:
+                consecutive += 1
+                max_consecutive = max(max_consecutive, consecutive)
+            else:
+                consecutive = 0
+        metrics["max_consecutive_short_sentences"] = max_consecutive
+
+        if max_consecutive > max_consec:
+            issues.append(ValidationIssue(
+                "INFO", "句长",
+                f"连续短句({short_threshold}字以内)最多 {max_consecutive} 句 > 阈值 {max_consec}",
+                max_consecutive,
+            ))
+
+        long_min = self.thresholds.get("long_sentence_min", 25)
+        paragraphs = [p for p in text.split("\n") if p.strip()]
+        short_para_count = 0
+        for para in paragraphs:
+            para_sents = [s for s in re.split(r"[。！？…]+", para) if s.strip()]
+            para_lens = [
+                len(re.findall(r"[一-鿿]", s))
+                for s in para_sents
+                if len(re.findall(r"[一-鿿]", s)) > 0
+            ]
+            if para_lens and not any(l >= long_min for l in para_lens):
+                short_para_count += 1
+        metrics["paragraphs_without_long_sentence"] = short_para_count
+        if short_para_count > 0:
+            issues.append(ValidationIssue(
+                "INFO", "句长",
+                f"{short_para_count} 个段落未包含≥{long_min}字的长句",
+                short_para_count,
+            ))
+
+        return issues
+
+    def _check_iwr_structure(self, text: str, metrics: dict[str, Any]) -> list[ValidationIssue]:
+        """检查悬念问句数量和揭示词数量，返回问题列表。"""
+        issues: list[ValidationIssue] = []
+
+        question_hits = self._re_question.findall(text)
+        metrics["question_count"] = len(question_hits)
+
+        reveal_hits = self._re_reveal.findall(text)
+        metrics["reveal_count"] = len(reveal_hits)
+
+        q_min = self.thresholds.get("question_count_min", 5)
+        r_max = self.thresholds.get("reveal_count_max", 3)
+
+        if len(question_hits) < q_min:
+            issues.append(ValidationIssue(
+                "WARN", "悬念结构",
+                f"悬念问句 {len(question_hits)} 个 < 阈值 {q_min}，IWR不足导致追读力弱",
+                question_hits,
+            ))
+
+        if len(reveal_hits) > r_max:
+            issues.append(ValidationIssue(
+                "WARN", "悬念结构",
+                f"揭示词 {len(reveal_hits)} 个 > 阈值 {r_max}: {reveal_hits[:5]}，信息过度释放",
+                reveal_hits,
+            ))
+
+        return issues
+
+    def _check_ending_structure(self, text: str, ctx: dict) -> list[ValidationIssue]:
+        """检测是否使用了'主角静止+物品特写+悬念'的AI万能结尾结构。"""
+        issues: list[ValidationIssue] = []
+        last_200 = text[-200:]
+
+        # 检测模式：主角名 + 静止动词（站/坐/握/看/摸/抵/触/盯）+ 物品 + 疑问/悬念/省略
+        static_pattern = re.compile(
+            r'(?:林默|苏晚).{0,15}(?:站|坐|握|看|摸|抵|触|盯|望|盯|抵|靠).{0,25}'
+            r'(?:工牌|照片|刀|门|血|黑暗|空白|碎裂|裂缝|倒计时|NULL|文件|纸|屏幕|光).{0,30}'
+            r'[？?……]'
+        )
+        if static_pattern.search(last_200):
+            issues.append(ValidationIssue(
+                "WARN", "结尾结构",
+                "检测到'主角静止+物品特写+悬念'结尾结构，连续使用会导致同质化AI味。建议轮换：动作悬念/对话未竟/认知崩塌/环境突变",
+                last_200[-60:],
+            ))
+
+        # 检测"不是X，是Y"句式（全书禁用）
+        not_x_but_y = re.compile(r'不是[^，。！？]{1,10}，?而是[^，。！？]{1,10}')
+        nyb_hits = not_x_but_y.findall(text)
+        if nyb_hits:
+            issues.append(ValidationIssue(
+                "WARN", "AI模式",
+                f"'不是X，是Y'句式出现 {len(nyb_hits)} 次：{nyb_hits[:3]}。这是典型的AI结构化表达，请改为直接描述。",
+                nyb_hits[:3],
+            ))
+
         return issues
 
     def _auto_replace(self, text: str, banned_hits: dict[str, list[str]]) -> str:

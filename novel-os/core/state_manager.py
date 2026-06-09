@@ -284,6 +284,26 @@ class StateManager:
                     FOREIGN KEY (project_id) REFERENCES projects(project_id)
                 );
                 CREATE INDEX IF NOT EXISTS idx_outer_crew ON outer_crew_reports(project_id, chapter, agent_type);
+
+                CREATE TABLE IF NOT EXISTS term_dict (
+                    project_id      TEXT NOT NULL,
+                    term            TEXT NOT NULL,
+                    category        TEXT,
+                    first_chapter   INTEGER,
+                    description     TEXT,
+                    PRIMARY KEY (project_id, term),
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                );
+
+                CREATE TABLE IF NOT EXISTS chapter_specs (
+                    project_id      TEXT NOT NULL,
+                    chapter         INTEGER NOT NULL,
+                    spec_key        TEXT NOT NULL,
+                    spec_value      TEXT,
+                    PRIMARY KEY (project_id, chapter, spec_key),
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_chapter_specs ON chapter_specs(project_id, chapter);
                 """
             )
 
@@ -800,13 +820,19 @@ class StateManager:
     # 查询接口（供 API 层使用）
     # ------------------------------------------------------------------
     def list_characters(self) -> list[dict[str, Any]]:
-        """列出当前项目的所有角色（去重）。"""
+        """列出当前项目的所有角色的最新状态（按 chapter 降序取最新）。"""
         with self._connect() as conn:
             cursor = conn.execute(
                 """
-                SELECT DISTINCT character_name, location, emotional_state
-                FROM character_states
+                SELECT character_name, location, emotional_state, known_secrets,
+                       dialog_fingerprint, body_language, physical_description
+                FROM character_states cs1
                 WHERE project_id = ?
+                  AND chapter = (
+                      SELECT MAX(chapter) FROM character_states cs2
+                      WHERE cs2.project_id = cs1.project_id
+                        AND cs2.character_name = cs1.character_name
+                  )
                 ORDER BY character_name
                 """,
                 (self.project_id,),
@@ -1001,6 +1027,138 @@ class StateManager:
             encoding="utf-8",
         )
 
+
+    # ------------------------------------------------------------------
+    # 扩展查询接口（供 batch_writer 使用，替代直接 SQL）
+    # ------------------------------------------------------------------
+    def get_chapter_title(self, chapter_num: int) -> str:
+        """获取指定章节的标题。"""
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT title FROM chapter_history WHERE project_id = ? AND chapter = ?",
+                (self.project_id, chapter_num),
+            ).fetchone()
+            return row["title"] if row and row["title"] else ""
+
+    def set_chapter_title(self, chapter_num: int, title: str) -> None:
+        """保存章节标题到 chapter_history。"""
+        with self._connect() as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO chapter_history (project_id, chapter, title, created_at) VALUES (?, ?, ?, datetime('now'))",
+                (self.project_id, chapter_num, title),
+            )
+
+    def get_chapter_outline(self, chapter_num: int) -> dict[str, str]:
+        """获取指定章节的大纲规划。"""
+        with self._connect() as conn:
+            row = conn.execute(
+                """SELECT arc, core_event, face_slap_target, face_slap_method,
+                   husband_moment, chapter_hook, emotion_ratio, skill_unlocked
+                   FROM outline WHERE project_id = ? AND chapter = ?""",
+                (self.project_id, chapter_num),
+            ).fetchone()
+            if row:
+                return {
+                    "arc": row["arc"] or "",
+                    "core_event": row["core_event"] or "",
+                    "face_slap_target": row["face_slap_target"] or "",
+                    "face_slap_method": row["face_slap_method"] or "",
+                    "husband_moment": row["husband_moment"] or "",
+                    "chapter_hook": row["chapter_hook"] or "",
+                    "emotion_ratio": row["emotion_ratio"] or "",
+                    "skill_unlocked": row["skill_unlocked"] or "",
+                }
+            return {}
+
+    def get_characters_full(self) -> list[dict[str, Any]]:
+        """获取所有活跃人物的完整状态（含对话指纹）。"""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """SELECT character_name, location, emotional_state, known_secrets,
+                   unknown_secrets, abilities_active, dialog_fingerprint,
+                   body_language, physical_description
+                   FROM character_states WHERE project_id = ?""",
+                (self.project_id,),
+            ).fetchall()
+            return [
+                {
+                    "name": r["character_name"],
+                    "location": r["location"],
+                    "emotional_state": r["emotional_state"],
+                    "known_secrets": r["known_secrets"],
+                    "unknown_secrets": r["unknown_secrets"],
+                    "abilities": r["abilities_active"],
+                    "dialog_fingerprint": r["dialog_fingerprint"] or "",
+                    "body_language": r["body_language"] or "",
+                    "description": r["physical_description"] or "",
+                }
+                for r in rows
+            ]
+
+    def get_characters_by_chapter(self, chapter: int) -> list[dict[str, Any]]:
+        """获取指定章节的所有角色状态。"""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """SELECT character_name, location, emotional_state, known_secrets,
+                   unknown_secrets, abilities_active, dialog_fingerprint,
+                   body_language, physical_description
+                   FROM character_states
+                   WHERE project_id = ? AND chapter = ?""",
+                (self.project_id, chapter),
+            ).fetchall()
+            return [
+                {
+                    "name": r["character_name"],
+                    "location": r["location"],
+                    "emotional_state": r["emotional_state"],
+                    "known_secrets": r["known_secrets"],
+                    "unknown_secrets": r["unknown_secrets"],
+                    "abilities": r["abilities_active"],
+                    "dialog_fingerprint": r["dialog_fingerprint"] or "",
+                    "body_language": r["body_language"] or "",
+                    "description": r["physical_description"] or "",
+                }
+                for r in rows
+            ]
+
+    def get_hard_rules(self) -> list[str]:
+        """获取所有 hard 级别的写作规则。"""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """SELECT rule_type, rule_content FROM consistency_rules
+                   WHERE project_id = ? AND enforcement_level = 'hard'""",
+                (self.project_id,),
+            ).fetchall()
+            return [f"[{r['rule_type']}] {r['rule_content']}" for r in rows]
+
+    def get_term_dict(self) -> list[dict[str, Any]]:
+        """获取术语字典。"""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """SELECT term, category, first_chapter, description
+                   FROM term_dict WHERE project_id = ? ORDER BY first_chapter""",
+                (self.project_id,),
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+    def get_chapter_specs(self, spec_keys: list[str] | None = None) -> list[dict[str, Any]]:
+        """获取章节规格（如 title、core_event 等）。"""
+        with self._connect() as conn:
+            if spec_keys:
+                placeholders = ",".join(["?"] * len(spec_keys))
+                rows = conn.execute(
+                    f"""SELECT chapter, spec_key, spec_value FROM chapter_specs
+                       WHERE project_id = ? AND spec_key IN ({placeholders})
+                       ORDER BY chapter LIMIT 30""",
+                    (self.project_id, *spec_keys),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """SELECT chapter, spec_key, spec_value FROM chapter_specs
+                       WHERE project_id = ? ORDER BY chapter LIMIT 30""",
+                    (self.project_id,),
+                ).fetchall()
+            return [dict(r) for r in rows]
 
     # ------------------------------------------------------------------
     # Interceptor / DeAI 扩展（Phase 2 预留）

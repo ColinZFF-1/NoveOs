@@ -1,11 +1,15 @@
 import asyncio
 import logging
+import os
+from pathlib import Path
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException as FastAPIHTTPException
+from fastapi.staticfiles import StaticFiles
 from core.orchestrator import Orchestrator
+from core.config_loader import BookConfig
 
 # 统一日志格式
 logging.basicConfig(
@@ -73,5 +77,46 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 @app.on_event("startup")
 async def startup():
-    """启动事件：Orchestrator 已在模块级初始化完成。"""
-    pass
+    """启动事件：扫描 books/ 目录自动注册项目，并处理 Orc 初始化。"""
+
+    # ── 1. 扫描 books/ 目录，自动注册未在 DB 中的项目 ──
+    books_root = Path(os.environ.get("NOVEL_BASE_PATH", "D:/noveos/books"))
+    if books_root.exists():
+        registered = {p.project_id for p in orchestrator._projects.values()}
+        for book_dir in books_root.iterdir():
+            if not book_dir.is_dir():
+                continue
+            yaml_path = book_dir / "book.yaml"
+            if not yaml_path.exists():
+                continue
+            # 用目录名作为 project_id
+            project_id = book_dir.name
+            if project_id in registered:
+                continue
+            try:
+                book_config = BookConfig.from_yaml(yaml_path)
+                orchestrator.register_project(project_id, book_config)
+                logging.getLogger("novel-os.api").info(
+                    "自动注册项目: %s (%s · %s · %d章)",
+                    project_id,
+                    book_config.genre,
+                    book_config.platform,
+                    book_config.chapters_target,
+                )
+                # 持久化到全局 DB
+                orchestrator._persist_project(
+                    project_id,
+                    orchestrator._projects[project_id],
+                )
+            except Exception:
+                logging.getLogger("novel-os.api").exception(
+                    "自动注册项目失败: %s", project_id
+                )
+
+    # ── 2. 挂载前端静态文件（开发时由 Vite dev server 提供，生产时由此处提供）──
+    dist_dir = Path(__file__).resolve().parent.parent.parent / "app" / "dist"
+    if dist_dir.exists():
+        app.mount("/", StaticFiles(directory=str(dist_dir), html=True), name="frontend")
+        logging.getLogger("novel-os.api").info(
+            "前端静态文件已挂载: %s", dist_dir
+        )

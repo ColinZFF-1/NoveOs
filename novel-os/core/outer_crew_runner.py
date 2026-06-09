@@ -1,4 +1,4 @@
-"""Novel-OS 外层 CrewAI 运行器 —— 战略层质量巡检。
+"""Novel-OS 外层巡检运行器 —— 战略层质量巡检。
 
 职责：
   - 每 5 章：Novel Architect（全书架构师）+ Continuity Inspector（跨章一致性巡检）
@@ -6,7 +6,7 @@
   - 发现 🔴 矛盾时：Retcon Manager（回溯修正师）
 
 设计约束：
-  - 复用 CrewAIConnector（YAML 配置加载）+ LLMClient
+  - 直接从 book.yaml 加载配置 + LLMClient 调用
   - 失败隔离：外层 Agent 失败不阻塞内层写作
   - 上下文裁剪：只注入 Agent 需要的信息，避免 prompt 爆炸
 """
@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Any
 
 from core.config_loader import BookConfig
-from core.crewai_connector import CrewAIConnector
 from core.llm_client import LLMClient
 from core.state_manager import StateManager
 
@@ -97,9 +96,9 @@ class RetconPlan:
 # ============================================================================
 
 class OuterCrewRunner:
-    """外层 CrewAI 战略层运行器。
+    """外层战略巡检运行器。
 
-    通过 CrewAIConnector 加载 outer_crew/agents.yaml + tasks.yaml，
+    从 book.yaml 和 StateManager 加载配置与上下文，
     调用 LLM 执行 4 个外层 Agent，返回结构化报告。
     """
 
@@ -113,16 +112,10 @@ class OuterCrewRunner:
         self.state = state_manager
         self.llm = llm_client
 
-        # 加载外层 CrewAI 配置
-        yaml_dir = Path(__file__).parent.parent / "outer_crew"
-        self.crew = CrewAIConnector(
-            db_path=Path("/dev/null"),  # 外层不用 db，只用 YAML
-            mock_mode=False,
-            yaml_dir=yaml_dir if yaml_dir.exists() else None,
-        )
-
-        if self.crew.mock_mode:
-            logger.warning("外层 CrewAI 未找到 YAML 配置，将禁用外层巡检")
+        # 外层巡检配置：检查 book.yaml 是否配置了外层 Agent
+        self._available = "novel_architect" in self.cfg.agent_query
+        if not self._available:
+            logger.info("book.yaml 未配置外层巡检 Agent（novel_architect），外层巡检已禁用")
 
     # ------------------------------------------------------------------
     # 公共接口
@@ -130,11 +123,11 @@ class OuterCrewRunner:
 
     def is_available(self) -> bool:
         """外层配置是否可用。"""
-        return not self.crew.mock_mode
+        return self._available
 
     def run_architecture_review(self, chapter_num: int) -> ArchitectureReview:
         """运行 Novel Architect —— 全书架构巡检。"""
-        if self.crew.mock_mode:
+        if not self._available:
             return ArchitectureReview()
 
         try:
@@ -151,7 +144,7 @@ class OuterCrewRunner:
 
     def run_continuity_check(self, chapter_num: int) -> ContinuityReport:
         """运行 Continuity Inspector —— 跨章一致性巡检。"""
-        if self.crew.mock_mode:
+        if not self._available:
             return ContinuityReport()
 
         try:
@@ -168,7 +161,7 @@ class OuterCrewRunner:
 
     def run_pacing_analysis(self, chapter_num: int) -> PacingReport:
         """运行 Pacing Analyst —— 节奏分析。"""
-        if self.crew.mock_mode:
+        if not self._available:
             return PacingReport()
 
         try:
@@ -187,7 +180,7 @@ class OuterCrewRunner:
         self, issues: list[ContinuityIssue], chapter_num: int
     ) -> RetconPlan:
         """运行 Retcon Manager —— 回溯修正。"""
-        if self.crew.mock_mode or not issues:
+        if not self._available or not issues:
             return RetconPlan()
 
         try:
@@ -207,54 +200,27 @@ class OuterCrewRunner:
     # ------------------------------------------------------------------
 
     def _build_system_prompt(self, agent_type: str) -> str:
-        """构建 system prompt。优先从 book.yaml agent_query 读取，fallback 到 crewai/agents.yaml。"""
-        # 1. 优先从 book.yaml agent_query 读取（与内层写作流水线统一）
+        """构建 system prompt。直接从 book.yaml agent_query 读取。"""
         query_cfg = self.cfg.agent_query.get(agent_type, {})
-        role = query_cfg.get("role", "")
+        role = query_cfg.get("role", agent_type)
         goal = query_cfg.get("goal", "")
-        # book.yaml 的 agent_query 没有 backstory，所以 backstory 仍从 crewai YAML 取
-
-        # 2. Fallback 到 crewai/agents.yaml
-        crew_cfg = {}
-        if not role:
-            try:
-                agent_id = self.crew.get_agent_id("", agent_type)
-                crew_cfg = self.crew.get_agent_config(agent_id)
-            except ValueError:
-                pass
-            role = crew_cfg.get("role", agent_type)
-            goal = crew_cfg.get("goal", "")
-        backstory = crew_cfg.get("backstory", "")
 
         parts = [f"你是 {role}。"]
         if goal:
             parts.append(f"你的目标是：{goal}")
-        if backstory:
-            parts.append(backstory)
         return "\n\n".join(parts)
 
     def _build_task_prompt(
         self, task_type: str, chapter_num: int, context: dict[str, Any]
     ) -> str:
-        """从 CrewAIConnector 查询 Task 配置，构建 user prompt。"""
-        try:
-            # 外层 task 的 agent_id 就是 agent_type（YAML 里 agent 字段）
-            agent_type = task_type.replace("architecture_review", "novel_architect")
-            agent_type = agent_type.replace("continuity_check", "continuity_inspector")
-            agent_type = agent_type.replace("pacing_analysis", "pacing_analyst")
-            agent_type = agent_type.replace("retcon_fix", "retcon_manager")
-
-            agent_id = self.crew.get_agent_id("", agent_type)
-            task_id = self.crew.get_task_id(agent_id, task_type)
-            task_cfg = self.crew.get_task_config(task_id)
-            desc = task_cfg.get("description", "")
-            expected = task_cfg.get("expected_output", "")
-        except ValueError:
-            desc = ""
-            expected = ""
+        """从 book.yaml 查询 Task 配置，构建 user prompt。"""
+        query_cfg = self.cfg.agent_query.get(task_type, {})
+        desc = query_cfg.get("description", "")
+        expected = query_cfg.get("expected_output", "")
 
         # 替换模板变量
         desc = desc.replace("{chapter_number}", str(chapter_num))
+        desc = desc.replace("{chapter}", str(chapter_num))
         for key, val in context.items():
             placeholder = "{" + key + "}"
             if placeholder in desc:
@@ -373,8 +339,8 @@ class OuterCrewRunner:
         lines = ["## 最近章节摘要"]
         for h in history:
             lines.append(
-                f"- 第{h.get('chapter', '?')}章 [{h.get('title', '无标题')}]: "
-                f"{h.get('summary', '')[:100]} | 字数:{h.get('word_count', 0)}"
+                f"- 第{h.get('chapter', '?')}章 [{h.get('title') or '无标题'}]: "
+                f"{(h.get('summary') or '')[:100]} | 字数:{h.get('word_count', 0)}"
             )
         return "\n".join(lines)
 

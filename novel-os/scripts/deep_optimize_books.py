@@ -41,7 +41,6 @@ logger = logging.getLogger("deep_optimize")
 
 from core.config_loader import BookConfig
 from core.state_manager import StateManager
-from core.crewai_connector import CrewAIConnector
 from core.batch_writer import BatchWriter, WriteResult
 from core.iwr_analyzer import analyze_chapter
 from core.platform_scorer import score_platform_adaptation

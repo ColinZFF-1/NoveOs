@@ -12,7 +12,11 @@
 """
 from __future__ import annotations
 
+import glob
 import logging
+import os
+import re
+from pathlib import Path
 from typing import Any
 
 from core.config_loader import BookConfig
@@ -22,12 +26,16 @@ logger = logging.getLogger("novel-os.prompt_builder")
 
 # 默认去 AI 味规则（当配置未提供时兜底）
 _DEFAULT_DE_AI_RULES = """\
-【去AI味核心规则】
-1. 他字密度≤10%：每100字中"他/她/它"出现不超过10次。情绪必须物化（如"指甲掐进掌心"代替"她很愤怒"）。
-2. 禁用高频AI词：然而、不得不说、众所周知、突然、竟然、原来、与此同时、紧接着、果不其然。
-3. 句式破坏：每200字必须有1处短句（≤8字）或非常规断句，禁止连续3句主谓宾整齐排比。
+1. 他字密度：每100字中"他/她/它"不得超过10个。情绪必须物化（不是"他很害怕"，而是"指节发白，茶水在杯里晃出涟漪"）。
+2. 禁用词（出现即严重扣分，每章不得超过3次）：缓缓、微微、淡淡、轻轻、默默、悄然、莫名、忽然、竟然、突然、与此同时、果不其然、不得不说、众所周知、就在这时、心中一凛、心头一震、下意识觉得。
+3. 句式破坏：每200字必须有1处短句（≤8字）或非常规断句，禁止连续3句主谓宾整齐排比。单句长度控制在25字以内，超过35字必须拆句。
 4. 感官锚定：每300字至少1处五感细节（味/嗅/触/听/视），禁止抽象概括。
-5. 对话指纹：每个角色对话必须有独特口头禅或句式习惯，禁止所有角色说话像同一个人。
+5. 对话指纹：每个角色对话必须有独特口头禅或句式习惯，禁止所有角色说话像同一个人。对话占比不得超过30%，其余70%必须是环境描写、动作细节或心理外化。
+6. IWR铁律（追读核心）：每章必须提出至少3个新的认知缺口（疑问/悬念），揭示词（原来/终于/发现/明白/突然/竟然/果然/顿时）总计不得超过5次。信息扣留比IWR必须≥2.0。
+7. 钩子铁律：章末最后50字必须留下未解之谜——问句、动作悬念、或新威胁的引入。禁止以叙述总结或情绪收束结尾。
+8. 开场铁律：优先以情境描写或动作切入开场，非必要不使用对话开场。前100字必须建立空间锚点（地点/光线/气味/声音）。
+9. 比喻铁律：全文比喻不得超过3处。禁止公共库存比喻（像刀/像蛇/像铁板/像离水的鱼/像提线木偶/像蜡像/像木偶）。允许：私有比喻（必须与主角个人经历或本章特定物品绑定）。禁止通用比喻词：仿佛、好似、犹如、宛如、如同、像……一样、就像、好比。
+10. 排版铁律：每段控制在15-25个中文字（约1-2句话），超过30字必须换行。对话和叙述交替时每句一换行，禁止大段连续描写。移动端阅读：短段落=高翻页率=高留存。
 """
 
 _DEFAULT_FORBIDDEN_WORDS = [
@@ -202,6 +210,54 @@ class PromptBuilder:
             return f"【去AI味核心规则】\n{custom}"
         return _DEFAULT_DE_AI_RULES
 
+    def _build_writing_constitution(self, chapter_num: int) -> str:
+        """将 Validator 硬指标翻译成 LLM 前置写作指令。"""
+        target = self.cfg.words_per_chapter
+        tol = self.cfg.words_tolerance
+
+        # 从 ChapterValidator 同步阈值，避免 prompt 与校验器脱节
+        from core.chapter_validator import THRESHOLDS as VT
+
+        iwr_target = VT.get("iwr_target", 2.5)
+        q_min = VT.get("question_count_min", 5)
+        r_max = VT.get("reveal_count_max", 3)
+        sent_min = VT.get("sentence_length_min", 20)
+        short_max = VT.get("short_sentence_max", 12)
+        long_min = VT.get("long_sentence_min", 25)
+        max_consec = VT.get("max_consecutive_short", 3)
+        dlg_lo, dlg_hi = VT.get("dialogue_ratio", (0.25, 0.45))
+
+        lines = [
+            "【写作宪法——违反任何一条，整章作废重写】",
+            "",
+            f"1. 字数铁律：本章中文字数必须严格控制在 {target - tol} ~ {target + tol} 字。",
+            f"   统计方式：只算汉字，不算标点、空格、英文、数字。",
+            "",
+            f"2. 悬念铁律（IWR≥{iwr_target}）：",
+            f"   - 本章必须预埋至少 {q_min} 个悬念问句（用难道/究竟/怎么/会不会等）。",
+            f"   - 揭示词（原来/终于/发现/明白/知道/看来/果然/竟然/突然/顿时）不得超过 {r_max} 个。",
+            "   - 每提出一个悬念，必须在 500 字内给出部分线索，但不得在 2000 字内彻底揭晓。",
+            "",
+            f"3. 句长铁律（均值 {sent_min}-28 字）：",
+            f"   - 禁止连续使用 {max_consec} 个以上≤{short_max} 字的句子。",
+            f"   - 每个段落至少包含 1 个≥{long_min} 字的复合句。",
+            '   - 碎片化动作（"他笑了。他走了。他回头。"）视为一级违规。',
+            "",
+            f"4. 视角铁律（他密度<{VT.get('max_ta_density', 0.10):.0%}）：",
+            '   - 主语优先使用角色全名（林默/陈雨），其次用省略主语的无头句。',
+            '   - 禁止用"他/她"指代前文超过 3 句未出现的角色。',
+            "",
+            f"5. 对话铁律（占比 {int(dlg_lo*100)}%-{int(dlg_hi*100)}%）：",
+            "   - 对话簇（连续引号段落）不得超过 3 段。",
+            "   - 规则条款用冷峻客观体，情感对话克制而撕裂。",
+            "   - 禁止用对话交代世界观。",
+            "",
+            "6. 章末钩子铁律：",
+            "   - 最后 100 字必须包含 1 个未解之谜或 1 个情绪定格画面。",
+            '   - 禁止用"他不知道的是……"这种 AI 万能结尾。',
+        ]
+        return "\n".join(lines)
+
     def _build_plugin_rules(self) -> str:
         """插件专属规则。"""
         if not self._plugin_rules:
@@ -278,24 +334,27 @@ class PromptBuilder:
         # 2. 去 AI 味核心规则
         parts.append(self._build_de_ai_rules())
 
-        # 3. 插件专属规则
+        # 3. 写作宪法（把 Validator 硬指标前置注入）
+        parts.append(self._build_writing_constitution(chapter_num))
+
+        # 4. 插件专属规则
         plugin_rules = self._build_plugin_rules()
         if plugin_rules:
             parts.append(plugin_rules)
 
-        # 4. Agent 描述
+        # 5. Agent 描述
         if desc:
             parts.append(desc)
 
-        # 5. 上下文与状态
+        # 6. 上下文与状态
         if context:
             parts.append(f"[外部上下文]\n{context}")
         parts.append(f"[本章状态]\n{state_text}")
 
-        # 6. Director 任务卡
+        # 7. Director 任务卡
         parts.append(f"[Director 任务卡]\n{director_output[:5000]}")
 
-        # 7. 预期输出
+        # 8. 预期输出
         if expected:
             parts.append(f"[预期输出]\n{expected}")
 

@@ -66,10 +66,17 @@ class LLMConfig:
 class LLMClient:
     """统一的 LLM 调用客户端（基于 OpenAI SDK，兼容 DeepSeek 等 OpenAI 格式 API）。
 
-    支持 fallback 配置：当主 Provider 调用失败时自动切换到备用 Provider。
+    支持：
+    - fallback 配置：主 Provider 失败自动切换
+    - 按 Agent 分模型：不同 Agent 可走不同模型/Provider（对标 InkOS）
     """
 
-    def __init__(self, config: LLMConfig | None = None, fallback_config: LLMConfig | None = None) -> None:
+    def __init__(
+        self,
+        config: LLMConfig | None = None,
+        fallback_config: LLMConfig | None = None,
+        agent_configs: dict[str, dict[str, Any]] | None = None,
+    ) -> None:
         self.cfg = config or LLMConfig.from_env()
         self.cfg.validate()
         self._client, self._use_openai = self._build_client(self.cfg)
@@ -81,6 +88,23 @@ class LLMClient:
         if self.fallback_cfg:
             self.fallback_cfg.validate()
             self._fallback_client, self._fallback_use_openai = self._build_client(self.fallback_cfg)
+
+        # ★ 按 Agent 分模型配置（InkOS 对标）
+        self.agent_configs: dict[str, LLMConfig] = {}
+        if agent_configs:
+            for agent_name, cfg_dict in agent_configs.items():
+                self.agent_configs[agent_name] = LLMConfig(
+                    model=cfg_dict.get("model", self.cfg.model),
+                    api_key=cfg_dict.get("api_key", self.cfg.api_key),
+                    api_base=cfg_dict.get("api_base", self.cfg.api_base),
+                    temperature=cfg_dict.get("temperature", self.cfg.temperature),
+                    max_tokens=cfg_dict.get("max_tokens", self.cfg.max_tokens),
+                    timeout=cfg_dict.get("timeout", self.cfg.timeout),
+                    reasoning_effort=cfg_dict.get("reasoning_effort", self.cfg.reasoning_effort),
+                    thinking_enabled=cfg_dict.get("thinking_enabled", self.cfg.thinking_enabled),
+                )
+                self.agent_configs[agent_name].validate()
+                logger.info("[LLMClient] Agent '%s' → model=%s", agent_name, self.agent_configs[agent_name].model)
 
     @staticmethod
     def _build_client(cfg: LLMConfig):
@@ -114,6 +138,10 @@ class LLMClient:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
+
+        # kimi 模型强制 temperature=1（kimi-k2.5 只接受 temperature=1）
+        if "kimi" in cfg.model.lower():
+            temperature = 1.0
 
         # DeepSeek V4 thinking mode 参数
         extra_body: dict[str, Any] | None = None
@@ -161,9 +189,102 @@ class LLMClient:
                 original_len - len(content),
             )
 
+        # ★ 防御 Qwen3.6 thinking process 泄漏
+        think_markers = [
+            "Here's a thinking process:",
+            "Here's a thinking process",
+            "1.  **Analyze User Input:**",
+            "1. **Analyze User Input:**",
+            "**Thinking Process**",
+            "<thinking>",
+        ]
+        for marker in think_markers:
+            if marker in content:
+                original_len = len(content)
+                idx = content.find(marker)
+                if idx >= 0:
+                    content = content[:idx].strip()
+                    logger.warning(
+                        "LLM 返回内容中包含 thinking process（%s），已过滤（移除 %d 字符）",
+                        marker[:30], original_len - len(content),
+                    )
+                break
+
+        # ★ 防御 Kimi 思考过程泄漏（"用户希望我作为..." / "The user wants me to..."）
+        # 只在内容以思考过程开头且总长度>100字时触发过滤，避免误伤正常短文
+        kimi_think_prefixes = [
+            "用户希望我作为", "用户希望我能", "用户要求我", "用户",
+            "The user wants me to", "The user asked me to",
+            "我来分析", "让我先理解", "让我来", "让我",
+            "好的，", "好的。", "好的，我来", "好的，让我",
+            "作为", "作为DialogueTuner", "作为Polish", "作为SpotFix",
+            "首先，", "第一步", "1. ", "1、",
+            "分析当前", "我需要", "我需要先", "我需要根据", "我需要对",
+            "明白了，", "了解了，", "OK，", "Okay，", "ok，", "okay，",
+            "任务要求", "根据指令", "指令指出", "修正指令",
+        ]
+        for prefix in kimi_think_prefixes:
+            if content.startswith(prefix) and len(content) > 100:
+                original_len = len(content)
+                # 尝试找到 "---" 分隔线后的正文
+                sep_match = re.search(r"\n---+\s*\n", content)
+                if sep_match:
+                    content = content[sep_match.end():].strip()
+                else:
+                    # 没有分隔线，尝试找第一个段落结束后的空行+新段落
+                    para_match = re.search(r"[。?!]\n\n", content)
+                    if para_match:
+                        content = content[para_match.end():].strip()
+                    else:
+                        content = ""
+                if content:
+                    logger.warning(
+                        "LLM 返回内容中包含 Kimi 思考过程（前缀: %s），已过滤（移除 %d 字符）",
+                        prefix[:20], original_len - len(content),
+                    )
+                break
+
         if not content.strip():
             raise ValueError("API 返回空内容")
         return content
+
+    def call_for_agent(
+        self,
+        agent_name: str,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: int | None = None,
+    ) -> str:
+        """按 Agent 名调用 LLM，自动选择该 Agent 的专属模型配置。
+
+        对标 InkOS: inkos config set-model writer claude-sonnet-4
+        """
+        agent_cfg = self.agent_configs.get(agent_name)
+        if not agent_cfg:
+            # 未配置则回退到默认
+            return self.call(system_prompt, user_prompt, temperature, max_tokens, timeout)
+
+        # 为 Agent 构建专属客户端
+        client, use_openai = self._build_client(agent_cfg)
+        temp = temperature if temperature is not None else agent_cfg.temperature
+        tokens = max_tokens if max_tokens is not None else agent_cfg.max_tokens
+        to = timeout if timeout is not None else agent_cfg.timeout
+
+        logger.info(
+            "[LLMClient] Agent '%s' 调用: model=%s, temp=%.2f, max_tokens=%d",
+            agent_name, agent_cfg.model, temp, tokens,
+        )
+
+        try:
+            return self._do_call(
+                client, agent_cfg, use_openai,
+                system_prompt, user_prompt, temp, tokens, to,
+            )
+        except Exception as exc:
+            logger.warning("Agent '%s' 专属模型调用失败: %s，回退到默认模型", agent_name, exc)
+            return self.call(system_prompt, user_prompt, temperature, max_tokens, timeout)
 
     def call(
         self,

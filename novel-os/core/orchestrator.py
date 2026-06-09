@@ -13,7 +13,6 @@ from typing import Any, Callable
 
 from core.batch_writer import BatchWriter
 from core.config_loader import BookConfig
-from core.crewai_connector import CrewAIConnector
 from core.event_bus import (
     CHAPTER_COMPLETE,
     CHAPTER_ERROR,

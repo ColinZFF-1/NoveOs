@@ -1,0 +1,555 @@
+{
+  "C_Users": [
+    {
+      "name": "AppData",
+      "path": "C:/Users/Administrator/AppData",
+      "size_kb": 70277003,
+      "size_h": "67.0 GB",
+      "files": 45289
+    },
+    {
+      "name": "Local Settings",
+      "path": "C:/Users/Administrator/Local Settings",
+      "size_kb": 69210239,
+      "size_h": "66.0 GB",
+      "files": 44640
+    },
+    {
+      "name": "Application Data",
+      "path": "C:/Users/Administrator/Application Data",
+      "size_kb": 15814599,
+      "size_h": "15.1 GB",
+      "files": 91486
+    },
+    {
+      "name": "node_cache",
+      "path": "C:/Users/Administrator/node_cache",
+      "size_kb": 2002138,
+      "size_h": "1.9 GB",
+      "files": 7786
+    },
+    {
+      "name": ".codeartsdoer",
+      "path": "C:/Users/Administrator/.codeartsdoer",
+      "size_kb": 1917787,
+      "size_h": "1.8 GB",
+      "files": 4547
+    },
+    {
+      "name": "Documents",
+      "path": "C:/Users/Administrator/Documents",
+      "size_kb": 1567823,
+      "size_h": "1.5 GB",
+      "files": 7274
+    },
+    {
+      "name": "My Documents",
+      "path": "C:/Users/Administrator/My Documents",
+      "size_kb": 1567823,
+      "size_h": "1.5 GB",
+      "files": 7274
+    },
+    {
+      "name": ".vscode",
+      "path": "C:/Users/Administrator/.vscode",
+      "size_kb": 1274651,
+      "size_h": "1.2 GB",
+      "files": 11469
+    },
+    {
+      "name": ".cache",
+      "path": "C:/Users/Administrator/.cache",
+      "size_kb": 1062285,
+      "size_h": "1.0 GB",
+      "files": 8256
+    },
+    {
+      "name": ".chromium-browser-snapshots",
+      "path": "C:/Users/Administrator/.chromium-browser-snapshots",
+      "size_kb": 747705,
+      "size_h": "730 MB",
+      "files": 261
+    },
+    {
+      "name": ".workbuddy",
+      "path": "C:/Users/Administrator/.workbuddy",
+      "size_kb": 435473,
+      "size_h": "425 MB",
+      "files": 14145
+    },
+    {
+      "name": ".codex",
+      "path": "C:/Users/Administrator/.codex",
+      "size_kb": 425048,
+      "size_h": "415 MB",
+      "files": 3630
+    },
+    {
+      "name": ".kimi",
+      "path": "C:/Users/Administrator/.kimi",
+      "size_kb": 359538,
+      "size_h": "351 MB",
+      "files": 4512
+    },
+    {
+      "name": ".trae-cn",
+      "path": "C:/Users/Administrator/.trae-cn",
+      "size_kb": 200269,
+      "size_h": "195 MB",
+      "files": 10006
+    },
+    {
+      "name": ".claude",
+      "path": "C:/Users/Administrator/.claude",
+      "size_kb": 195911,
+      "size_h": "191 MB",
+      "files": 1930
+    },
+    {
+      "name": "Desktop",
+      "path": "C:/Users/Administrator/Desktop",
+      "size_kb": 120064,
+      "size_h": "117 MB",
+      "files": 38
+    },
+    {
+      "name": ".local",
+      "path": "C:/Users/Administrator/.local",
+      "size_kb": 53537,
+      "size_h": "52 MB",
+      "files": 4
+    }
+  ],
+  "C_AppData_Local": [
+    {
+      "name": "Application Data",
+      "path": "C:/Users/Administrator/AppData/Local/Application Data",
+      "size_kb": 69270796,
+      "size_h": "66.1 GB",
+      "files": 45746
+    },
+    {
+      "name": "Temp",
+      "path": "C:/Users/Administrator/AppData/Local/Temp",
+      "size_kb": 6220133,
+      "size_h": "5.9 GB",
+      "files": 39692
+    },
+    {
+      "name": "Programs",
+      "path": "C:/Users/Administrator/AppData/Local/Programs",
+      "size_kb": 4940131,
+      "size_h": "4.7 GB",
+      "files": 27725
+    },
+    {
+      "name": "Microsoft",
+      "path": "C:/Users/Administrator/AppData/Local/Microsoft",
+      "size_kb": 2515101,
+      "size_h": "2.4 GB",
+      "files": 16646
+    },
+    {
+      "name": "ms-playwright",
+      "path": "C:/Users/Administrator/AppData/Local/ms-playwright",
+      "size_kb": 1703224,
+      "size_h": "1.6 GB",
+      "files": 1304
+    },
+    {
+      "name": "pip",
+      "path": "C:/Users/Administrator/AppData/Local/pip",
+      "size_kb": 1541115,
+      "size_h": "1.5 GB",
+      "files": 3607
+    },
+    {
+      "name": "Doubao",
+      "path": "C:/Users/Administrator/AppData/Local/Doubao",
+      "size_kb": 1514730,
+      "size_h": "1.4 GB",
+      "files": 8766
+    },
+    {
+      "name": "Google",
+      "path": "C:/Users/Administrator/AppData/Local/Google",
+      "size_kb": 1456997,
+      "size_h": "1.4 GB",
+      "files": 5582
+    },
+    {
+      "name": "sogoupdf",
+      "path": "C:/Users/Administrator/AppData/Local/sogoupdf",
+      "size_kb": 963849,
+      "size_h": "941 MB",
+      "files": 1294
+    },
+    {
+      "name": "npm-cache",
+      "path": "C:/Users/Administrator/AppData/Local/npm-cache",
+      "size_kb": 697722,
+      "size_h": "681 MB",
+      "files": 2617
+    },
+    {
+      "name": "Python",
+      "path": "C:/Users/Administrator/AppData/Local/Python",
+      "size_kb": 493005,
+      "size_h": "481 MB",
+      "files": 18134
+    },
+    {
+      "name": "AMD",
+      "path": "C:/Users/Administrator/AppData/Local/AMD",
+      "size_kb": 482742,
+      "size_h": "471 MB",
+      "files": 415
+    },
+    {
+      "name": "123pan",
+      "path": "C:/Users/Administrator/AppData/Local/123pan",
+      "size_kb": 360197,
+      "size_h": "351 MB",
+      "files": 208
+    },
+    {
+      "name": "OpenAI",
+      "path": "C:/Users/Administrator/AppData/Local/OpenAI",
+      "size_kb": 357518,
+      "size_h": "349 MB",
+      "files": 6
+    },
+    {
+      "name": "cloud-computer-client-updater",
+      "path": "C:/Users/Administrator/AppData/Local/cloud-computer-client-updater",
+      "size_kb": 356557,
+      "size_h": "348 MB",
+      "files": 3
+    },
+    {
+      "name": "kimi-desktop-updater",
+      "path": "C:/Users/Administrator/AppData/Local/kimi-desktop-updater",
+      "size_kb": 343257,
+      "size_h": "335 MB",
+      "files": 3
+    },
+    {
+      "name": "Chromium",
+      "path": "C:/Users/Administrator/AppData/Local/Chromium",
+      "size_kb": 283998,
+      "size_h": "277 MB",
+      "files": 243
+    },
+    {
+      "name": "@genieworkbuddy-desktop-updater",
+      "path": "C:/Users/Administrator/AppData/Local/@genieworkbuddy-desktop-updater",
+      "size_kb": 228418,
+      "size_h": "223 MB",
+      "files": 1
+    },
+    {
+      "name": "Packages",
+      "path": "C:/Users/Administrator/AppData/Local/Packages",
+      "size_kb": 212259,
+      "size_h": "207 MB",
+      "files": 2303
+    },
+    {
+      "name": "authorwrite-updater",
+      "path": "C:/Users/Administrator/AppData/Local/authorwrite-updater",
+      "size_kb": 192893,
+      "size_h": "188 MB",
+      "files": 1
+    },
+    {
+      "name": "Qianwen",
+      "path": "C:/Users/Administrator/AppData/Local/Qianwen",
+      "size_kb": 140415,
+      "size_h": "137 MB",
+      "files": 992
+    },
+    {
+      "name": "WeGame",
+      "path": "C:/Users/Administrator/AppData/Local/WeGame",
+      "size_kb": 135098,
+      "size_h": "131 MB",
+      "files": 458
+    },
+    {
+      "name": "Quark",
+      "path": "C:/Users/Administrator/AppData/Local/Quark",
+      "size_kb": 107302,
+      "size_h": "104 MB",
+      "files": 1937
+    },
+    {
+      "name": "qclaw-lite-updater",
+      "path": "C:/Users/Administrator/AppData/Local/qclaw-lite-updater",
+      "size_kb": 105440,
+      "size_h": "102 MB",
+      "files": 1
+    },
+    {
+      "name": "qmlauncher-updater",
+      "path": "C:/Users/Administrator/AppData/Local/qmlauncher-updater",
+      "size_kb": 90884,
+      "size_h": "88 MB",
+      "files": 1
+    },
+    {
+      "name": "Firaxis Games",
+      "path": "C:/Users/Administrator/AppData/Local/Firaxis Games",
+      "size_kb": 74827,
+      "size_h": "73 MB",
+      "files": 65
+    },
+    {
+      "name": "WorkBuddyExtension",
+      "path": "C:/Users/Administrator/AppData/Local/WorkBuddyExtension",
+      "size_kb": 73074,
+      "size_h": "71 MB",
+      "files": 612
+    },
+    {
+      "name": "node-gyp",
+      "path": "C:/Users/Administrator/AppData/Local/node-gyp",
+      "size_kb": 61994,
+      "size_h": "60 MB",
+      "files": 2727
+    }
+  ],
+  "C_AppData_Roaming": [
+    {
+      "name": "Tencent",
+      "path": "C:/Users/Administrator/AppData/Roaming/Tencent",
+      "size_kb": 3947042,
+      "size_h": "3.8 GB",
+      "files": 6348
+    },
+    {
+      "name": "TRAE SOLO CN",
+      "path": "C:/Users/Administrator/AppData/Roaming/TRAE SOLO CN",
+      "size_kb": 3278584,
+      "size_h": "3.1 GB",
+      "files": 32205
+    },
+    {
+      "name": "Qclaw",
+      "path": "C:/Users/Administrator/AppData/Roaming/Qclaw",
+      "size_kb": 1929786,
+      "size_h": "1.8 GB",
+      "files": 10713
+    },
+    {
+      "name": "webcast_mate",
+      "path": "C:/Users/Administrator/AppData/Roaming/webcast_mate",
+      "size_kb": 1828260,
+      "size_h": "1.7 GB",
+      "files": 25355
+    },
+    {
+      "name": "Code",
+      "path": "C:/Users/Administrator/AppData/Roaming/Code",
+      "size_kb": 981060,
+      "size_h": "958 MB",
+      "files": 4206
+    },
+    {
+      "name": "Microsoft",
+      "path": "C:/Users/Administrator/AppData/Roaming/Microsoft",
+      "size_kb": 636086,
+      "size_h": "621 MB",
+      "files": 2445
+    },
+    {
+      "name": "rod",
+      "path": "C:/Users/Administrator/AppData/Roaming/rod",
+      "size_kb": 615047,
+      "size_h": "600 MB",
+      "files": 88
+    },
+    {
+      "name": "Trae CN",
+      "path": "C:/Users/Administrator/AppData/Roaming/Trae CN",
+      "size_kb": 414560,
+      "size_h": "404 MB",
+      "files": 641
+    },
+    {
+      "name": "cloud-computer-client",
+      "path": "C:/Users/Administrator/AppData/Roaming/cloud-computer-client",
+      "size_kb": 356205,
+      "size_h": "347 MB",
+      "files": 699
+    },
+    {
+      "name": "Google",
+      "path": "C:/Users/Administrator/AppData/Roaming/Google",
+      "size_kb": 323494,
+      "size_h": "315 MB",
+      "files": 933
+    },
+    {
+      "name": "Python",
+      "path": "C:/Users/Administrator/AppData/Roaming/Python",
+      "size_kb": 311221,
+      "size_h": "303 MB",
+      "files": 5117
+    },
+    {
+      "name": "WorkBuddy",
+      "path": "C:/Users/Administrator/AppData/Roaming/WorkBuddy",
+      "size_kb": 255564,
+      "size_h": "249 MB",
+      "files": 272
+    },
+    {
+      "name": "codearts-agent",
+      "path": "C:/Users/Administrator/AppData/Roaming/codearts-agent",
+      "size_kb": 240921,
+      "size_h": "235 MB",
+      "files": 826
+    },
+    {
+      "name": "fe763faba3abcef3f83fa55ec2a413b7.downloadtmp",
+      "path": "C:/Users/Administrator/AppData/Roaming/fe763faba3abcef3f83fa55ec2a413b7.downloadtmp",
+      "size_kb": 174243,
+      "size_h": "170 MB",
+      "files": 0
+    },
+    {
+      "name": "haimayun.exe",
+      "path": "C:/Users/Administrator/AppData/Roaming/haimayun.exe",
+      "size_kb": 174243,
+      "size_h": "170 MB",
+      "files": 0
+    },
+    {
+      "name": "kingsoft",
+      "path": "C:/Users/Administrator/AppData/Roaming/kingsoft",
+      "size_kb": 105594,
+      "size_h": "103 MB",
+      "files": 216
+    },
+    {
+      "name": "腾讯电脑管家-全局搜",
+      "path": "C:/Users/Administrator/AppData/Roaming/腾讯电脑管家-全局搜",
+      "size_kb": 94304,
+      "size_h": "92 MB",
+      "files": 227
+    },
+    {
+      "name": "authorwrite",
+      "path": "C:/Users/Administrator/AppData/Roaming/authorwrite",
+      "size_kb": 73518,
+      "size_h": "71 MB",
+      "files": 760
+    },
+    {
+      "name": "kimi-desktop",
+      "path": "C:/Users/Administrator/AppData/Roaming/kimi-desktop",
+      "size_kb": 55420,
+      "size_h": "54 MB",
+      "files": 270
+    }
+  ],
+  "C_Downloads": [],
+  "C_Documents": [
+    {
+      "name": "WXWork",
+      "path": "C:/Users/Administrator/Documents/WXWork",
+      "size_kb": 1207156,
+      "size_h": "1.2 GB",
+      "files": 4916
+    },
+    {
+      "name": "xwechat_files",
+      "path": "C:/Users/Administrator/Documents/xwechat_files",
+      "size_kb": 351129,
+      "size_h": "342 MB",
+      "files": 1370
+    }
+  ],
+  "C_Desktop": [],
+  "E_Drive": [
+    {
+      "name": "Program Files",
+      "path": "E:/Program Files",
+      "size_kb": 15135039,
+      "size_h": "14.4 GB",
+      "files": 79443
+    },
+    {
+      "name": "Steam",
+      "path": "E:/Steam",
+      "size_kb": 5792044,
+      "size_h": "5.5 GB",
+      "files": 12230
+    },
+    {
+      "name": "番茄",
+      "path": "E:/番茄",
+      "size_kb": 984262,
+      "size_h": "961 MB",
+      "files": 14612
+    },
+    {
+      "name": "crewai-venv",
+      "path": "E:/crewai-venv",
+      "size_kb": 902474,
+      "size_h": "881 MB",
+      "files": 23564
+    },
+    {
+      "name": "$RECYCLE.BIN",
+      "path": "E:/$RECYCLE.BIN",
+      "size_kb": 465530,
+      "size_h": "454 MB",
+      "files": 2174
+    },
+    {
+      "name": "Image",
+      "path": "E:/Image",
+      "size_kb": 354601,
+      "size_h": "346 MB",
+      "files": 1770
+    }
+  ],
+  "D_Drive": [
+    {
+      "name": "WXWork",
+      "path": "D:/WXWork",
+      "size_kb": 1493614,
+      "size_h": "1.4 GB",
+      "files": 3360
+    },
+    {
+      "name": "noveos",
+      "path": "D:/noveos",
+      "size_kb": 1431163,
+      "size_h": "1.4 GB",
+      "files": 697
+    },
+    {
+      "name": "noveos - 副本",
+      "path": "D:/noveos - 副本",
+      "size_kb": 1344701,
+      "size_h": "1.3 GB",
+      "files": 853
+    },
+    {
+      "name": "noveos.backup.20260601",
+      "path": "D:/noveos.backup.20260601",
+      "size_kb": 1341872,
+      "size_h": "1.3 GB",
+      "files": 732
+    },
+    {
+      "name": "Program Files",
+      "path": "D:/Program Files",
+      "size_kb": 813496,
+      "size_h": "794 MB",
+      "files": 32
+    }
+  ]
+}

@@ -70,12 +70,11 @@ def main():
     # 3. 初始化组件
     from core.config_loader import BookConfig
     from core.state_manager import StateManager
-    from core.crewai_connector import CrewAIConnector
     from core.batch_writer import BatchWriter
 
     cfg = BookConfig.from_yaml(BASE_PATH / "book.yaml")
     state = StateManager(BASE_PATH / "world_state.db", project_id=PROJECT_ID)
-    # BatchWriter 内部会自动创建 CrewAIConnector，不要传第三个参数（会被当作 event_bus）
+    # BatchWriter 第三个参数是 event_bus，不需要则不传
     writer = BatchWriter(cfg, state)
 
     # 4. 批量写作

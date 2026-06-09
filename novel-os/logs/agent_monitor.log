@@ -1,0 +1,33 @@
+=== Agent Monitor Started at 2026-06-03 01:41:20 ===
+BASELINE|core/batch_writer.py|1780421863|82188
+BASELINE|core/chapter_validator.py|1780421642|24212
+BASELINE|core/prompt_builder.py|1780421669|23568
+BASELINE|core/state_manager.py|1780405011|51720
+BASELINE|core/llm_client.py|1780412157|9792
+BASELINE|core/config_loader.py|1780421822|6289
+BASELINE|cli.py|1780417151|6678
+BASELINE|../crewai/agents.yaml|1780420025|2525
+BASELINE|../books/入职诡秘公司：我的工牌不对劲/book.yaml|1780422059|3191
+=== Agent Monitor Started at 2026-06-03 01:47:49 ===
+BASELINE|core/batch_writer.py|1780421863|82188
+BASELINE|core/chapter_validator.py|1780421642|24212
+BASELINE|core/prompt_builder.py|1780421669|23568
+BASELINE|core/state_manager.py|1780405011|51720
+BASELINE|core/llm_client.py|1780412157|9792
+BASELINE|core/config_loader.py|1780421822|6289
+BASELINE|cli.py|1780417151|6678
+BASELINE|../crewai/agents.yaml|1780420025|2525
+BASELINE|../books/入职诡秘公司：我的工牌不对劲/book.yaml|1780422059|3191
+CHECK|2026-06-03 01:50:50|no changes
+CHECK|2026-06-03 01:53:54|no changes
+CHANGED|2026-06-03 01:56:58|core/chapter_validator.py|mtime:1780421642->1780422983|size:24212->24213
+CHANGED|2026-06-03 01:56:58|core/prompt_builder.py|mtime:1780421669->1780423000|size:23568->18114
+CHANGED|2026-06-03 01:56:58|../books/入职诡秘公司：我的工牌不对劲/book.yaml|mtime:1780422059->1780422998|size:3191->3006
+CHANGED|2026-06-03 02:00:01|core/batch_writer.py|mtime:1780421863->1780423071|size:82188->71531
+CHANGED|2026-06-03 02:00:01|core/chapter_validator.py|mtime:1780421642->1780423105|size:24212->24012
+CHANGED|2026-06-03 02:00:01|core/prompt_builder.py|mtime:1780421669->1780423000|size:23568->18114
+CHANGED|2026-06-03 02:00:01|../books/入职诡秘公司：我的工牌不对劲/book.yaml|mtime:1780422059->1780422998|size:3191->3006
+CHANGED|2026-06-03 02:03:05|core/batch_writer.py|mtime:1780421863->1780423071|size:82188->71531
+CHANGED|2026-06-03 02:03:05|core/chapter_validator.py|mtime:1780421642->1780423105|size:24212->24012
+CHANGED|2026-06-03 02:03:05|core/prompt_builder.py|mtime:1780421669->1780423000|size:23568->18114
+CHANGED|2026-06-03 02:03:05|../books/入职诡秘公司：我的工牌不对劲/book.yaml|mtime:1780422059->1780422998|size:3191->3006

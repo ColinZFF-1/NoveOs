@@ -11,16 +11,40 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 from pathlib import Path
 
+# 自动加载项目根目录的 .env 文件
+_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+if _ENV_PATH.exists():
+    with open(_ENV_PATH, encoding="utf-8") as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _key, _, _val = _line.partition("=")
+                _key = _key.strip()
+                _val = _val.strip().strip('"').strip("'")
+                if _key not in os.environ:
+                    os.environ[_key] = _val
+
 from core.batch_writer import BatchWriter
 from core.config_loader import BookConfig
+from core.orchestrator import Orchestrator
 from core.state_manager import StateManager
+
+# 强制 UTF-8 编码，避免 Windows 终端中文乱码
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+    ],
 )
 logger = logging.getLogger("novel-os.cli")
 
@@ -125,6 +149,47 @@ def cmd_state(args: argparse.Namespace) -> int:
     return 2
 
 
+def cmd_pipeline(args: argparse.Namespace) -> int:
+    """通过 Orchestrator 双层调度批量写作（支持暂停/恢复/外层巡检）。"""
+    cfg = BookConfig.from_yaml(args.book)
+    project_id = cfg.base_path.name
+
+    orch = Orchestrator()
+    orch.register_project(project_id, cfg)
+
+    if args.range:
+        start, end = map(int, args.range.split(":"))
+    else:
+        print("请指定 --range（如 1:30）")
+        return 2
+
+    pipeline_id = orch.start_pipeline(
+        project_id, (start, end), resume=args.resume
+    )
+    print(f"Pipeline 已启动: {pipeline_id}")
+    print(f"项目: {project_id}, 章节范围: {start}-{end}")
+
+    # 等待完成（阻塞轮询）
+    try:
+        import time
+        while True:
+            status = orch.get_project_status(project_id)
+            if not status:
+                print("项目状态丢失，终止等待")
+                return 1
+            if status["status"] in ("completed", "error", "paused"):
+                print(f"\nPipeline 结束: status={status['status']}, chapter={status['current_chapter']}")
+                stats = orch.get_global_stats()
+                print(f"全局统计: {stats}")
+                return 0 if status["status"] == "completed" else 1
+            time.sleep(2)
+    except KeyboardInterrupt:
+        print("\n收到中断信号，暂停 Pipeline...")
+        orch.pause_pipeline(project_id)
+        print(f"已暂停在章节 {orch.get_project_status(project_id)['current_chapter']}")
+        return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="novel-os",
@@ -154,6 +219,12 @@ def main(argv: list[str] | None = None) -> int:
     p_state.add_argument("--export", help="导出 JSON 视图路径")
     p_state.add_argument("--rollback", help="回滚快照，格式: chapter,type")
     p_state.set_defaults(func=cmd_state)
+
+    # pipeline（通过 Orchestrator 双层调度）
+    p_pipeline = sub.add_parser("pipeline", help="通过 Orchestrator 双层调度批量写作（支持暂停/恢复/外层巡检）")
+    p_pipeline.add_argument("--range", help="范围，如 1:30")
+    p_pipeline.add_argument("--resume", action="store_true", help="断点续传")
+    p_pipeline.set_defaults(func=cmd_pipeline)
 
     args = parser.parse_args(argv)
     return args.func(args)

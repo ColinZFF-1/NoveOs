@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI变现案例洞察报告 | InsightSkill v7.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans SC"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            primary: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81' },
+            accent: { 50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12' },
+            slate: { 850: '#1e293b', 950: '#020617' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Noto Sans SC', system-ui, sans-serif; }
+    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+    .gradient-text { background: linear-gradient(135deg, #4338ca 0%, #ea580c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .tag-pulse { animation: pulse-soft 2s infinite; }
+    @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    .progress-bar { background: linear-gradient(90deg, #6366f1 0%, #f97316 100%); }
+    details > summary { cursor: pointer; list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    .star { color: #fbbf24; letter-spacing: -2px; }
+    .noise-bg { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 noise-bg">
+
+  <!-- Floating Nav -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center text-white font-bold text-sm">IS</div>
+          <span class="font-bold text-slate-800 text-sm tracking-tight">InsightSkill <span class="text-primary-600">v7.0</span></span>
+        </div>
+        <div class="hidden md:flex items-center gap-6 text-xs font-medium text-slate-500">
+          <a href="#executive" class="hover:text-primary-600 transition-colors">执行摘要</a>
+          <a href="#sources" class="hover:text-primary-600 transition-colors">信源</a>
+          <a href="#vertical" class="hover:text-primary-600 transition-colors">纵向分析</a>
+          <a href="#horizontal" class="hover:text-primary-600 transition-colors">横向分析</a>
+          <a href="#intersection" class="hover:text-primary-600 transition-colors">交汇推演</a>
+          <a href="#validation" class="hover:text-primary-600 transition-colors">校验</a>
+          <a href="#action" class="hover:text-primary-600 transition-colors">可执行度</a>
+        </div>
+        <div class="text-xs font-mono text-slate-400">2026-06-07</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="relative pt-32 pb-20 px-4 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50 opacity-80"></div>
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-200 rounded-full blur-3xl opacity-30"></div>
+    <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-accent-200 rounded-full blur-3xl opacity-30"></div>
+    <div class="relative max-w-5xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-primary-100 text-primary-700 text-xs font-semibold mb-6 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-primary-500 tag-pulse"></span>
+        全场景融合洞察引擎
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 mb-6 leading-tight">
+        AI变现案例<br>
+        <span class="gradient-text">洞察报告</span>
+      </h1>
+      <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+        真正赚到大钱的不是"用AI的人"，而是"给AI造铲子的人"。<br class="hidden sm:block">
+        本报告基于20条分级信源，覆盖基础设施层、工具层与创作者层的价值重构全景。
+      </p>
+      <div class="flex flex-wrap justify-center gap-3 text-xs font-mono">
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm">置信度 0.72</span>
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm">六维均分 3.7/5.0</span>
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm">⭐信源 20条</span>
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm">推演 5处</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 space-y-8">
+
+    <!-- Executive Summary -->
+    <section id="executive" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 sm:p-10 text-white shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-primary-500 rounded-full blur-3xl opacity-10"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-accent-500 rounded-full blur-3xl opacity-10"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 mb-4">
+            <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <h2 class="text-sm font-bold tracking-wider text-primary-400 uppercase">执行摘要</h2>
+          </div>
+          <p class="text-lg sm:text-xl leading-relaxed font-light text-slate-100 mb-6">
+            AI变现的真实格局与大众想象截然相反：<strong class="text-white font-semibold">真正赚到大钱的不是"用AI的人"，而是"给AI造铲子的人"</strong>。OpenAI计算利润率已达70%，Anthropic在2026年Q2首次实现运营盈利（5.59亿美元），Cursor半年内ARR从1亿飙至5亿美元——这些数字证明，价值捕获集中在基础设施层和B端工作流嵌入。
+          </p>
+          <p class="text-slate-300 leading-relaxed mb-8">
+            与此同时，个人创作者路径正经历"供给爆炸→注意力贬值→平台限制"的三重挤压：小红书已明确拒绝AI托管账号，知乎盐选会员收入同比下降16.1%，10万粉丝博主年综合收入仅5-15万元。对个体而言，AI变现的窗口期正在从"流量套利"转向"人机协作工作流重构"。
+          </p>
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+              <div class="text-2xl font-black text-primary-400 mb-1">70%</div>
+              <div class="text-xs text-slate-400">OpenAI计算利润率</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+              <div class="text-2xl font-black text-accent-400 mb-1">$5.59亿</div>
+              <div class="text-xs text-slate-400">Anthropic单季运营利润</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+              <div class="text-2xl font-black text-emerald-400 mb-1">5→15万</div>
+              <div class="text-xs text-slate-400">10万粉博主年收入（元）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Insights Cards -->
+    <section>
+      <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-primary-500 rounded-full"></span>
+        三大核心洞察
+      </h3>
+      <div class="grid md:grid-cols-3 gap-5">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary-50 text-primary-700 text-xs font-bold mb-4">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+            I1 · 发现未知
+          </div>
+          <h4 class="font-bold text-slate-900 mb-2 text-sm leading-snug">利润集中在基础设施层与B端工作流工具</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">API成本下降→企业采纳率提升→工作流依赖加深→高粘性付费。OpenAI利润率70%，Anthropic运营盈利，Cursor半年ARR涨400%。</p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-mono text-slate-400">
+            <span>置信度</span>
+            <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[80%] progress-bar rounded-full"></div>
+            </div>
+            <span class="text-primary-600 font-bold">0.80</span>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent-50 text-accent-700 text-xs font-bold mb-4">
+            <span class="w-1.5 h-1.5 rounded-full bg-accent-500"></span>
+            I2 · 纠正误知
+          </div>
+          <h4 class="font-bold text-slate-900 mb-2 text-sm leading-snug">个人创作者AI变现窗口正在关闭</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">AI让内容生产门槛趋近于零→供给爆炸→注意力稀释→平台政策收紧。小红书拒绝AI托管，知乎盐选收入降16%。</p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-mono text-slate-400">
+            <span>置信度</span>
+            <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[70%] progress-bar rounded-full"></div>
+            </div>
+            <span class="text-accent-600 font-bold">0.70</span>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold mb-4">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            I3 · 深化浅知
+          </div>
+          <h4 class="font-bold text-slate-900 mb-2 text-sm leading-snug">"免费送AI"是大厂生态锁定的高级策略</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">GitLab、Atlassian将AI功能打包进核心订阅，不是因为AI不值钱，而是因为价值已在底层锁定，AI只是留存钩子。</p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-mono text-slate-400">
+            <span>置信度</span>
+            <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[65%] progress-bar rounded-full"></div>
+            </div>
+            <span class="text-emerald-600 font-bold">0.65</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sources -->
+    <section id="sources" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-1.5 h-6 bg-primary-500 rounded-full"></span>
+            信源清单
+          </h3>
+          <span class="text-xs font-mono text-slate-400">20条分级信源</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead class="bg-slate-50 text-slate-500 font-semibold">
+              <tr>
+                <th class="px-4 py-3 text-left">ID</th>
+                <th class="px-4 py-3 text-left">来源</th>
+                <th class="px-4 py-3 text-left">类型</th>
+                <th class="px-4 py-3 text-left">时效</th>
+                <th class="px-4 py-3 text-left">可信度</th>
+                <th class="px-4 py-3 text-left hidden lg:table-cell">关键摘要</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono text-slate-400">S3</td>
+                <td class="px-4 py-3 font-medium">和众汇富/艾瑞</td>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-primary-50 text-primary-700 text-[10px] font-bold">财经研究</span></td>
+                <td class="px-4 py-3 font-mono text-slate-500">2025-12</td>
+                <td class="px-4 py-3 star">⭐⭐⭐⭐⭐</td>
+                <td class="px-4 py-3 text-slate-500 hidden lg:table-cell max-w-xs truncate">OpenAI计算利润率70%；DeepSeek输入成本0.28美元/百万token</td>
+              </tr>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono text-slate-400">S7</td>
+                <td class="px-4 py-3 font-medium">中信建投</td>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-primary-50 text-primary-700 text-[10px] font-bold">券商研报</span></td>
+                <td class="px-4 py-3 font-mono text-slate-500">2025</td>
+                <td class="px-4 py-3 star">⭐⭐⭐⭐⭐</td>
+                <td class="px-4 py-3 text-slate-500 hidden lg:table-cell max-w-xs truncate">Cursor ARR 1亿→5亿美元；Anthropic ARR 50亿美元，60%来自API</td>
+              </tr>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono text-slate-400">S8</td>
+                <td class="px-4 py-3 font-medium">新浪财经/The Information</td>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-primary-50 text-primary-700 text-[10px] font-bold">权威财经</span></td>
+                <td class="px-4 py-3 font-mono text-slate-500">2026-05</td>
+                <td class="px-4 py-3 star">⭐⭐⭐⭐⭐</td>
+                <td class="px-4 py-3 text-slate-500 hidden lg:table-cell max-w-xs truncate">Anthropic Q2营收109亿美元，首次运营利润5.59亿美元</td>
+              </tr>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono text-slate-400">S9</td>
+                <td class="px-4 py-3 font-medium">证券之星/科大讯飞</td>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-primary-50 text-primary-700 text-[10px] font-bold">上市公司研报</span></td>
+                <td class="px-4 py-3 font-mono text-slate-500">2026-05</td>
+                <td class="px-4 py-3 star">⭐⭐⭐⭐⭐</td>
+                <td class="px-4 py-3 text-slate-500 hidden lg:table-cell max-w-xs truncate">讯飞智医助力市占率80%，海外营收增长275%</td>
+              </tr>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono text-slate-400">S15</td>
+                <td class="px-4 py-3 font-medium">36氪</td>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-accent-50 text-accent-700 text-[10px] font-bold">权威科技媒体</span></td>
+                <td class="px-4 py-3 font-mono text-slate-500">2026-05</td>
+                <td class="px-4 py-3 star">⭐⭐⭐⭐⭐</td>
+                <td class="px-4 py-3 text-slate-500 hidden lg:table-cell max-w-xs truncate">四平台变现差异：抖音放大器、B站信任沉淀、小红书高客单</td>
+              </tr>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono text-slate-400">S19</td>
+                <td class="px-4 py-3 font-medium">钛媒体</td>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-accent-50 text-accent-700 text-[10px] font-bold">权威科技媒体</span></td>
+                <td class="px-4 py-3 font-mono text-slate-500">2026-03</td>
+                <td class="px-4 py-3 star">⭐⭐⭐⭐⭐</td>
+                <td class="px-4 py-3 text-slate-500 hidden lg:table-cell max-w-xs truncate">小红书拒绝AI托管账号；知乎盐选会员收入降16.1%</td>
+              </tr>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono text-slate-400">S20</td>
+                <td class="px-4 py-3 font-medium">国信证券</td>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-primary-50 text-primary-700 text-[10px] font-bold">券商研报</span></td>
+                <td class="px-4 py-3 font-mono text-slate-500">2026-01</td>
+                <td class="px-4 py-3 star">⭐⭐⭐⭐⭐</td>
+                <td class="px-4 py-3 text-slate-500 hidden lg:table-cell max-w-xs truncate">小红书2030年广告年收入预计2000亿；B站广告CAGR+19%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 text-xs text-slate-500 flex flex-wrap gap-4">
+          <span>⭐⭐⭐⭐⭐ <strong>4</strong> 条</span>
+          <span>⭐⭐⭐⭐ <strong>11</strong> 条</span>
+          <span>⭐⭐⭐ <strong>5</strong> 条</span>
+          <span class="ml-auto">低质量信源占比 <strong>0%</strong></span>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Vertical Analysis -->
+    <section id="vertical" class="scroll-mt-20 space-y-5">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-primary-500 rounded-full"></span>
+        纵向分析：市场权力重组史
+      </h3>
+
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
+        <div class="mb-6">
+          <span class="inline-block px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-bold mb-3">起源与第一性原理</span>
+          <p class="text-sm text-slate-700 leading-relaxed">
+            2022年底ChatGPT发布时，AI变现的叙事非常简单：一个更聪明的工具，让个人能批量生产内容、代码、设计，然后卖给市场。这个叙事成立的前提是<strong class="text-slate-900">"生产能力稀缺"</strong>——只要你能生产，就能换钱。但当时没人意识到，<span class="bg-accent-100 text-accent-800 px-1 rounded">当生产能力被AI无限复制时，真正稀缺的会变成"分发权"和"信任"</span>。
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Node 1 -->
+          <div class="relative pl-8 border-l-2 border-primary-200">
+            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary-500 border-4 border-white shadow"></div>
+            <div class="mb-2">
+              <span class="text-xs font-mono text-primary-600 font-bold">节点一 · 2023年春</span>
+              <h4 class="text-sm font-bold text-slate-900 mt-1">大模型价格战与API成本断崖</h4>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4 text-xs">
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="font-semibold text-slate-900 mb-1">当时的选择</div>
+                <p class="text-slate-600">字节、阿里、DeepSeek将API价格砍去一到两个数量级，用"低价换市场份额"策略快速教育市场。</p>
+              </div>
+              <div class="bg-accent-50 rounded-lg p-4">
+                <div class="font-semibold text-accent-900 mb-1">今天的包袱</div>
+                <p class="text-accent-800">API价格通缩导致纯套壳型AI创业公司失去生存空间。Salesforce放弃按交互计费，GitLab将Duo免费赠送——<strong>应用层被迫让利</strong>。</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="font-semibold text-slate-900 mb-1">被放弃的替代路径</div>
+                <p class="text-slate-600">如果当时选择走高价精品路线、深耕企业工作流而非个人工具，今天的竞争格局会否不同？</p>
+              </div>
+              <div class="bg-primary-50 rounded-lg p-4">
+                <div class="font-semibold text-primary-900 mb-1">反事实追问</div>
+                <p class="text-primary-800">Cursor证明了反事实：不拼价格，拼"模型+IDE"深度集成，半年ARR涨400%。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Node 2 -->
+          <div class="relative pl-8 border-l-2 border-accent-200">
+            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-accent-500 border-4 border-white shadow"></div>
+            <div class="mb-2">
+              <span class="text-xs font-mono text-accent-600 font-bold">节点二 · 2024年冬</span>
+              <h4 class="text-sm font-bold text-slate-900 mt-1">AI编程从"辅助"到"替代"</h4>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4 text-xs">
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="font-semibold text-slate-900 mb-1">当时的选择</div>
+                <p class="text-slate-600">GitHub Copilot、Cursor将AI编程从"代码补全"升级为"自然语言生成完整应用"，开发者首次大规模付费。</p>
+              </div>
+              <div class="bg-accent-50 rounded-lg p-4">
+                <div class="font-semibold text-accent-900 mb-1">今天的包袱</div>
+                <p class="text-accent-800">编程门槛崩塌后，"Vibe Coding"让非程序员也能开发产品。百度秒哒81%应用由非程序员创建→<strong>软件供给爆炸</strong>。</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="font-semibold text-slate-900 mb-1">迁移成本</div>
+                <p class="text-slate-600">专业程序员的"技术溢价"被快速侵蚀，必须转向架构设计、产品思维等更高阶能力。</p>
+              </div>
+              <div class="bg-primary-50 rounded-lg p-4">
+                <div class="font-semibold text-primary-900 mb-1">反事实追问</div>
+                <p class="text-primary-800">如果Vibe Coding晚两年出现，当前SaaS市场格局是否会更稳定？技术窗口一旦打开，不会倒退。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Node 3 -->
+          <div class="relative pl-8 border-l-2 border-emerald-200">
+            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white shadow"></div>
+            <div class="mb-2">
+              <span class="text-xs font-mono text-emerald-600 font-bold">节点三 · 2025年夏</span>
+              <h4 class="text-sm font-bold text-slate-900 mt-1">平台对AI内容的"反制"</h4>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4 text-xs">
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="font-semibold text-slate-900 mb-1">当时的选择</div>
+                <p class="text-slate-600">抖音、小红书、B站早期默许甚至鼓励AI内容以提升平台供给量。</p>
+              </div>
+              <div class="bg-accent-50 rounded-lg p-4">
+                <div class="font-semibold text-accent-900 mb-1">今天的包袱</div>
+                <p class="text-accent-800">2026年3月小红书明确拒绝AI托管账号。知乎盐选收入降16.1%。<strong>平台意识到无限制AI内容会摧毁社区真实性</strong>。</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="font-semibold text-slate-900 mb-1">迁移成本</div>
+                <p class="text-slate-600">依赖AI批量生成内容的创作者面临账号限流、变现路径断裂。</p>
+              </div>
+              <div class="bg-primary-50 rounded-lg p-4">
+                <div class="font-semibold text-primary-900 mb-1">复活机会</div>
+                <p class="text-primary-800">平台限制AI内容，是否为"真实人类创作者"创造了新的溢价空间？</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 bg-slate-900 rounded-xl p-5 text-white">
+          <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-xs font-bold text-primary-400 uppercase tracking-wider">隐性债务脉络</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            今天AI变现格局的分化，根源在2023年的"免费/低价红利期"。当时各大厂用补贴换取用户习惯，<strong class="text-white">隐性债务是：用户从未被真正培养为AI付费用户</strong>。当底层模型成本不再下降（S14指出："最好模型的成本始终大致相同"），应用层却发现用户付费意愿已被免费策略透支。于是出现荒诞画面：OpenAI利润率70%，而大量AI应用公司却送不出收费功能。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Horizontal Analysis -->
+    <section id="horizontal" class="scroll-mt-20 space-y-5">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-accent-500 rounded-full"></span>
+        横向分析：三镜切片
+      </h3>
+
+      <div class="grid lg:grid-cols-3 gap-5">
+        <!-- Mirror 1 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xs">Who</div>
+            <h4 class="font-bold text-slate-900 text-sm">利益相关者地图</h4>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-start gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary-500 mt-1.5 shrink-0"></span>
+              <div>
+                <span class="font-semibold text-slate-900">大模型厂商</span>
+                <p class="text-slate-500 mt-0.5">掌握真实调用数据，定价权极高，但必须持续证明技术领先性。</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary-400 mt-1.5 shrink-0"></span>
+              <div>
+                <span class="font-semibold text-slate-900">云厂商</span>
+                <p class="text-slate-500 mt-0.5">掌握企业客户采购决策，将AI需求转化为云资源消耗。</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-accent-500 mt-1.5 shrink-0"></span>
+              <div>
+                <span class="font-semibold text-slate-900">AI原生工具</span>
+                <p class="text-slate-500 mt-0.5">Cursor/Midjourney追求高ARR与高粘性，但依赖底层模型。</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 shrink-0"></span>
+              <div>
+                <span class="font-semibold text-slate-900">内容平台</span>
+                <p class="text-slate-500 mt-0.5">算法黑箱掌握分发权，必须在供给量与内容质量间平衡。</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0"></span>
+              <div>
+                <span class="font-semibold text-slate-900">个人创作者</span>
+                <p class="text-slate-500 mt-0.5">声音被系统性放大（最会写内容），但真实议价权最弱。</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 p-3 bg-accent-50 rounded-lg border border-accent-100">
+            <div class="text-[10px] font-bold text-accent-700 uppercase mb-1">权力盲区</div>
+            <p class="text-[11px] text-accent-800">个人创作者的真实收入权和议价权最弱，却是AI变现叙事中最响亮的群体。</p>
+          </div>
+        </div>
+
+        <!-- Mirror 2 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-accent-100 flex items-center justify-center text-accent-700 font-bold text-xs">What</div>
+            <h4 class="font-bold text-slate-900 text-sm">问题链下钻</h4>
+          </div>
+          <div class="space-y-4">
+            <div class="relative pl-4 border-l-2 border-slate-200">
+              <div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-300"></div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">表层现象</div>
+              <p class="text-xs text-slate-700">AI变现案例铺天盖地——"大学生月入九万"、"AI写作月入十万"。</p>
+            </div>
+            <div class="relative pl-4 border-l-2 border-accent-200">
+              <div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-accent-300"></div>
+              <div class="text-[10px] font-bold text-accent-500 uppercase mb-1">中层假设</div>
+              <p class="text-xs text-slate-700">主流解释："AI降低门槛让普通人有机会"。<span class="text-accent-600 font-medium">遗漏了平台算法才是最终分配者。</span></p>
+            </div>
+            <div class="relative pl-4 border-l-2 border-primary-200">
+              <div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-primary-400"></div>
+              <div class="text-[10px] font-bold text-primary-500 uppercase mb-1">深层根因</div>
+              <p class="text-xs text-slate-700">AI让内容生产从稀缺技能变成通用能力。<strong class="text-primary-700">供给无限增加而注意力固定，价格必然趋向于零。</strong></p>
+            </div>
+            <div class="relative pl-4 border-l-2 border-slate-800">
+              <div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-800"></div>
+              <div class="text-[10px] font-bold text-slate-600 uppercase mb-1">系统约束</div>
+              <p class="text-xs text-slate-700">打破根因需要打破"平台垄断注意力分配"的结构。用户迁移成本、网络效应让这极难实现。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mirror 3 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">How</div>
+            <h4 class="font-bold text-slate-900 text-sm">价值流分析</h4>
+          </div>
+          <div class="space-y-3 text-xs">
+            <div class="flex justify-between items-center p-2 bg-primary-50 rounded-lg">
+              <span class="font-semibold text-primary-900">基础设施层</span>
+              <span class="font-bold text-primary-700">捕获最多</span>
+            </div>
+            <div class="pl-4 text-slate-500">OpenAI利润率70%，Anthropic运营盈利，DeepSeek理论利润率545%</div>
+
+            <div class="flex justify-between items-center p-2 bg-accent-50 rounded-lg">
+              <span class="font-semibold text-accent-900">工具层</span>
+              <span class="font-bold text-accent-700">分化严重</span>
+            </div>
+            <div class="pl-4 text-slate-500">Cursor ARR 5亿美元；普通AI写作工具陷入价格战</div>
+
+            <div class="flex justify-between items-center p-2 bg-slate-100 rounded-lg">
+              <span class="font-semibold text-slate-900">创作者层</span>
+              <span class="font-bold text-slate-700">捕获最少</span>
+            </div>
+            <div class="pl-4 text-slate-500">10万粉丝年入5-15万，平台抽成、广告分成不透明</div>
+          </div>
+          <div class="mt-4 p-3 bg-slate-900 rounded-lg">
+            <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">反馈断裂</div>
+            <p class="text-[11px] text-slate-300">平台算法是否给AI内容流量倾斜？这个反馈被黑箱化，创作者无法做出理性生产决策。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alternatives -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h4 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          替代品视角
+        </h4>
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-red-50 border border-red-100">
+            <div class="text-xs font-bold text-red-800 mb-1">直接替代 · 威胁程度高</div>
+            <p class="text-[11px] text-red-700">传统SaaS工具（Notion、Figma、传统IDE）叠加AI功能。用户已有使用习惯，迁移成本被低估。</p>
+          </div>
+          <div class="p-4 rounded-xl bg-orange-50 border border-orange-100">
+            <div class="text-xs font-bold text-orange-800 mb-1">间接替代 · 威胁极高</div>
+            <p class="text-[11px] text-orange-700">用户"不消费"——用平台自带的免费AI功能完成需求。抖音即梦、小红书自带AI正在侵蚀第三方工具市场。</p>
+          </div>
+          <div class="p-4 rounded-xl bg-amber-50 border border-amber-100">
+            <div class="text-xs font-bold text-amber-800 mb-1">跨界降维 · 威胁高</div>
+            <p class="text-[11px] text-amber-700">企业自研AI应用（DIY趋势）替代采购第三方软件。29家AI native公司报告显示此趋势正在加速。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Intersection -->
+    <section id="intersection" class="scroll-mt-20 space-y-5">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+        横纵交汇：推演判断
+      </h3>
+
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+          <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 text-xs">+</span>
+            债务复利
+          </h4>
+          <p class="text-xs text-slate-600 leading-relaxed mb-3">
+            OpenAI和Anthropic今天的利润优势，来源于2023-2024年"烧钱换市场"时积累的品牌认知、企业客户关系和模型性能壁垒。
+          </p>
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-[10px] font-bold text-slate-500 uppercase">复利还能持续多久？</span>
+            <p class="text-[11px] text-slate-700 mt-1">当DeepSeek以1/10价格提供可比较能力时，OpenAI定价权已松动。</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+          <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-accent-700 text-xs">−</span>
+            债务包袱
+          </h4>
+          <p class="text-xs text-slate-600 leading-relaxed mb-3">
+            2023年"免费教育市场"策略的包袱今天显现在应用层：<strong class="text-slate-900">用户不愿意为AI功能额外付费</strong>。
+          </p>
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-[10px] font-bold text-slate-500 uppercase">迁移窗口被低估</span>
+            <p class="text-[11px] text-slate-700 mt-1">GitLab、Atlassian被迫将AI打包进订阅——不是generosity，是定价权丧失。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conflict Points -->
+      <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-6 border border-red-100">
+        <h4 class="text-sm font-bold text-red-900 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          三镜冲突点（真洞察所在）
+        </h4>
+        <div class="space-y-3">
+          <div class="flex gap-3 text-xs">
+            <span class="px-2 py-1 rounded bg-red-100 text-red-800 font-bold shrink-0 h-fit">冲突1</span>
+            <p class="text-slate-700"><strong>镜一 vs 镜三：</strong>平台声称支持创作者经济，但价值流显示平台是最大价值捕获者。小红书的"买手橱窗"和"亿级流量扶持"，本质是平台用创作者内容换广告收入，再返还一小部分给头部。</p>
+          </div>
+          <div class="flex gap-3 text-xs">
+            <span class="px-2 py-1 rounded bg-red-100 text-red-800 font-bold shrink-0 h-fit">冲突2</span>
+            <p class="text-slate-700"><strong>镜二 vs 镜三：</strong>问题链深层根因是"供给过剩导致价格趋零"，但价值流显示大模型厂商却在此过程中利润率飙升。<span class="bg-red-100 text-red-800 px-1 rounded">价值创造者和价值捕获者完全错配。</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h4 class="text-sm font-bold text-slate-900 mb-4">情景构建法</h4>
+        <div class="mb-4 p-3 bg-slate-50 rounded-lg">
+          <span class="text-[10px] font-bold text-slate-500 uppercase">关键不确定性因素</span>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="px-2 py-1 rounded-md bg-primary-100 text-primary-800 text-xs font-medium">X：顶尖模型成本是否继续下降</span>
+            <span class="px-2 py-1 rounded-md bg-accent-100 text-accent-800 text-xs font-medium">Y：平台对AI内容的政策走向</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="text-slate-500 border-b border-slate-100">
+                <th class="text-left py-2 pr-4">情景</th>
+                <th class="text-left py-2 pr-4">假设组合</th>
+                <th class="text-left py-2 pr-4">描述</th>
+                <th class="text-left py-2 pr-4">预警信号</th>
+                <th class="text-left py-2">置信度</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              <tr>
+                <td class="py-3 pr-4 font-bold text-primary-700">A：B端繁荣</td>
+                <td class="py-3 pr-4 text-slate-600">X停滞 + Y限制</td>
+                <td class="py-3 pr-4 text-slate-700">个人创作者路径被封堵，企业AI工作流工具爆发</td>
+                <td class="py-3 pr-4 text-slate-600">Copilot ARR继续翻倍；更多平台限制纯AI内容</td>
+                <td class="py-3 font-mono font-bold text-primary-600">0.70</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-4 font-bold text-accent-700">B：精品胜出</td>
+                <td class="py-3 pr-4 text-slate-600">X停滞 + Y接纳</td>
+                <td class="py-3 pr-4 text-slate-700">只有真正高质量、有创意的"人机协作"内容能存活</td>
+                <td class="py-3 pr-4 text-slate-600">平台推出"人类创作认证"或流量倾斜</td>
+                <td class="py-3 font-mono font-bold text-accent-600">0.55</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-4 font-bold text-slate-700">C：全面内卷</td>
+                <td class="py-3 pr-4 text-slate-600">X下降 + Y限制</td>
+                <td class="py-3 pr-4 text-slate-700">应用层价格战白热化，只有巨头能活</td>
+                <td class="py-3 pr-4 text-slate-600">API价格再降80%；创业公司大批死亡</td>
+                <td class="py-3 font-mono font-bold text-slate-600">0.45</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Counter-intuitive Findings -->
+      <div class="space-y-4">
+        <h4 class="text-sm font-bold text-slate-900">反常识发现</h4>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-primary-500">
+            <div class="text-[10px] font-bold text-primary-600 uppercase mb-2">悖论一 · 纠正误知</div>
+            <h5 class="text-sm font-bold text-slate-900 mb-2">AI让创作变容易，但让变现变难</h5>
+            <p class="text-xs text-slate-600 leading-relaxed mb-3">AI让内容生产门槛趋近于零，导致供给爆炸。在注意力固定的前提下，个体创作者的议价权被系统性稀释。</p>
+            <div class="p-2 bg-primary-50 rounded text-[11px] text-primary-800">
+              <strong>违反的直觉：</strong>大多数人以为"AI是创作者的神器"，实际上AI是平台的供给放大器，不是创作者的收入放大器。
+            </div>
+          </div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-accent-500">
+            <div class="text-[10px] font-bold text-accent-600 uppercase mb-2">悖论二 · 发现未知</div>
+            <h5 class="text-sm font-bold text-slate-900 mb-2">造铲人吃肉，用铲人喝汤</h5>
+            <p class="text-xs text-slate-600 leading-relaxed mb-3">最大赢家是OpenAI（利润率70%）、Anthropic（运营盈利）、Cursor（ARR涨400%）——他们卖的是"铲子"本身。</p>
+            <div class="p-2 bg-accent-50 rounded text-[11px] text-accent-800">
+              <strong>违反的直觉：</strong>大多数人想"怎么用AI赚钱"，但真正的问题是"你能不能成为卖AI能力的人"。
+            </div>
+          </div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-emerald-500">
+            <div class="text-[10px] font-bold text-emerald-600 uppercase mb-2">悖论三 · 深化浅知</div>
+            <h5 class="text-sm font-bold text-slate-900 mb-2">大厂免费送AI，恰恰证明AI值钱</h5>
+            <p class="text-xs text-slate-600 leading-relaxed mb-3">GitLab、Atlassian将AI打包进订阅，不是因为AI不值钱，而是因为价值已在底层锁定，AI只是留存钩子。</p>
+            <div class="p-2 bg-emerald-50 rounded text-[11px] text-emerald-800">
+              <strong>违反的直觉：</strong>大多数人看到"免费"就以为"没商业机会"，实际上免费是最高级的变现策略。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Causal Inference -->
+    <section class="space-y-5">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-indigo-500 rounded-full"></span>
+        因果推断
+      </h3>
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="text-slate-500 border-b border-slate-100">
+              <th class="text-left py-2 pr-4">洞察</th>
+              <th class="text-left py-2 pr-4">DAG因果链</th>
+              <th class="text-left py-2 pr-4">反事实框架</th>
+              <th class="text-left py-2">验证方法</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            <tr>
+              <td class="py-3 pr-4 font-medium text-slate-900">I1：利润集中基础设施层</td>
+              <td class="py-3 pr-4 text-slate-700">API成本下降 → 企业采纳率提升 → 工作流依赖加深 → 高粘性付费</td>
+              <td class="py-3 pr-4 text-slate-600">如果API成本未下降，企业是否仍会大规模采购？GPT4早期因昂贵限制了采用。</td>
+              <td class="py-3 text-slate-600">对比2023 vs 2025企业AI支出；分析付费企业留存率</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-medium text-slate-900">I2：创作者窗口关闭</td>
+              <td class="py-3 pr-4 text-slate-700">AI生成门槛降低 → 供给爆炸 → 注意力稀释 → 平台政策收紧</td>
+              <td class="py-3 pr-4 text-slate-600">若平台不限制AI内容，创作者收入是否会继续下降？知乎盐选降16%提供部分证据。</td>
+              <td class="py-3 text-slate-600">追踪平台AI内容流量政策；调研创作者收入变化</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-medium text-slate-900">I3：免费是生态锁定</td>
+              <td class="py-3 pr-4 text-slate-700">底层成本高 → 应用层难盈利 → AI作为生态组件 → 锁定基础订阅</td>
+              <td class="py-3 pr-4 text-slate-600">若GitLab单独收费Duo，用户会付费还是转向免费替代品？</td>
+              <td class="py-3 text-slate-600">分析财报中"核心订阅增长"vs"AI功能收费"贡献比</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Validation -->
+    <section id="validation" class="scroll-mt-20 space-y-5">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-slate-700 rounded-full"></span>
+        洞察成立性校验与六维评估
+      </h3>
+
+      <!-- Self-check -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h4 class="text-sm font-bold text-slate-900 mb-4">洞察痛点自检</h4>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+            <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+            <span class="text-xs text-emerald-800">框架明确</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+            <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+            <span class="text-xs text-emerald-800">交叉验证</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+            <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+            <span class="text-xs text-emerald-800">竞争视角</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+            <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+            <span class="text-xs text-emerald-800">未来情景</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+            <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+            <span class="text-xs text-emerald-800">可执行建议</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-red-50 border border-red-100">
+            <span class="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] font-bold">✗</span>
+            <span class="text-xs text-red-800">一线原声（缺访谈）</span>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center gap-2 text-xs">
+          <span class="text-slate-500">未通过项：</span>
+          <span class="font-mono font-bold text-slate-900">1 / 9</span>
+          <span class="text-slate-400">· 置信度维持当前档位</span>
+        </div>
+      </div>
+
+      <!-- Six Dimensions -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h4 class="text-sm font-bold text-slate-900 mb-5">六维评估卡</h4>
+        <div class="space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-24 text-xs font-medium text-slate-600 text-right shrink-0">认知颠覆度</div>
+            <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[86%] bg-gradient-to-r from-primary-500 to-primary-400 rounded-full"></div>
+            </div>
+            <div class="w-8 text-xs font-mono font-bold text-primary-600">4.3</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-24 text-xs font-medium text-slate-600 text-right shrink-0">因果论证力</div>
+            <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[66%] bg-gradient-to-r from-primary-500 to-accent-400 rounded-full"></div>
+            </div>
+            <div class="w-8 text-xs font-mono font-bold text-primary-600">3.3</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-24 text-xs font-medium text-slate-600 text-right shrink-0">可证伪度</div>
+            <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[74%] bg-gradient-to-r from-primary-500 to-accent-400 rounded-full"></div>
+            </div>
+            <div class="w-8 text-xs font-mono font-bold text-primary-600">3.7</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-24 text-xs font-medium text-slate-600 text-right shrink-0">可执行度</div>
+            <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[80%] bg-gradient-to-r from-primary-500 to-accent-400 rounded-full"></div>
+            </div>
+            <div class="w-8 text-xs font-mono font-bold text-primary-600">4.0</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-24 text-xs font-medium text-slate-600 text-right shrink-0">隐性成本揭示</div>
+            <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[80%] bg-gradient-to-r from-primary-500 to-accent-400 rounded-full"></div>
+            </div>
+            <div class="w-8 text-xs font-mono font-bold text-primary-600">4.0</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-24 text-xs font-medium text-slate-600 text-right shrink-0">场景真实度</div>
+            <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-[74%] bg-gradient-to-r from-primary-500 to-accent-400 rounded-full"></div>
+            </div>
+            <div class="w-8 text-xs font-mono font-bold text-primary-600">3.7</div>
+          </div>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-4">
+          <div class="px-4 py-2 bg-slate-900 rounded-lg text-white">
+            <span class="text-[10px] text-slate-400 uppercase">六维均分</span>
+            <div class="text-xl font-black">3.7 <span class="text-sm text-slate-400 font-normal">/ 5.0</span></div>
+          </div>
+          <div class="px-4 py-2 bg-primary-50 rounded-lg border border-primary-100">
+            <span class="text-[10px] text-primary-600 uppercase">整体置信度</span>
+            <div class="text-xl font-black text-primary-700">0.72</div>
+          </div>
+          <div class="text-xs text-slate-500 max-w-sm">
+            <strong>天花板原因：</strong>缺少一手访谈数据和创作者真实收入样本；部分推演依赖公开信息推断，可能存在"过度解读"风险。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Items -->
+    <section id="action" class="scroll-mt-20 space-y-5">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-orange-500 rounded-full"></span>
+        可执行度清单（72小时启动）
+      </h3>
+
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="flex items-start gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-sm shrink-0">J1</div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900">放弃"纯AI内容套利"，转向垂直场景服务</h4>
+              <p class="text-xs text-slate-500 mt-1">从流量思维转向工作流思维</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex gap-2">
+              <span class="text-primary-600 font-bold shrink-0">第一步：</span>
+              <p class="text-slate-700">列出你所在/熟悉的3个行业，搜索"该行业+AI工具"的现有痛点</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-primary-600 font-bold shrink-0">资源：</span>
+              <p class="text-slate-700">2小时调研时间</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-red-600 font-bold shrink-0">止损线：</span>
+              <p class="text-slate-700">若3个行业均已有成熟解决方案，放弃此方向</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="flex items-start gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-accent-100 flex items-center justify-center text-accent-700 font-bold text-sm shrink-0">J2</div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900">测试B端AI工作流顾问路径</h4>
+              <p class="text-xs text-slate-500 mt-1">用MVP验证付费意愿</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex gap-2">
+              <span class="text-accent-600 font-bold shrink-0">第一步：</span>
+              <p class="text-slate-700">用Cursor/Claude在48小时内搭建一个最小可用原型（MVP），解决一个具体工作流问题</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-accent-600 font-bold shrink-0">资源：</span>
+              <p class="text-slate-700">免费试用版AI编程工具</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-red-600 font-bold shrink-0">止损线：</span>
+              <p class="text-slate-700">若48小时内无法做出可演示原型，说明技能缺口过大</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="flex items-start gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm shrink-0">J3</div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900">若坚持创作者路径，叠加"人类稀缺性"</h4>
+              <p class="text-xs text-slate-500 mt-1">与纯AI内容形成差异化</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex gap-2">
+              <span class="text-emerald-600 font-bold shrink-0">第一步：</span>
+              <p class="text-slate-700">在内容中明确标注"人机协作过程"，并加入无法被AI替代的个人经验/实地调研</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-emerald-600 font-bold shrink-0">资源：</span>
+              <p class="text-slate-700">时间投入</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-red-600 font-bold shrink-0">止损线：</span>
+              <p class="text-slate-700">若3个月内粉丝增长&lt;20%，说明差异化不足</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover">
+          <div class="flex items-start gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-sm shrink-0">J4</div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900">关注API/基础设施层投资机会（若你有资本）</h4>
+              <p class="text-xs text-slate-500 mt-1">从使用者转向投资者视角</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex gap-2">
+              <span class="text-purple-600 font-bold shrink-0">第一步：</span>
+              <p class="text-slate-700">开设海外券商账户，追踪Anthropic/OpenAI上市进程，或研究AI云厂商财报</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-purple-600 font-bold shrink-0">资源：</span>
+              <p class="text-slate-700">最小可投资金</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-red-600 font-bold shrink-0">止损线：</span>
+              <p class="text-slate-700">若AI板块估值PE&gt;100且营收增速&lt;30%，暂缓</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="pt-10 border-t border-slate-200">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center text-white font-bold text-[10px]">IS</div>
+          <span>InsightSkill v7.0 · 全场景融合洞察引擎</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span>20条信源 · 置信度0.72</span>
+          <span>·</span>
+          <span>生成于 2026-06-07</span>
+        </div>
+      </div>
+      <div class="mt-4 text-[10px] text-slate-300 text-center">
+        本报告基于公开可获取的财报、券商研报与科技媒体报道整理，不构成投资或商业建议。核心洞察已标注置信度与失效条件，请结合实际情况独立判断。
+      </div>
+    </footer>
+
+  </main>
+
+  <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 right-6 w-10 h-10 rounded-full bg-slate-900 text-white shadow-lg flex items-center justify-center hover:bg-primary-600 transition-colors z-50" aria-label="回到顶部">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+  </button>
+
+</body>
+</html>

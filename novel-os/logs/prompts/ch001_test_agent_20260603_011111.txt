@@ -1,0 +1,7 @@
+=== Agent: test_agent | Chapter: 1 | Time: 20260603_011111 ===
+
+----- SYSTEM PROMPT -----
+system text
+
+----- USER PROMPT -----
+user text
