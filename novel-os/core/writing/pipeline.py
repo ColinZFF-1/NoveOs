@@ -175,19 +175,33 @@ class WritingPipeline:
                     logger.info("第 %d 章 AI 痕迹分数 %.2f，无需改写", ctx.chapter_num, ai_markers["total"])
 
             if validation.verdict == "BLOCK":
+                block_issues = [i for i in validation.issues if i.level == "BLOCK"]
                 logger.warning("ChapterValidator BLOCK: %s",
-                               [i.message for i in validation.issues if i.level == "BLOCK"])
+                               [i.message for i in block_issues])
+
+                has_overlength = any("字数超标" in i.message for i in block_issues)
+                has_shortage = any("字数不足" in i.message for i in block_issues)
 
                 # 字数超标 → 截断
-                if any("字数超标" in i.message for i in validation.issues if i.level == "BLOCK"):
+                if has_overlength:
                     content = self._truncate_if_overlength(ctx, content)
                     if self._validator:
                         validation = self._validator.validate(content, {"chapter_num": ctx.chapter_num})
                     if validation.verdict != "BLOCK":
                         break
+                    # 截断后仍有其他阻塞问题，合并修正指令继续重试
+                    corrections = self._merge_corrections(
+                        corrections, self._generate_corrections(validation, audit_report)
+                    )
+                    logger.info(
+                        "[Pipeline] 第 %d 章 截断后仍有 %d 处阻塞问题，继续重试",
+                        ctx.chapter_num,
+                        len([i for i in validation.issues if i.level == "BLOCK"]),
+                    )
+                    continue
 
                 # 字数不足 → Expander
-                elif any("字数不足" in i.message for i in validation.issues if i.level == "BLOCK"):
+                if has_shortage:
                     content = self._try_expand(ctx, content, validation)
                     if self._validator:
                         validation = self._validator.validate(content, {"chapter_num": ctx.chapter_num})
@@ -201,14 +215,43 @@ class WritingPipeline:
                             validation = self._validator.validate(content, {"chapter_num": ctx.chapter_num})
                         if validation.verdict != "BLOCK":
                             break
+                        # 若二次扩写后字数达标但仍有其他阻塞问题，合并修正指令
+                        if not any("字数不足" in i.message for i in validation.issues if i.level == "BLOCK"):
+                            corrections = self._merge_corrections(
+                                corrections, self._generate_corrections(validation, audit_report)
+                            )
+                            logger.info(
+                                "[Pipeline] 第 %d 章 扩写后字数达标但仍有 %d 处阻塞问题，继续重试",
+                                ctx.chapter_num,
+                                len([i for i in validation.issues if i.level == "BLOCK"]),
+                            )
+                            continue
                         short_by3 = ctx.word_min - count_chinese_chars(content)
-                        corrections["scene_writer"] += (
-                            f"\n字数仍不足，当前{count_chinese_chars(content)}字，"
-                            f"需再扩写{max(short_by3, 200)}字。"
-                        )
+                        corrections = self._merge_corrections(corrections, {
+                            "scene_writer": (
+                                f"\n字数仍不足，当前{count_chinese_chars(content)}字，"
+                                f"需再扩写{max(short_by3, 200)}字。"
+                            ),
+                            "hook_engineer": "",
+                            "dialogue_tuner": "",
+                            "global": "",
+                        })
                         logger.info("[Pipeline] 第 %d 章 第二次Expander后仍不足，回退 SceneWriter", ctx.chapter_num)
+                    else:
+                        # 扩写后字数达标但仍有其他阻塞问题，合并修正指令继续重试
+                        corrections = self._merge_corrections(
+                            corrections, self._generate_corrections(validation, audit_report)
+                        )
+                        logger.info(
+                            "[Pipeline] 第 %d 章 扩写后字数达标但仍有 %d 处阻塞问题，继续重试",
+                            ctx.chapter_num,
+                            len([i for i in validation.issues if i.level == "BLOCK"]),
+                        )
+                        continue
                 else:
-                    corrections = self._generate_corrections(validation, audit_report)
+                    corrections = self._merge_corrections(
+                        corrections, self._generate_corrections(validation, audit_report)
+                    )
                     logger.info("[Pipeline] 第 %d 章 结构问题，回退修正", ctx.chapter_num)
             else:
                 break
@@ -248,6 +291,17 @@ class WritingPipeline:
     def _should_retry(self, validation: ValidationResult, attempt: int) -> bool:
         return validation.verdict == "BLOCK" and attempt < self._cfg.max_retries
 
+    @staticmethod
+    def _merge_corrections(
+        old: dict[str, str], new: dict[str, str]
+    ) -> dict[str, str]:
+        """合并修正指令，避免覆盖已累积的反馈。"""
+        merged = dict(old)
+        for key, value in new.items():
+            if value:
+                merged[key] = (merged.get(key, "") + "\n" + value).strip()
+        return merged
+
     def _run_steps(self, ctx: ChapterContext, corrections: dict[str, str]) -> str:
         """按顺序执行 Steps，返回最终正文。"""
         content = ""
@@ -269,6 +323,11 @@ class WritingPipeline:
                 if ctx.word_min <= wc <= ctx.word_max:
                     logger.info("[Pipeline] HookEngineer 后字数达标(%d)，跳过 DialogueTuner", wc)
                     continue
+
+            # 时间保护：跳过 Polish 和 Auditor，直接保存 SceneWriter 原始输出
+            if step.name in ("Polish", "Auditor"):
+                logger.info("[Pipeline] 跳过 %s，直接保存 SceneWriter 输出", step.name)
+                continue
 
             # 传递当前内容给需要前置内容的 Steps
             if step.name in ("HookEngineer", "DialogueTuner", "Polish", "Auditor"):

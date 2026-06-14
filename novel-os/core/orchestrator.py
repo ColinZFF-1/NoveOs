@@ -314,6 +314,10 @@ class Orchestrator:
                 writer = runtime.batch_writer
 
             start, end = chapter_range
+            failed_chapters: list[int] = []
+            consecutive_failures = 0
+            max_consecutive_failures = 3  # 防止连续失败浪费 API Token
+
             for num in range(start, end + 1):
                 # 检查暂停/停止
                 if project_id in self._stopped:
@@ -350,12 +354,23 @@ class Orchestrator:
                         runtime.current_chapter = num
                         if result.success:
                             runtime.status = "writing"
+                            consecutive_failures = 0
                         else:
-                            runtime.status = "error"
-                            self._persist_project(project_id, runtime)
-                            # Stop on first failure — don't waste API calls
-                            logger.error("项目 %s 第 %d 章失败，停止流水线 (gate=%s)", project_id, num, result.gate_level)
-                            break
+                            failed_chapters.append(num)
+                            consecutive_failures += 1
+                            runtime.status = "writing"
+                            logger.warning(
+                                "项目 %s 第 %d 章失败 (gate=%s)，继续后续章节",
+                                project_id, num, result.gate_level,
+                            )
+                            if consecutive_failures >= max_consecutive_failures:
+                                logger.error(
+                                    "项目 %s 连续 %d 章失败，停止流水线",
+                                    project_id, consecutive_failures,
+                                )
+                                runtime.status = "error"
+                                self._persist_project(project_id, runtime)
+                                break
                         # 记录最近一次审计结果
                         runtime.last_audit = {
                             "quality_passed": result.gate_level != "BLOCKING",
@@ -400,6 +415,8 @@ class Orchestrator:
             # 全部完成
             with self._lock:
                 if runtime.status not in ("paused", "error"):
+                    # 即使有个别章节失败，只要跑完范围就算完成，避免用户手动 resume。
+                    # 失败章节的草稿已保存，用户可通过日志/文件定位。
                     runtime.status = "completed"
                 runtime.pipeline_id = None
                 runtime.future = None
@@ -412,6 +429,7 @@ class Orchestrator:
                     "pipeline_id": pipeline_id,
                     "final_status": runtime.status,
                     "last_chapter": runtime.current_chapter,
+                    "failed_chapters": failed_chapters,
                 },
             )
 
