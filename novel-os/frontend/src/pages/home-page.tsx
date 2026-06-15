@@ -2,17 +2,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Topbar } from "@/components/layout/topbar";
 import { getLLMSettings } from "@/api/settings";
+import { listProjects } from "@/api/projects";
 import { useQuery } from "@tanstack/react-query";
-import { PlusCircle, Settings, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { PlusCircle, Settings, Sparkles, BookOpen, ChevronRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export function HomePage() {
+  const navigate = useNavigate();
   const { data: llmSettings } = useQuery({
     queryKey: ["llm-settings"],
     queryFn: getLLMSettings,
   });
+  const { data: projects = [] } = useQuery({
+    queryKey: ["projects"],
+    queryFn: listProjects,
+  });
 
   const defaultProvider = llmSettings?.default_provider;
+  const totalChapters = projects.reduce((sum, p) => sum + p.current_chapter, 0);
+  const recentProjects = projects.slice(0, 3);
 
   return (
     <div>
@@ -26,20 +34,22 @@ export function HomePage() {
           <Card className="md:col-span-3">
             <CardHeader className="pb-3">
               <CardDescription>当前项目</CardDescription>
-              <CardTitle className="text-3xl">0</CardTitle>
+              <CardTitle className="text-3xl">{projects.length}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">尚无项目，开始创建你的第一个故事</p>
+              <p className="text-sm text-muted-foreground">
+                {projects.length === 0 ? "尚无项目，开始创建你的第一个故事" : `${projects.length} 个进行中或已完成的项目`}
+              </p>
             </CardContent>
           </Card>
 
           <Card className="md:col-span-2">
             <CardHeader className="pb-3">
               <CardDescription>已完成章节</CardDescription>
-              <CardTitle className="text-3xl">0</CardTitle>
+              <CardTitle className="text-3xl">{totalChapters}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">累计创作字数：0</p>
+              <p className="text-sm text-muted-foreground">累计创作章节数</p>
             </CardContent>
           </Card>
 
@@ -59,6 +69,34 @@ export function HomePage() {
             </CardContent>
           </Card>
         </div>
+
+        {recentProjects.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BookOpen className="size-4 text-primary" />
+                最近项目
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {recentProjects.map((project) => (
+                <button
+                  key={project.project_id}
+                  onClick={() => navigate(`/projects/${project.project_id}/write`)}
+                  className="flex w-full items-center justify-between rounded-md border border-border p-3 text-left transition-colors hover:bg-muted"
+                >
+                  <div>
+                    <div className="font-medium">{project.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {project.current_chapter} / {project.total_chapters} 章 · {project.status}
+                    </div>
+                  </div>
+                  <ChevronRight className="size-4 text-muted-foreground" />
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-dashed">
           <CardHeader>

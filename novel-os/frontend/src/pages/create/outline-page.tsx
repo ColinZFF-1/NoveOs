@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +41,7 @@ export function OutlinePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
   const [editedOutline, setEditedOutline] = useState<OutlineItem[]>([]);
+  const pollingRef = useRef(false);
 
   useEffect(() => {
     if (!topic || !categoryId) {
@@ -83,37 +84,41 @@ export function OutlinePage() {
   useEffect(() => {
     if (!taskId) return;
 
+    let cancelled = false;
+
     const poll = async () => {
+      if (cancelled || pollingRef.current) return;
+      pollingRef.current = true;
       try {
         const task = await getTask(taskId);
+        if (cancelled) return;
         if (task.status === "success") {
           const result = task.result as Outline | null;
           setOutline(result);
           setEditedOutline(result?.outline || []);
           setIsGenerating(false);
-          return true;
+          return;
         }
         if (task.status === "failed") {
           setError(task.error || "大纲生成失败");
           setIsGenerating(false);
-          return true;
+          return;
         }
-        return false;
+        const timer = setTimeout(() => { pollingRef.current = false; poll(); }, 2000);
+        return () => clearTimeout(timer);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "查询任务失败");
-        setIsGenerating(false);
-        return true;
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "查询任务失败");
+          setIsGenerating(false);
+        }
+      } finally {
+        pollingRef.current = false;
       }
     };
 
-    const interval = setInterval(async () => {
-      const done = await poll();
-      if (done) clearInterval(interval);
-    }, 2000);
-
     poll();
 
-    return () => clearInterval(interval);
+    return () => { cancelled = true; };
   }, [taskId]);
 
   const updateChapterField = (index: number, field: keyof OutlineItem, value: string) => {
@@ -202,7 +207,10 @@ export function OutlinePage() {
                     min={3}
                     max={2000}
                     value={chaptersTarget}
-                    onChange={(e) => setChaptersTarget(Number(e.target.value))}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setChaptersTarget(v === "" ? 0 : Number(v));
+                    }}
                   />
                 </div>
                 <div className="space-y-2">
@@ -212,7 +220,10 @@ export function OutlinePage() {
                     min={500}
                     max={10000}
                     value={wordsPerChapter}
-                    onChange={(e) => setWordsPerChapter(Number(e.target.value))}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setWordsPerChapter(v === "" ? 0 : Number(v));
+                    }}
                   />
                 </div>
               </div>
@@ -431,7 +442,7 @@ export function OutlinePage() {
                 <CardContent>
                   <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                     {outline.rules.map((rule, i) => (
-                      <li key={i}>{rule}</li>
+                      <li key={`${rule}-${i}`}>{rule}</li>
                     ))}
                   </ul>
                 </CardContent>

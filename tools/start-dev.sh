@@ -5,6 +5,8 @@
 
 set -e
 
+export PYTHONUTF8=1
+
 BACKEND_DIR="d:/noveos/novel-os"
 FRONTEND_DIR="d:/noveos/app"
 PYTHON="E:/crewai-venv/Scripts/python.exe"
