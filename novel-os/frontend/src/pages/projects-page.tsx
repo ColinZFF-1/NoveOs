@@ -12,6 +12,8 @@ export function ProjectsPage() {
   const { data: projects = [], isLoading, error } = useQuery({
     queryKey: ["projects"],
     queryFn: listProjects,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   return (

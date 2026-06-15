@@ -13,9 +13,11 @@ export function HomePage() {
     queryKey: ["llm-settings"],
     queryFn: getLLMSettings,
   });
-  const { data: projects = [] } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery({
     queryKey: ["projects"],
     queryFn: listProjects,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const defaultProvider = llmSettings?.default_provider;
@@ -34,11 +36,19 @@ export function HomePage() {
           <Card className="md:col-span-3">
             <CardHeader className="pb-3">
               <CardDescription>当前项目</CardDescription>
-              <CardTitle className="text-3xl">{projects.length}</CardTitle>
+              <CardTitle className="text-3xl">
+                {projectsLoading ? "..." : projectsError ? "-" : projects.length}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                {projects.length === 0 ? "尚无项目，开始创建你的第一个故事" : `${projects.length} 个进行中或已完成的项目`}
+                {projectsLoading
+                  ? "加载中..."
+                  : projectsError
+                  ? `加载失败：${projectsError instanceof Error ? projectsError.message : "未知错误"}`
+                  : projects.length === 0
+                  ? "尚无项目，开始创建你的第一个故事"
+                  : `${projects.length} 个进行中或已完成的项目`}
               </p>
             </CardContent>
           </Card>
