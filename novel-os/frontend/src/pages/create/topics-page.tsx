@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -54,8 +54,10 @@ export function TopicsPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string>("");
+  const generatingRef = useRef(false);
+  const pollingRef = useRef(false);
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
   });
@@ -64,7 +66,8 @@ export function TopicsPage() {
   const pathNames = categoryId ? getCategoryPathNames(categories, categoryId) : [];
 
   const startGeneration = async () => {
-    if (!categoryId) return;
+    if (!categoryId || generatingRef.current) return;
+    generatingRef.current = true;
     setIsGenerating(true);
     setError("");
     setTopics([]);
@@ -81,7 +84,7 @@ export function TopicsPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "创建任务失败");
       setIsGenerating(false);
-      // 创建任务失败时同样清理旧参数，避免重复触发
+      generatingRef.current = false;
       setSearchParams(new URLSearchParams(), { replace: true });
     }
   };
@@ -91,51 +94,58 @@ export function TopicsPage() {
       navigate("/create/category");
       return;
     }
-    startGeneration();
+    // 延迟到下一个事件循环，避免在 effect 中同步调用 setState
+    const timer = setTimeout(() => startGeneration(), 0);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId]);
 
   useEffect(() => {
     if (!taskId) return;
 
+    let cancelled = false;
+
     const clearUrlParams = () => {
-      // 任务结束后清理 URL 中的旧分类参数，防止返回/刷新时再次触发失败状态
       setSearchParams(new URLSearchParams(), { replace: true });
     };
 
     const poll = async () => {
+      if (cancelled || pollingRef.current) return;
+      pollingRef.current = true;
       try {
         const task = await getTask(taskId);
+        if (cancelled) return;
         if (task.status === "success") {
           setTopics(task.result || []);
           setIsGenerating(false);
-          return true;
+          generatingRef.current = false;
+          return;
         }
         if (task.status === "failed") {
           setError(task.error || "生成失败");
           setIsGenerating(false);
-          // 失败后清理 URL 中的旧分类参数，防止返回/刷新时直接展示失败状态
+          generatingRef.current = false;
           clearUrlParams();
-          return true;
+          return;
         }
-        return false;
+        // 未完成，继续轮询
+        const timer = setTimeout(() => { pollingRef.current = false; poll(); }, 1500);
+        return () => clearTimeout(timer);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "查询任务失败");
-        setIsGenerating(false);
-        // 查询异常后同样清理旧参数
-        clearUrlParams();
-        return true;
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "查询任务失败");
+          setIsGenerating(false);
+          generatingRef.current = false;
+          clearUrlParams();
+        }
+      } finally {
+        pollingRef.current = false;
       }
     };
 
-    const interval = setInterval(async () => {
-      const done = await poll();
-      if (done) clearInterval(interval);
-    }, 1500);
-
     poll();
 
-    return () => clearInterval(interval);
+    return () => { cancelled = true; };
   }, [taskId, setSearchParams]);
 
   const handleRefresh = () => {
@@ -152,7 +162,13 @@ export function TopicsPage() {
     <div>
       <Topbar
         title="AI 选题推荐"
-        description={category ? pathNames.join(" / ") : "选择感兴趣的选题"}
+        description={
+          categoriesLoading
+            ? "加载分类中..."
+            : category
+              ? pathNames.join(" / ")
+              : "选择感兴趣的选题"
+        }
       />
 
       <div className="p-8">
