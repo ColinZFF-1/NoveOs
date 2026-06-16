@@ -225,13 +225,65 @@ class Orchestrator:
                 info.future.cancel()
             logger.info("项目 %s 已注销", project_id)
 
+    def update_project(
+        self,
+        project_id: str,
+        *,
+        name: str | None = None,
+        genre: str | None = None,
+        platform: str | None = None,
+        chapters_target: int | None = None,
+        words_per_chapter: int | None = None,
+    ) -> dict[str, Any] | None:
+        """更新项目元信息并持久化到 book.yaml 和全局注册表。"""
+        with self._lock:
+            runtime = self._projects.get(project_id)
+            if not runtime:
+                return None
+
+            # 流水线运行时禁止修改核心参数
+            if runtime.status in ("writing", "auditing") and (chapters_target is not None or words_per_chapter is not None):
+                raise ValueError("流水线运行中，不能修改章节数或每章字数")
+
+            total_words_target = None
+            if chapters_target is not None and words_per_chapter is not None:
+                total_words_target = chapters_target * words_per_chapter
+            elif chapters_target is not None:
+                total_words_target = chapters_target * runtime.book_config.words_per_chapter
+            elif words_per_chapter is not None:
+                total_words_target = runtime.book_config.chapters_target * words_per_chapter
+
+            new_config = runtime.book_config.update_fields(
+                project=name,
+                genre=genre,
+                platform=platform,
+                chapters_target=chapters_target,
+                words_per_chapter=words_per_chapter,
+                total_words_target=total_words_target,
+            )
+            runtime.book_config = new_config
+
+            self._persist_project(project_id, runtime)
+            logger.info("项目 %s 信息已更新", project_id)
+            return self.get_project_status(project_id)
+
     # ------------------------------------------------------------------
     # 流水线控制
     # ------------------------------------------------------------------
     def start_pipeline(
-        self, project_id: str, chapter_range: tuple[int, int], resume: bool = False
+        self,
+        project_id: str,
+        chapter_range: tuple[int, int] | list[tuple[int, int]],
+        resume: bool = False,
     ) -> str:
-        """启动项目流水线，提交到 Worker Pool。"""
+        """启动项目流水线，提交到 Worker Pool。
+
+        chapter_range 支持单范围 (start, end) 或多范围列表。
+        """
+        ranges = [chapter_range] if isinstance(chapter_range, tuple) else chapter_range
+        if not ranges:
+            raise ValueError("章节范围不能为空")
+
         with self._lock:
             if project_id not in self._projects:
                 raise ValueError(f"项目不存在: {project_id}")
@@ -242,12 +294,12 @@ class Orchestrator:
             pipeline_id = f"pipe_{datetime.utcnow():%Y%m%d_%H%M%S}_{uuid.uuid4().hex[:6]}"
             runtime.pipeline_id = pipeline_id
             runtime.status = "writing"
-            runtime.current_chapter = chapter_range[0]
+            runtime.current_chapter = ranges[0][0]
             self._paused.discard(project_id)
             self._stopped.discard(project_id)
 
             future = self._executor.submit(
-                self._run_pipeline, project_id, chapter_range, resume, pipeline_id
+                self._run_pipeline, project_id, ranges, resume, pipeline_id
             )
             runtime.future = future
             self._persist_project(project_id, runtime)
@@ -256,7 +308,7 @@ class Orchestrator:
                 "项目 %s 流水线 %s 启动，章节范围 %s",
                 project_id,
                 pipeline_id,
-                chapter_range,
+                ranges,
             )
             return pipeline_id
 
@@ -292,7 +344,7 @@ class Orchestrator:
     def _run_pipeline(
         self,
         project_id: str,
-        chapter_range: tuple[int, int],
+        chapter_ranges: list[tuple[int, int]],
         resume: bool,
         pipeline_id: str,
     ) -> None:
@@ -303,7 +355,7 @@ class Orchestrator:
                 {
                     "project_id": project_id,
                     "pipeline_id": pipeline_id,
-                    "chapter_range": chapter_range,
+                    "chapter_ranges": chapter_ranges,
                 },
             )
 
@@ -313,104 +365,105 @@ class Orchestrator:
                     return
                 writer = runtime.batch_writer
 
-            start, end = chapter_range
             failed_chapters: list[int] = []
             consecutive_failures = 0
             max_consecutive_failures = 3  # 防止连续失败浪费 API Token
 
-            for num in range(start, end + 1):
-                # 检查暂停/停止
-                if project_id in self._stopped:
-                    logger.info("项目 %s 被停止", project_id)
-                    break
-                if project_id in self._paused:
-                    logger.info("项目 %s 被暂停", project_id)
+            for chapter_range in chapter_ranges:
+                start, end = chapter_range
+                for num in range(start, end + 1):
+                    # 检查暂停/停止
+                    if project_id in self._stopped:
+                        logger.info("项目 %s 被停止", project_id)
+                        break
+                    if project_id in self._paused:
+                        logger.info("项目 %s 被暂停", project_id)
+                        self._event_bus.emit(
+                            PIPELINE_PAUSE,
+                            {"project_id": project_id, "pipeline_id": pipeline_id, "paused_at": num},
+                        )
+                        break
+
+                    # resume 模式下跳过已存在的章节
+                    if resume and writer._chapter_exists(num):
+                        logger.info("项目 %s 第 %d 章已存在，跳过", project_id, num)
+                        with self._lock:
+                            runtime.current_chapter = num
+                            self._persist_project(project_id, runtime)
+                        continue
+
                     self._event_bus.emit(
-                        PIPELINE_PAUSE,
-                        {"project_id": project_id, "pipeline_id": pipeline_id, "paused_at": num},
+                        CHAPTER_START,
+                        {
+                            "project_id": project_id,
+                            "pipeline_id": pipeline_id,
+                            "chapter_num": num,
+                        },
                     )
-                    break
 
-                # resume 模式下跳过已存在的章节
-                if resume and writer._chapter_exists(num):
-                    logger.info("项目 %s 第 %d 章已存在，跳过", project_id, num)
-                    with self._lock:
-                        runtime.current_chapter = num
-                        self._persist_project(project_id, runtime)
-                    continue
-
-                self._event_bus.emit(
-                    CHAPTER_START,
-                    {
-                        "project_id": project_id,
-                        "pipeline_id": pipeline_id,
-                        "chapter_num": num,
-                    },
-                )
-
-                try:
-                    result = writer.write_chapter(num)
-                    with self._lock:
-                        runtime.current_chapter = num
-                        if result.success:
-                            runtime.status = "writing"
-                            consecutive_failures = 0
-                        else:
-                            failed_chapters.append(num)
-                            consecutive_failures += 1
-                            runtime.status = "writing"
-                            logger.warning(
-                                "项目 %s 第 %d 章失败 (gate=%s)，继续后续章节",
-                                project_id, num, result.gate_level,
-                            )
-                            if consecutive_failures >= max_consecutive_failures:
-                                logger.error(
-                                    "项目 %s 连续 %d 章失败，停止流水线",
-                                    project_id, consecutive_failures,
+                    try:
+                        result = writer.write_chapter(num)
+                        with self._lock:
+                            runtime.current_chapter = num
+                            if result.success:
+                                runtime.status = "writing"
+                                consecutive_failures = 0
+                            else:
+                                failed_chapters.append(num)
+                                consecutive_failures += 1
+                                runtime.status = "writing"
+                                logger.warning(
+                                    "项目 %s 第 %d 章失败 (gate=%s)，继续后续章节",
+                                    project_id, num, result.gate_level,
                                 )
-                                runtime.status = "error"
-                                self._persist_project(project_id, runtime)
-                                break
-                        # 记录最近一次审计结果
-                        runtime.last_audit = {
-                            "quality_passed": result.gate_level != "BLOCKING",
-                            "sensitive_passed": len(result.audit_report.get("forbidden_words", [])) == 0,
-                        }
-                        # 计算追读力分数（多维度：字数 + 质量门 + 对话密度 + 节奏）
-                        runtime.reader_pull_score = self._calc_reader_pull_score(result)
-                        self._persist_project(project_id, runtime)
+                                if consecutive_failures >= max_consecutive_failures:
+                                    logger.error(
+                                        "项目 %s 连续 %d 章失败，停止流水线",
+                                        project_id, consecutive_failures,
+                                    )
+                                    runtime.status = "error"
+                                    self._persist_project(project_id, runtime)
+                                    break
+                            # 记录最近一次审计结果
+                            runtime.last_audit = {
+                                "quality_passed": result.gate_level != "BLOCKING",
+                                "sensitive_passed": len(result.audit_report.get("forbidden_words", [])) == 0,
+                            }
+                            # 计算追读力分数（多维度：字数 + 质量门 + 对话密度 + 节奏）
+                            runtime.reader_pull_score = self._calc_reader_pull_score(result)
+                            self._persist_project(project_id, runtime)
 
-                    self._event_bus.emit(
-                        CHAPTER_COMPLETE,
-                        {
-                            "project_id": project_id,
-                            "pipeline_id": pipeline_id,
-                            "chapter_num": num,
-                            "word_count": result.word_count,
-                            "gate_level": result.gate_level,
-                            "success": result.success,
-                        },
-                    )
+                        self._event_bus.emit(
+                            CHAPTER_COMPLETE,
+                            {
+                                "project_id": project_id,
+                                "pipeline_id": pipeline_id,
+                                "chapter_num": num,
+                                "word_count": result.word_count,
+                                "gate_level": result.gate_level,
+                                "success": result.success,
+                            },
+                        )
 
-                    # ★ 外层 CrewAI 巡检触发
-                    if self._should_trigger_outer_crew(project_id, num):
-                        self._run_outer_crew_inspection(project_id, num)
+                        # ★ 外层 CrewAI 巡检触发
+                        if self._should_trigger_outer_crew(project_id, num):
+                            self._run_outer_crew_inspection(project_id, num)
 
-                except Exception as exc:
-                    logger.exception("项目 %s 第 %d 章写作失败", project_id, num)
-                    self._event_bus.emit(
-                        CHAPTER_ERROR,
-                        {
-                            "project_id": project_id,
-                            "pipeline_id": pipeline_id,
-                            "chapter_num": num,
-                            "error": str(exc),
-                        },
-                    )
-                    with self._lock:
-                        runtime.status = "error"
-                        self._persist_project(project_id, runtime)
-                    break
+                    except Exception as exc:
+                        logger.exception("项目 %s 第 %d 章写作失败", project_id, num)
+                        self._event_bus.emit(
+                            CHAPTER_ERROR,
+                            {
+                                "project_id": project_id,
+                                "pipeline_id": pipeline_id,
+                                "chapter_num": num,
+                                "error": str(exc),
+                            },
+                        )
+                        with self._lock:
+                            runtime.status = "error"
+                            self._persist_project(project_id, runtime)
+                        break
 
             # 全部完成
             with self._lock:
@@ -448,11 +501,28 @@ class Orchestrator:
     # ------------------------------------------------------------------
     # 状态查询
     # ------------------------------------------------------------------
+    def _get_completed_chapters(self, runtime: ProjectRuntime) -> int:
+        """从章节历史表计算实际已完成章节数，弥补内存 current_chapter 滞后。"""
+        try:
+            db_path = Path(runtime.book_config.base_path) / "world_state.db"
+            if not db_path.exists():
+                return runtime.current_chapter
+            with sqlite3.connect(str(db_path)) as conn:
+                row = conn.execute(
+                    "SELECT MAX(chapter) FROM chapter_history WHERE project_id = ?",
+                    (runtime.project_id,),
+                ).fetchone()
+                history_max = row[0] or 0
+        except Exception:
+            history_max = 0
+        return max(runtime.current_chapter, history_max)
+
     def get_project_status(self, project_id: str) -> dict[str, Any] | None:
         """获取单个项目状态。
 
         优先从内存读取，若内存中 current_chapter 为 0（可能由 cli.py 直接写入数据库），
         则从数据库 projects 表读取最新的 current_chapter 和 status。
+        completed_chapters 会基于章节历史表再校准一次，确保项目卡片展示的是真实进度。
         """
         with self._lock:
             runtime = self._projects.get(project_id)
@@ -478,6 +548,7 @@ class Orchestrator:
                 except Exception:
                     pass
 
+            completed_chapters = self._get_completed_chapters(runtime)
             return {
                 "project_id": runtime.project_id,
                 "name": runtime.book_config.project,
@@ -485,12 +556,16 @@ class Orchestrator:
                 "platform": runtime.book_config.platform,
                 "status": status,
                 "current_chapter": current_chapter,
+                "completed_chapters": completed_chapters,
                 "total_chapters": runtime.book_config.chapters_target,
+                "words_per_chapter": runtime.book_config.words_per_chapter,
+                "total_words_target": runtime.book_config.total_words_target,
                 "pipeline_id": runtime.pipeline_id,
                 "base_path": str(runtime.book_config.base_path),
                 "llm": runtime.book_config.llm,
                 "last_audit": runtime.last_audit,
                 "reader_pull_score": runtime.reader_pull_score,
+                "created_at": runtime.created_at,
             }
 
     def get_all_projects(self) -> list[dict[str, Any]]:
@@ -504,6 +579,8 @@ class Orchestrator:
                     "platform": p.book_config.platform,
                     "status": p.status,
                     "current_chapter": p.current_chapter,
+                    "completed_chapters": self._get_completed_chapters(p),
+                    "created_at": p.created_at,
                     "total_chapters": p.book_config.chapters_target,
                 }
                 for p in self._projects.values()

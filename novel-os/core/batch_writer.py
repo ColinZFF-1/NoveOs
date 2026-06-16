@@ -14,7 +14,6 @@ Phase 3 重构后，BatchWriter 职责缩减为：
 from __future__ import annotations
 
 import logging
-import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
@@ -22,7 +21,7 @@ from typing import Any
 from core.config_loader import BookConfig
 from core.content.metrics import count_chinese_chars
 from core.content.sanitizer import Sanitizer
-from core.content.title import extract_from_director, extract_from_content, ensure_prefix
+from core.content.title import extract_from_director, ensure_prefix
 from core.event_bus import EventBus
 from core.chapter_validator import ChapterValidator
 from core.llm_client import LLMClient, LLMConfig
@@ -37,7 +36,6 @@ from core.writing.context import ChapterContext, ChapterContextBuilder
 from core.writing.output import WriteResult
 from core.writing.pipeline import WritingPipeline, PipelineConfig
 
-# 向后兼容：WriteResult 原定义在 batch_writer.py，现从 core.writing.output 导入
 __all__ = ["BatchWriter", "WriteResult"]
 
 logger = logging.getLogger("novel-os.batch_writer")
@@ -84,12 +82,50 @@ class BatchWriter:
         llm_cfg = book_config.llm
         fallback_cfg = book_config.llm_fallback
         agent_cfgs = getattr(book_config, "agent_llm", None)
+
         if llm_cfg:
+            # book.yaml 显式配置 → 优先使用
             primary = _build_llm_cfg(llm_cfg)
             fallback = _build_llm_cfg(fallback_cfg) if fallback_cfg else None
             self.llm = LLMClient(primary, fallback, agent_configs=agent_cfgs)
         else:
-            self.llm = LLMClient(LLMConfig.from_env(), agent_configs=agent_cfgs)
+            # 尝试从 llm.yaml（前端 LLM 设置页）加载
+            try:
+                from core.llm_settings_client import load_llm_settings
+                settings = load_llm_settings()
+                default_name = settings.get("default_provider", "")
+                providers = settings.get("providers", {})
+                if default_name and default_name in providers:
+                    p = providers[default_name]
+                    primary = LLMConfig(
+                        model=p.get("model", "deepseek-chat"),
+                        api_key=p.get("api_key", ""),
+                        api_base=p.get("base_url", "https://api.deepseek.com/v1"),
+                        temperature=p.get("temperature", 0.7),
+                        max_tokens=p.get("max_tokens", 8000),
+                        timeout=p.get("timeout", 300),
+                    )
+                    # 加载 Agent 专属 Provider 分配
+                    agent_providers = settings.get("agent_providers", {})
+                    resolved_agent_cfgs: dict[str, dict[str, Any]] = {}
+                    for agent_name, provider_name in agent_providers.items():
+                        if provider_name in providers:
+                            ap = providers[provider_name]
+                            resolved_agent_cfgs[agent_name] = {
+                                "model": ap.get("model"),
+                                "api_key": ap.get("api_key"),
+                                "api_base": ap.get("base_url"),
+                                "temperature": ap.get("temperature", 0.7),
+                                "max_tokens": ap.get("max_tokens", 8000),
+                                "timeout": ap.get("timeout", 300),
+                            }
+                    merged_agent_cfgs = {**(agent_cfgs or {}), **resolved_agent_cfgs}
+                    self.llm = LLMClient(primary, agent_configs=merged_agent_cfgs if merged_agent_cfgs else None)
+                    logger.info("BatchWriter 从 llm.yaml 加载 LLM 配置: provider=%s, model=%s", default_name, primary.model)
+                else:
+                    self.llm = LLMClient(LLMConfig.from_env(), agent_configs=agent_cfgs)
+            except Exception:
+                self.llm = LLMClient(LLMConfig.from_env(), agent_configs=agent_cfgs)
 
         # 输入治理 + 反检测改写
         self.post_validator = PostWriteValidator()
@@ -177,12 +213,11 @@ class BatchWriter:
         return results
 
     def save_chapter(self, chapter_num: int, content: str) -> Path:
-        """保存章节正文到 output_dir。"""
+        """保存章节正文到 output_dir，使用标准文件名 chapter_{num:03d}.md。"""
         content = self._sanitizer.sanitize(content)
-        title = self._get_chapter_title(chapter_num) or extract_from_content(chapter_num, content)
-        safe_title = re.sub(r'[\\/:*?"<>|]', "", title)[:20]
-        filename = f"第{chapter_num:03d}章_{safe_title}.txt"
+        filename = f"chapter_{chapter_num:03d}.md"
         path = self.output_dir / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
         return path
 
@@ -205,6 +240,20 @@ class BatchWriter:
     # 状态库查询
     # ------------------------------------------------------------------
     def _get_chapter_title(self, chapter_num: int) -> str:
+        """获取章节标题。优先从 outline.title 读取，回退到 chapter_history。"""
+        try:
+            # outline 表的 title 是权威标题
+            import sqlite3
+            with sqlite3.connect(str(self.state.db_path)) as conn:
+                conn.row_factory = sqlite3.Row
+                row = conn.execute(
+                    "SELECT title FROM outline WHERE project_id = ? AND chapter = ?",
+                    (self.state.project_id, chapter_num),
+                ).fetchone()
+                if row and row["title"]:
+                    return row["title"]
+        except Exception:
+            pass
         try:
             return self.state.get_chapter_title(chapter_num)
         except Exception:
@@ -231,7 +280,19 @@ class BatchWriter:
             if db_pid:
                 logger.info("project_id 校验通过: %s", cfg_pid)
             else:
-                logger.warning("数据库中无 projects 记录，跳过 project_id 校验")
+                logger.warning("数据库中无 projects 记录，自动初始化项目...")
+                self.state.init_project(
+                    project_id=cfg_pid,
+                    name=self.cfg.project,
+                    genre=self.cfg.genre,
+                    platform=self.cfg.platform,
+                    base_path=str(self.cfg.base_path),
+                    total_chapters=self.cfg.chapters_target,
+                )
+                # 若 genre_dna 缺失也一并初始化
+                if not self.state.get_genre_dna():
+                    self.state.init_genre_dna(self.cfg.genre)
+                logger.info("项目记录已创建: %s", cfg_pid)
         except Exception as exc:
             if isinstance(exc, ValueError):
                 raise
@@ -241,16 +302,14 @@ class BatchWriter:
     # 文件系统
     # ------------------------------------------------------------------
     def _chapter_exists(self, chapter_num: int) -> bool:
-        pattern = f"第{chapter_num:03d}章_*_正文.txt"
-        return any(self.output_dir.glob(pattern))
+        return (self.output_dir / f"chapter_{chapter_num:03d}.md").exists()
 
     def _load_existing_chapter(self, chapter_num: int) -> str:
-        pattern = f"第{chapter_num:03d}章_*_正文.txt"
-        files = list(self.output_dir.glob(pattern))
-        if not files:
+        path = self.output_dir / f"chapter_{chapter_num:03d}.md"
+        if not path.exists():
             return ""
         try:
-            return files[0].read_text(encoding="utf-8")
+            return path.read_text(encoding="utf-8")
         except Exception:
             return ""
 
